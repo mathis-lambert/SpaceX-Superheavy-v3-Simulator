@@ -14,3 +14,4 @@ Saved
 *.xcworkspace
 .vsconfig
 *.log
+.DS_Store
