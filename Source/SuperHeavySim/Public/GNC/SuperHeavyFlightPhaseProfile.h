@@ -75,7 +75,7 @@ struct SUPERHEAVYSIM_API FSuperHeavyFlightPhaseConfig
 	FSuperHeavyPidController AttitudeRollPid;
 };
 
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, Blueprintable)
 class SUPERHEAVYSIM_API USuperHeavyFlightPhaseProfile : public UDataAsset
 {
 	GENERATED_BODY()
