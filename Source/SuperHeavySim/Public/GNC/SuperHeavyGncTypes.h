@@ -12,6 +12,29 @@ enum class ESuperHeavyGuidanceMode : uint8
 	LandingTarget UMETA(DisplayName = "Landing Target")
 };
 
+UENUM(BlueprintType)
+enum class ESuperHeavyFlightPhase : uint8
+{
+	Manual UMETA(DisplayName = "Manual"),
+	Idle UMETA(DisplayName = "Idle"),
+	Liftoff UMETA(DisplayName = "Liftoff"),
+	Ascent UMETA(DisplayName = "Ascent"),
+	Coast UMETA(DisplayName = "Coast"),
+	Boostback UMETA(DisplayName = "Boostback"),
+	Entry UMETA(DisplayName = "Entry"),
+	LandingBurn UMETA(DisplayName = "Landing Burn"),
+	Touchdown UMETA(DisplayName = "Touchdown"),
+	Abort UMETA(DisplayName = "Abort")
+};
+
+UENUM(BlueprintType)
+enum class ESuperHeavyBodyAxis : uint8
+{
+	X UMETA(DisplayName = "Body X"),
+	Y UMETA(DisplayName = "Body Y"),
+	Z UMETA(DisplayName = "Body Z")
+};
+
 USTRUCT(BlueprintType)
 struct SUPERHEAVYSIM_API FSuperHeavyVehicleState
 {
@@ -32,11 +55,19 @@ struct SUPERHEAVYSIM_API FSuperHeavyVehicleState
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	FVector AngularVelocityDegPerSec = FVector::ZeroVector;
 
+	FQuat RotationWorldQuat = FQuat::Identity;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
-	FRotator RotationWorldDeg = FRotator::ZeroRotator;
+	FVector BodyForwardWorld = FVector::ForwardVector;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	FVector BodyRightWorld = FVector::RightVector;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	FVector BodyUpWorld = FVector::UpVector;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	FVector AngularVelocityBodyDegPerSec = FVector::ZeroVector;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	double AltitudeM = 0.0;
@@ -46,6 +77,12 @@ struct SUPERHEAVYSIM_API FSuperHeavyVehicleState
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	double MassKg = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	double EstimatedTotalThrustN = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	double EstimatedTWR = 0.0;
 };
 
 USTRUCT(BlueprintType)
@@ -106,6 +143,27 @@ struct SUPERHEAVYSIM_API FSuperHeavyActuatorCommand
 };
 
 USTRUCT(BlueprintType)
+struct SUPERHEAVYSIM_API FSuperHeavyEngineGroupUsage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Engine Groups")
+	bool bOuterThrottleEnabled = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Engine Groups")
+	bool bInnerThrottleEnabled = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Engine Groups")
+	bool bCenterThrottleEnabled = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Engine Groups")
+	bool bInnerGimbalEnabled = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Engine Groups")
+	bool bCenterGimbalEnabled = true;
+};
+
+USTRUCT(BlueprintType)
 struct SUPERHEAVYSIM_API FSuperHeavyEngineGroupConfig
 {
 	GENERATED_BODY()
@@ -147,4 +205,28 @@ struct SUPERHEAVYSIM_API FSuperHeavyActuatorLimits
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limits")
 	double MaxGridFinDeg = 60.0;
+};
+
+USTRUCT(BlueprintType)
+struct SUPERHEAVYSIM_API FSuperHeavyGncTelemetry
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
+	ESuperHeavyFlightPhase FlightPhase = ESuperHeavyFlightPhase::Manual;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
+	ESuperHeavyGuidanceMode GuidanceMode = ESuperHeavyGuidanceMode::Disabled;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
+	bool bGncEnabled = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
+	bool bAttitudeHoldEnabled = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
+	FSuperHeavyVehicleState State;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
+	FSuperHeavyActuatorCommand LastCommand;
 };

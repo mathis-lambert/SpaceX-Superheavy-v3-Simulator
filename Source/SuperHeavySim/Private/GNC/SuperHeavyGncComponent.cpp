@@ -3,7 +3,8 @@
 #include "Components/PrimitiveComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
-#include "UObject/UnrealType.h"
+#include "GNC/SuperHeavyVehicleControlInterface.h"
+#include "Logging/SuperHeavyLog.h"
 
 USuperHeavyGncComponent::USuperHeavyGncComponent()
 {
@@ -24,19 +25,27 @@ USuperHeavyGncComponent::USuperHeavyGncComponent()
 	VerticalSpeedPid.OutputMin = -20.0;
 	VerticalSpeedPid.OutputMax = 20.0;
 
-	AttitudePitchPid.Kp = 0.25;
-	AttitudePitchPid.Kd = 0.05;
+	AttitudePitchPid.Kp = 0.05;
+	AttitudePitchPid.Kd = 0.18;
 	AttitudePitchPid.bClampOutput = true;
-	AttitudePitchPid.OutputMin = -ActuatorLimits.MaxGimbalDeg;
-	AttitudePitchPid.OutputMax = ActuatorLimits.MaxGimbalDeg;
+	AttitudePitchPid.OutputMin = -5.0;
+	AttitudePitchPid.OutputMax = 5.0;
 
 	AttitudeRollPid = AttitudePitchPid;
+
+	CaptureDefaultPidSettings();
 }
 
 void USuperHeavyGncComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	CaptureDefaultPidSettings();
 	ResolvePhysicsComponent();
+
+	if (bValidatePhaseProfileOnBeginPlay)
+	{
+		ValidatePhaseProfile(true);
+	}
 }
 
 void USuperHeavyGncComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -51,6 +60,7 @@ void USuperHeavyGncComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	if (!bGncEnabled || GuidanceMode == ESuperHeavyGuidanceMode::Disabled)
 	{
 		LastState = CaptureState(DeltaTime);
+		UpdateTelemetry();
 		return;
 	}
 
@@ -93,6 +103,94 @@ void USuperHeavyGncComponent::SetGuidanceMode(ESuperHeavyGuidanceMode NewMode)
 	GuidanceMode = NewMode;
 }
 
+bool USuperHeavyGncComponent::SetFlightPhase(ESuperHeavyFlightPhase NewPhase)
+{
+	if (NewPhase == ESuperHeavyFlightPhase::Manual)
+	{
+		CurrentFlightPhase = NewPhase;
+		SetGncEnabled(false);
+		GuidanceMode = ESuperHeavyGuidanceMode::Disabled;
+		bEnableAttitudeHold = false;
+		UpdateTelemetry();
+		return true;
+	}
+
+	if (!PhaseProfile)
+	{
+		UE_LOG(LogSuperHeavyGnc, Warning, TEXT("SuperHeavyGncComponent: no phase profile assigned for flight phase %d."), static_cast<int32>(NewPhase));
+		UpdateTelemetry();
+		return false;
+	}
+
+	const FSuperHeavyFlightPhaseValidationResult ValidationResult = ValidatePhaseProfile(true);
+	if (!ValidationResult.bIsValid)
+	{
+		UE_LOG(LogSuperHeavyGnc, Warning, TEXT("SuperHeavyGncComponent: refusing to apply flight phase because the phase profile is invalid."));
+		UpdateTelemetry();
+		return false;
+	}
+
+	FSuperHeavyFlightPhaseConfig Config;
+	if (!PhaseProfile->FindConfigForPhase(NewPhase, Config))
+	{
+		UE_LOG(LogSuperHeavyGnc, Warning, TEXT("SuperHeavyGncComponent: no config found for flight phase %d."), static_cast<int32>(NewPhase));
+		UpdateTelemetry();
+		return false;
+	}
+
+	ApplyFlightPhaseConfig(Config);
+	return true;
+}
+
+void USuperHeavyGncComponent::ApplyFlightPhaseConfig(const FSuperHeavyFlightPhaseConfig& Config)
+{
+	CurrentFlightPhase = Config.Phase;
+	SetGncEnabled(Config.bEnableGnc);
+	SetGuidanceMode(Config.GuidanceMode);
+	bEnableAttitudeHold = Config.bEnableAttitudeHold;
+	ControlRateHz = FMath::Clamp(Config.ControlRateHz, 1.0, 500.0);
+	Targets = Config.Targets;
+	ActuatorLimits = Config.ActuatorLimits;
+
+	OuterEngines.bUseForThrottleControl = Config.EngineGroupUsage.bOuterThrottleEnabled;
+	OuterEngines.bUseForGimbalControl = false;
+	InnerEngines.bUseForThrottleControl = Config.EngineGroupUsage.bInnerThrottleEnabled;
+	InnerEngines.bUseForGimbalControl = Config.EngineGroupUsage.bInnerGimbalEnabled;
+	CenterEngines.bUseForThrottleControl = Config.EngineGroupUsage.bCenterThrottleEnabled;
+	CenterEngines.bUseForGimbalControl = Config.EngineGroupUsage.bCenterGimbalEnabled;
+
+	AltitudePid = Config.bOverrideAltitudePid ? Config.AltitudePid : DefaultAltitudePid;
+	VerticalSpeedPid = Config.bOverrideVerticalSpeedPid ? Config.VerticalSpeedPid : DefaultVerticalSpeedPid;
+	AttitudePitchPid = Config.bOverrideAttitudePitchPid ? Config.AttitudePitchPid : DefaultAttitudePitchPid;
+	AttitudeRollPid = Config.bOverrideAttitudeRollPid ? Config.AttitudeRollPid : DefaultAttitudeRollPid;
+
+	ResetControllers();
+	ControlAccumulatorSeconds = 0.0;
+	UpdateTelemetry();
+}
+
+FSuperHeavyFlightPhaseValidationResult USuperHeavyGncComponent::ValidatePhaseProfile(bool bLogResult)
+{
+	LastPhaseProfileValidation = FSuperHeavyFlightPhaseValidationResult();
+
+	if (!PhaseProfile)
+	{
+		LastPhaseProfileValidation.bIsValid = false;
+		LastPhaseProfileValidation.Errors.Add(TEXT("No SuperHeavyFlightPhaseProfile is assigned."));
+	}
+	else
+	{
+		LastPhaseProfileValidation = PhaseProfile->ValidateProfile();
+	}
+
+	if (bLogResult)
+	{
+		LogPhaseProfileValidation(LastPhaseProfileValidation);
+	}
+
+	return LastPhaseProfileValidation;
+}
+
 void USuperHeavyGncComponent::SetVerticalSpeedTarget(double TargetVerticalSpeedMps)
 {
 	Targets.TargetVerticalSpeedMps = TargetVerticalSpeedMps;
@@ -112,6 +210,17 @@ void USuperHeavyGncComponent::SetLandingTarget(FVector TargetWorldM, double Targ
 {
 	Targets.LandingTargetWorldM = TargetWorldM;
 	Targets.LandingTargetYawDeg = TargetYawDeg;
+}
+
+void USuperHeavyGncComponent::SetControlTargets(const FSuperHeavyControlTargets& NewTargets)
+{
+	Targets = NewTargets;
+}
+
+FSuperHeavyFlightPhaseValidationResult USuperHeavyGncComponent::SetPhaseProfile(USuperHeavyFlightPhaseProfile* NewPhaseProfile, bool bLogValidation)
+{
+	PhaseProfile = NewPhaseProfile;
+	return ValidatePhaseProfile(bLogValidation);
 }
 
 void USuperHeavyGncComponent::ResetControllers()
@@ -148,6 +257,19 @@ void USuperHeavyGncComponent::ConfigureDefaultEngineGroups()
 	CenterEngines.EngineIds = { TEXT("RGC01"), TEXT("RGC02"), TEXT("RGC03") };
 }
 
+void USuperHeavyGncComponent::CaptureDefaultPidSettings()
+{
+	DefaultAltitudePid = AltitudePid;
+	DefaultVerticalSpeedPid = VerticalSpeedPid;
+	DefaultAttitudePitchPid = AttitudePitchPid;
+	DefaultAttitudeRollPid = AttitudeRollPid;
+
+	DefaultAltitudePid.Reset();
+	DefaultVerticalSpeedPid.Reset();
+	DefaultAttitudePitchPid.Reset();
+	DefaultAttitudeRollPid.Reset();
+}
+
 void USuperHeavyGncComponent::ResolvePhysicsComponent()
 {
 	PhysicsComponent = nullptr;
@@ -176,12 +298,18 @@ void USuperHeavyGncComponent::ResolvePhysicsComponent()
 void USuperHeavyGncComponent::RunControlStep(double ControlDeltaTime)
 {
 	LastState = CaptureState(ControlDeltaTime);
-	LastCommand = ComputeCommand(LastState, ControlDeltaTime);
+	LastCommand = SanitizeActuatorCommand(ComputeCommand(LastState, ControlDeltaTime));
+	LastState.EstimatedTotalThrustN = EstimateCommandedThrustN(LastCommand);
+	LastState.EstimatedTWR = LastState.MassKg > UE_SMALL_NUMBER
+		? LastState.EstimatedTotalThrustN / (LastState.MassKg * GravityMps2)
+		: 0.0;
 
-	if (bApplyCommandsToBlueprint)
+	if (bApplyCommandsToVehicle)
 	{
 		ApplyCommand(LastCommand);
 	}
+
+	UpdateTelemetry();
 }
 
 FSuperHeavyVehicleState USuperHeavyGncComponent::CaptureState(double ControlDeltaTime) const
@@ -199,11 +327,18 @@ FSuperHeavyVehicleState USuperHeavyGncComponent::CaptureState(double ControlDelt
 	State.LocationWorldM = State.LocationWorldCm / 100.0;
 	State.VelocityWorldMps = Body->GetPhysicsLinearVelocity() / 100.0;
 	State.AngularVelocityDegPerSec = Body->GetPhysicsAngularVelocityInDegrees();
-	State.RotationWorldDeg = Body->GetComponentRotation();
+	State.RotationWorldQuat = Body->GetComponentQuat();
+	State.BodyForwardWorld = Body->GetForwardVector();
+	State.BodyRightWorld = Body->GetRightVector();
 	State.BodyUpWorld = Body->GetUpVector();
+	State.AngularVelocityBodyDegPerSec = State.RotationWorldQuat.Inverse().RotateVector(State.AngularVelocityDegPerSec);
 	State.AltitudeM = (State.LocationWorldCm.Z - AltitudeReferenceWorldZCm) / 100.0;
 	State.VerticalSpeedMps = State.VelocityWorldMps.Z;
 	State.MassKg = Body->GetMass();
+	State.EstimatedTotalThrustN = EstimateCommandedThrustN(LastCommand);
+	State.EstimatedTWR = State.MassKg > UE_SMALL_NUMBER
+		? State.EstimatedTotalThrustN / (State.MassKg * GravityMps2)
+		: 0.0;
 
 	return State;
 }
@@ -249,6 +384,40 @@ FSuperHeavyActuatorCommand USuperHeavyGncComponent::ComputeCommand(const FSuperH
 	return Command;
 }
 
+FSuperHeavyActuatorCommand USuperHeavyGncComponent::SanitizeActuatorCommand(const FSuperHeavyActuatorCommand& Command) const
+{
+	FSuperHeavyActuatorCommand Sanitized = Command;
+
+	Sanitized.OuterThrottle = OuterEngines.bUseForThrottleControl
+		? FMath::Clamp(Sanitized.OuterThrottle, ActuatorLimits.MinThrottle, ActuatorLimits.MaxThrottle)
+		: 0.0;
+	Sanitized.InnerThrottle = InnerEngines.bUseForThrottleControl
+		? FMath::Clamp(Sanitized.InnerThrottle, ActuatorLimits.MinThrottle, ActuatorLimits.MaxThrottle)
+		: 0.0;
+	Sanitized.CenterThrottle = CenterEngines.bUseForThrottleControl
+		? FMath::Clamp(Sanitized.CenterThrottle, ActuatorLimits.MinThrottle, ActuatorLimits.MaxThrottle)
+		: 0.0;
+
+	Sanitized.InnerGimbalPitchDeg = InnerEngines.bUseForGimbalControl
+		? FMath::Clamp(Sanitized.InnerGimbalPitchDeg, -ActuatorLimits.MaxGimbalDeg, ActuatorLimits.MaxGimbalDeg)
+		: 0.0;
+	Sanitized.InnerGimbalRollDeg = InnerEngines.bUseForGimbalControl
+		? FMath::Clamp(Sanitized.InnerGimbalRollDeg, -ActuatorLimits.MaxGimbalDeg, ActuatorLimits.MaxGimbalDeg)
+		: 0.0;
+	Sanitized.CenterGimbalPitchDeg = CenterEngines.bUseForGimbalControl
+		? FMath::Clamp(Sanitized.CenterGimbalPitchDeg, -ActuatorLimits.MaxGimbalDeg, ActuatorLimits.MaxGimbalDeg)
+		: 0.0;
+	Sanitized.CenterGimbalRollDeg = CenterEngines.bUseForGimbalControl
+		? FMath::Clamp(Sanitized.CenterGimbalRollDeg, -ActuatorLimits.MaxGimbalDeg, ActuatorLimits.MaxGimbalDeg)
+		: 0.0;
+
+	Sanitized.GridFinXPCommandDeg = FMath::Clamp(Sanitized.GridFinXPCommandDeg, -ActuatorLimits.MaxGridFinDeg, ActuatorLimits.MaxGridFinDeg);
+	Sanitized.GridFinXMCommandDeg = FMath::Clamp(Sanitized.GridFinXMCommandDeg, -ActuatorLimits.MaxGridFinDeg, ActuatorLimits.MaxGridFinDeg);
+	Sanitized.GridFinYMCommandDeg = FMath::Clamp(Sanitized.GridFinYMCommandDeg, -ActuatorLimits.MaxGridFinDeg, ActuatorLimits.MaxGridFinDeg);
+
+	return Sanitized;
+}
+
 double USuperHeavyGncComponent::ComputeThrottleForVerticalSpeed(const FSuperHeavyVehicleState& State, double TargetVerticalSpeedMps, double ControlDeltaTime)
 {
 	const double AvailableThrustN = GetAvailableThrottleThrustN();
@@ -268,16 +437,21 @@ double USuperHeavyGncComponent::ComputeThrottleForVerticalSpeed(const FSuperHeav
 
 void USuperHeavyGncComponent::ApplyAttitudeHold(const FSuperHeavyVehicleState& State, double ControlDeltaTime, FSuperHeavyActuatorCommand& Command)
 {
-	const double PitchErrorDeg = FMath::FindDeltaAngleDegrees(State.RotationWorldDeg.Pitch, Targets.TargetWorldAttitudeDeg.Pitch);
-	const double RollErrorDeg = FMath::FindDeltaAngleDegrees(State.RotationWorldDeg.Roll, Targets.TargetWorldAttitudeDeg.Roll);
+	const FQuat TargetWorldQuat = Targets.TargetWorldAttitudeDeg.Quaternion();
+	const FVector AttitudeErrorBodyDeg = ComputeAttitudeErrorBodyDeg(State.RotationWorldQuat, TargetWorldQuat);
+
+	const double PitchErrorDeg = GetBodyAxisValue(AttitudeErrorBodyDeg, PitchControlBodyAxis);
+	const double RollErrorDeg = GetBodyAxisValue(AttitudeErrorBodyDeg, RollControlBodyAxis);
+	const double PitchRateDegPerSec = GetBodyAxisValue(State.AngularVelocityBodyDegPerSec, PitchControlBodyAxis);
+	const double RollRateDegPerSec = GetBodyAxisValue(State.AngularVelocityBodyDegPerSec, RollControlBodyAxis);
 
 	const double PitchCommandDeg = FMath::Clamp(
-		AttitudePitchPid.Update(PitchErrorDeg, ControlDeltaTime) * GimbalPitchCommandSign,
+		AttitudePitchPid.UpdateWithMeasuredRate(PitchErrorDeg, PitchRateDegPerSec, ControlDeltaTime) * GimbalPitchCommandSign,
 		-ActuatorLimits.MaxGimbalDeg,
 		ActuatorLimits.MaxGimbalDeg);
 
 	const double RollCommandDeg = FMath::Clamp(
-		AttitudeRollPid.Update(RollErrorDeg, ControlDeltaTime) * GimbalRollCommandSign,
+		AttitudeRollPid.UpdateWithMeasuredRate(RollErrorDeg, RollRateDegPerSec, ControlDeltaTime) * GimbalRollCommandSign,
 		-ActuatorLimits.MaxGimbalDeg,
 		ActuatorLimits.MaxGimbalDeg);
 
@@ -289,16 +463,41 @@ void USuperHeavyGncComponent::ApplyAttitudeHold(const FSuperHeavyVehicleState& S
 
 void USuperHeavyGncComponent::ApplyCommand(const FSuperHeavyActuatorCommand& Command)
 {
-	SetGroupThrottle(OuterEngines, Command.OuterThrottle);
-	SetGroupThrottle(InnerEngines, Command.InnerThrottle);
-	SetGroupThrottle(CenterEngines, Command.CenterThrottle);
+	AActor* Owner = GetOwner();
+	if (!Owner || !Owner->GetClass()->ImplementsInterface(USuperHeavyVehicleControlInterface::StaticClass()))
+	{
+		if (!bWarnedMissingVehicleControlInterface)
+		{
+			UE_LOG(LogSuperHeavyGnc, Warning, TEXT("SuperHeavyGncComponent: owner must implement SuperHeavyVehicleControlInterface to receive actuator commands."));
+			bWarnedMissingVehicleControlInterface = true;
+		}
+		return;
+	}
 
-	SetGroupGimbal(InnerEngines, Command.InnerGimbalPitchDeg, Command.InnerGimbalRollDeg);
-	SetGroupGimbal(CenterEngines, Command.CenterGimbalPitchDeg, Command.CenterGimbalRollDeg);
+	ISuperHeavyVehicleControlInterface::Execute_ApplyActuatorCommand(Owner, Command);
+}
 
-	InvokeNameFloatFunction(SetGridFinAngleFunctionName, TEXT("GF_XP"), FMath::Clamp(Command.GridFinXPCommandDeg, -ActuatorLimits.MaxGridFinDeg, ActuatorLimits.MaxGridFinDeg));
-	InvokeNameFloatFunction(SetGridFinAngleFunctionName, TEXT("GF_XM"), FMath::Clamp(Command.GridFinXMCommandDeg, -ActuatorLimits.MaxGridFinDeg, ActuatorLimits.MaxGridFinDeg));
-	InvokeNameFloatFunction(SetGridFinAngleFunctionName, TEXT("GF_YM"), FMath::Clamp(Command.GridFinYMCommandDeg, -ActuatorLimits.MaxGridFinDeg, ActuatorLimits.MaxGridFinDeg));
+void USuperHeavyGncComponent::UpdateTelemetry()
+{
+	LastTelemetry.FlightPhase = CurrentFlightPhase;
+	LastTelemetry.GuidanceMode = GuidanceMode;
+	LastTelemetry.bGncEnabled = bGncEnabled;
+	LastTelemetry.bAttitudeHoldEnabled = bEnableAttitudeHold;
+	LastTelemetry.State = LastState;
+	LastTelemetry.LastCommand = LastCommand;
+}
+
+void USuperHeavyGncComponent::LogPhaseProfileValidation(const FSuperHeavyFlightPhaseValidationResult& ValidationResult) const
+{
+	for (const FString& Error : ValidationResult.Errors)
+	{
+		UE_LOG(LogSuperHeavyGnc, Error, TEXT("SuperHeavyGncComponent phase profile error: %s"), *Error);
+	}
+
+	for (const FString& Warning : ValidationResult.Warnings)
+	{
+		UE_LOG(LogSuperHeavyGnc, Warning, TEXT("SuperHeavyGncComponent phase profile warning: %s"), *Warning);
+	}
 }
 
 double USuperHeavyGncComponent::GetAvailableThrottleThrustN() const
@@ -306,100 +505,55 @@ double USuperHeavyGncComponent::GetAvailableThrottleThrustN() const
 	return OuterEngines.GetMaxThrustN() + InnerEngines.GetMaxThrustN() + CenterEngines.GetMaxThrustN();
 }
 
-void USuperHeavyGncComponent::SetGroupThrottle(const FSuperHeavyEngineGroupConfig& Group, double Throttle)
+double USuperHeavyGncComponent::EstimateCommandedThrustN(const FSuperHeavyActuatorCommand& Command) const
 {
-	const double ClampedThrottle = FMath::Clamp(Throttle, ActuatorLimits.MinThrottle, ActuatorLimits.MaxThrottle);
-	for (const FName EngineId : Group.EngineIds)
+	return EstimateGroupThrustN(OuterEngines, Command.OuterThrottle)
+		+ EstimateGroupThrustN(InnerEngines, Command.InnerThrottle)
+		+ EstimateGroupThrustN(CenterEngines, Command.CenterThrottle);
+}
+
+double USuperHeavyGncComponent::EstimateGroupThrustN(const FSuperHeavyEngineGroupConfig& Group, double Throttle)
+{
+	return Group.GetMaxThrustN() * FMath::Clamp(Throttle, 0.0, 1.0);
+}
+
+double USuperHeavyGncComponent::GetBodyAxisValue(const FVector& Vector, ESuperHeavyBodyAxis Axis)
+{
+	switch (Axis)
 	{
-		InvokeNameFloatFunction(SetEngineThrottleFunctionName, EngineId, ClampedThrottle);
+	case ESuperHeavyBodyAxis::X:
+		return Vector.X;
+	case ESuperHeavyBodyAxis::Y:
+		return Vector.Y;
+	case ESuperHeavyBodyAxis::Z:
+		return Vector.Z;
+	default:
+		return 0.0;
 	}
 }
 
-void USuperHeavyGncComponent::SetGroupGimbal(const FSuperHeavyEngineGroupConfig& Group, double PitchDeg, double RollDeg)
+FVector USuperHeavyGncComponent::ComputeAttitudeErrorBodyDeg(const FQuat& CurrentWorldQuat, const FQuat& TargetWorldQuat)
 {
-	if (!Group.bUseForGimbalControl)
+	FQuat ErrorWorldQuat = TargetWorldQuat * CurrentWorldQuat.Inverse();
+	ErrorWorldQuat.Normalize();
+
+	if (ErrorWorldQuat.W < 0.0)
 	{
-		return;
+		ErrorWorldQuat.X *= -1.0;
+		ErrorWorldQuat.Y *= -1.0;
+		ErrorWorldQuat.Z *= -1.0;
+		ErrorWorldQuat.W *= -1.0;
 	}
 
-	const double ClampedPitchDeg = FMath::Clamp(PitchDeg, -ActuatorLimits.MaxGimbalDeg, ActuatorLimits.MaxGimbalDeg);
-	const double ClampedRollDeg = FMath::Clamp(RollDeg, -ActuatorLimits.MaxGimbalDeg, ActuatorLimits.MaxGimbalDeg);
-	for (const FName EngineId : Group.EngineIds)
-	{
-		InvokeNameTwoFloatFunction(SetEngineGimbalFunctionName, EngineId, ClampedPitchDeg, ClampedRollDeg);
-	}
-}
+	FVector ErrorAxisWorld = FVector::ZeroVector;
+	double ErrorAngleRad = 0.0;
+	ErrorWorldQuat.ToAxisAndAngle(ErrorAxisWorld, ErrorAngleRad);
 
-bool USuperHeavyGncComponent::InvokeNameFloatFunction(FName FunctionName, FName Id, double Value) const
-{
-	AActor* Owner = GetOwner();
-	UFunction* Function = Owner ? Owner->FindFunction(FunctionName) : nullptr;
-	if (!Owner || !Function)
+	if (!ErrorAxisWorld.IsNormalized())
 	{
-		return false;
+		ErrorAxisWorld = ErrorAxisWorld.GetSafeNormal();
 	}
 
-	uint8* Params = static_cast<uint8*>(FMemory_Alloca(Function->ParmsSize));
-	FMemory::Memzero(Params, Function->ParmsSize);
-	SetInputParamsByType(Function, Params, &Id, &Value, nullptr);
-	Owner->ProcessEvent(Function, Params);
-	return true;
-}
-
-bool USuperHeavyGncComponent::InvokeNameTwoFloatFunction(FName FunctionName, FName Id, double FirstValue, double SecondValue) const
-{
-	AActor* Owner = GetOwner();
-	UFunction* Function = Owner ? Owner->FindFunction(FunctionName) : nullptr;
-	if (!Owner || !Function)
-	{
-		return false;
-	}
-
-	uint8* Params = static_cast<uint8*>(FMemory_Alloca(Function->ParmsSize));
-	FMemory::Memzero(Params, Function->ParmsSize);
-	SetInputParamsByType(Function, Params, &Id, &FirstValue, &SecondValue);
-	Owner->ProcessEvent(Function, Params);
-	return true;
-}
-
-void USuperHeavyGncComponent::SetInputParamsByType(UFunction* Function, void* Params, const FName* NameValue, const double* FirstValue, const double* SecondValue)
-{
-	int32 FloatParamIndex = 0;
-	bool bNameSet = false;
-
-	for (TFieldIterator<FProperty> It(Function); It; ++It)
-	{
-		FProperty* Property = *It;
-		if (!Property->HasAnyPropertyFlags(CPF_Parm) || Property->HasAnyPropertyFlags(CPF_ReturnParm))
-		{
-			continue;
-		}
-
-		if (FNameProperty* NameProperty = CastField<FNameProperty>(Property))
-		{
-			if (NameValue && !bNameSet)
-			{
-				NameProperty->SetPropertyValue_InContainer(Params, *NameValue);
-				bNameSet = true;
-			}
-			continue;
-		}
-
-		const double* FloatValue = FloatParamIndex == 0 ? FirstValue : SecondValue;
-		if (!FloatValue)
-		{
-			continue;
-		}
-
-		if (FFloatProperty* FloatProperty = CastField<FFloatProperty>(Property))
-		{
-			FloatProperty->SetPropertyValue_InContainer(Params, static_cast<float>(*FloatValue));
-			++FloatParamIndex;
-		}
-		else if (FDoubleProperty* DoubleProperty = CastField<FDoubleProperty>(Property))
-		{
-			DoubleProperty->SetPropertyValue_InContainer(Params, *FloatValue);
-			++FloatParamIndex;
-		}
-	}
+	const FVector ErrorWorldDeg = ErrorAxisWorld * FMath::RadiansToDegrees(ErrorAngleRad);
+	return CurrentWorldQuat.Inverse().RotateVector(ErrorWorldDeg);
 }

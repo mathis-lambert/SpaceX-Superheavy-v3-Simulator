@@ -87,6 +87,9 @@ SuperHeavySim.uproject
 
 ## Important Directories
 
+- [Docs/GNC_ARCHITECTURE.md](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Docs/GNC_ARCHITECTURE.md)
+  C++/Blueprint contract for the vehicle GNC stack.
+
 - [Content/SuperHeavy/Blueprints](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Content/SuperHeavy/Blueprints)
   Main vehicle Blueprints.
 
@@ -97,7 +100,7 @@ SuperHeavySim.uproject
   Cleaned and renamed meshes prepared for Unreal integration.
 
 - [Source/SuperHeavySim](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim)
-  Minimal Unreal C++ project base.
+  Unreal C++ gameplay, vehicle API, and GNC code.
 
 ## Architecture
 
@@ -114,6 +117,7 @@ Responsibilities:
 - initialize child actors
 - route commands to actuators
 - expose the vehicle API
+- host the `SuperHeavyGncComponent`
 
 Main functions:
 
@@ -124,8 +128,14 @@ Main functions:
 - `InitializeGridFins()`
 - `GetGridFin(GridFinId)`
 - `SetGridFinAngle(GridFinId, Angle)`
-- `SetGridFinAngles(XP, XM, YM)`
-- `ApplyVehicleCommand(...)`
+
+For C++ GNC integration, `BP_SuperHeavy` should be parented to `SuperHeavyVehicleActor` and implement:
+
+- `SetEngineThrottleCommand(EngineId, Throttle)`
+- `SetEngineGimbalCommand(EngineId, PitchDeg, RollDeg)`
+- `SetGridFinAngleCommand(GridFinId, AngleDeg)`
+
+The C++ base expands collective group commands to individual engine and grid-fin IDs.
 
 ### BP_RaptorEngine
 
@@ -226,9 +236,12 @@ Principles:
 ## Current Integration State
 
 - `BP_SuperHeavy` drives engines and grid fins through child actors
-- the `13` gimbaled engines are integrated through `BP_RaptorEngine`
+- all `33` engines are integrated through `BP_RaptorEngine`
 - the `3` grid fins are integrated through `BP_GridFin`
 - initialization and lookup functions are in place
+- propulsion is applied through the vehicle physics body
+- engine exhaust VFX are driven by engine throttle
+- the C++ GNC foundation is in place
 - the test map is usable to validate actuators
 
 ## Unreal Workflow
@@ -255,15 +268,24 @@ Recommended fix:
 3. delete the existing `BP_SuperHeavy` instance from the map
 4. place a fresh instance in the scene
 
-## C++ Base
+## C++ GNC Base
 
-The project includes a minimal Unreal C++ base:
+The project includes a C++ GNC foundation:
 
-- [Source/SuperHeavySim/SuperHeavySim.Build.cs](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/SuperHeavySim.Build.cs)
-- [Source/SuperHeavySim/SuperHeavySimGameModeBase.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/SuperHeavySimGameModeBase.h)
-- [Source/SuperHeavySim/SuperHeavySimGameModeBase.cpp](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/SuperHeavySimGameModeBase.cpp)
+- [SuperHeavyGncComponent.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/GNC/SuperHeavyGncComponent.h)
+  Fixed-rate guidance/control component with telemetry.
 
-Vehicle logic is currently carried mostly by Blueprints.
+- [SuperHeavyGncTypes.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/GNC/SuperHeavyGncTypes.h)
+  Shared state, target, actuator command, telemetry, and phase types.
+
+- [SuperHeavyFlightPhaseProfile.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/GNC/SuperHeavyFlightPhaseProfile.h)
+  DataAsset-based flight phase configuration.
+
+- [SuperHeavyVehicleControlInterface.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/GNC/SuperHeavyVehicleControlInterface.h)
+  Stable command interface between GNC and vehicle actor.
+
+- [SuperHeavyVehicleActor.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/Vehicle/SuperHeavyVehicleActor.h)
+  C++ vehicle base that routes grouped actuator commands.
 
 ## Assets
 
@@ -277,20 +299,19 @@ The repository contains:
 
 ## Next Steps
 
-- integrate the `20` fixed outer engines into `BP_RaptorEngine`
-- unify access to all `33` engines through the same API
-- finalize `ApplyVehicleCommand(...)`
-- compute thrust from `ThrustSocket` transforms
-- sum forces and torques at booster level
+- reparent `BP_SuperHeavy` to `SuperHeavyVehicleActor`
+- implement the three atomic actuator command events in `BP_SuperHeavy`
+- create and assign a `SuperHeavyFlightPhaseProfile`
+- validate a first automatic phase in PIE
 - add aerodynamics
-- connect the Guidance / Navigation / Control layer
+- expand guidance beyond vertical speed / altitude / attitude hold
+- add LQR/MPC controllers behind the same actuator command interface
 
 ## Current Limitations
 
-- physical propulsion is not yet applied to the booster
-- engine forces and torques are not yet computed
 - grid fin aerodynamics are not yet connected
-- the vehicle API is still being stabilized
+- lateral landing guidance is not yet implemented
+- the C++ GNC component still needs a full PIE validation pass through `BP_SuperHeavy`
 
 ## Git
 

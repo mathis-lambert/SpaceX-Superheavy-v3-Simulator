@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GNC/SuperHeavyFlightPhaseProfile.h"
 #include "GNC/SuperHeavyGncTypes.h"
 #include "GNC/SuperHeavyPidController.h"
 #include "SuperHeavyGncComponent.generated.h"
@@ -22,6 +23,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GNC")
 	ESuperHeavyGuidanceMode GuidanceMode = ESuperHeavyGuidanceMode::Disabled;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flight Phases")
+	ESuperHeavyFlightPhase CurrentFlightPhase = ESuperHeavyFlightPhase::Manual;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight Phases")
+	TObjectPtr<USuperHeavyFlightPhaseProfile> PhaseProfile;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight Phases|Validation")
+	bool bValidatePhaseProfileOnBeginPlay = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GNC")
 	bool bEnableAttitudeHold = false;
@@ -66,28 +76,31 @@ public:
 	FSuperHeavyPidController AttitudeRollPid;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
-	double GimbalPitchCommandSign = 1.0;
+	ESuperHeavyBodyAxis PitchControlBodyAxis = ESuperHeavyBodyAxis::X;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
-	double GimbalRollCommandSign = 1.0;
+	ESuperHeavyBodyAxis RollControlBodyAxis = ESuperHeavyBodyAxis::Y;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
-	FName SetEngineThrottleFunctionName = TEXT("SetEngineThrottle");
+	double GimbalPitchCommandSign = -1.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
-	FName SetEngineGimbalFunctionName = TEXT("SetEngineGimbal");
+	double GimbalRollCommandSign = -1.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
-	FName SetGridFinAngleFunctionName = TEXT("SetGridFinAngle");
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
-	bool bApplyCommandsToBlueprint = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Application")
+	bool bApplyCommandsToVehicle = true;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
 	FSuperHeavyVehicleState LastState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
 	FSuperHeavyActuatorCommand LastCommand;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
+	FSuperHeavyGncTelemetry LastTelemetry;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Flight Phases|Validation")
+	FSuperHeavyFlightPhaseValidationResult LastPhaseProfileValidation;
 
 	UFUNCTION(BlueprintCallable, Category = "GNC")
 	void SetGncEnabled(bool bEnabled);
@@ -108,7 +121,25 @@ public:
 	void SetLandingTarget(FVector TargetWorldM, double TargetYawDeg);
 
 	UFUNCTION(BlueprintCallable, Category = "GNC")
+	void SetControlTargets(const FSuperHeavyControlTargets& NewTargets);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "GNC")
+	FSuperHeavyControlTargets GetControlTargets() const { return Targets; }
+
+	UFUNCTION(BlueprintCallable, Category = "GNC")
 	void ResetControllers();
+
+	UFUNCTION(BlueprintCallable, Category = "Flight Phases")
+	FSuperHeavyFlightPhaseValidationResult SetPhaseProfile(USuperHeavyFlightPhaseProfile* NewPhaseProfile, bool bLogValidation = true);
+
+	UFUNCTION(BlueprintCallable, Category = "Flight Phases")
+	bool SetFlightPhase(ESuperHeavyFlightPhase NewPhase);
+
+	UFUNCTION(BlueprintCallable, Category = "Flight Phases")
+	void ApplyFlightPhaseConfig(const FSuperHeavyFlightPhaseConfig& Config);
+
+	UFUNCTION(BlueprintCallable, Category = "Flight Phases|Validation")
+	FSuperHeavyFlightPhaseValidationResult ValidatePhaseProfile(bool bLogResult = true);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Telemetry")
 	FSuperHeavyVehicleState GetLastState() const { return LastState; }
@@ -116,26 +147,40 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Telemetry")
 	FSuperHeavyActuatorCommand GetLastCommand() const { return LastCommand; }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Telemetry")
+	FSuperHeavyGncTelemetry GetLastTelemetry() const { return LastTelemetry; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Telemetry")
+	ESuperHeavyFlightPhase GetCurrentFlightPhase() const { return CurrentFlightPhase; }
+
 protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UPrimitiveComponent> PhysicsComponent;
 
 	double ControlAccumulatorSeconds = 0.0;
+	FSuperHeavyPidController DefaultAltitudePid;
+	FSuperHeavyPidController DefaultVerticalSpeedPid;
+	FSuperHeavyPidController DefaultAttitudePitchPid;
+	FSuperHeavyPidController DefaultAttitudeRollPid;
+	bool bWarnedMissingVehicleControlInterface = false;
 
 	void ConfigureDefaultEngineGroups();
+	void CaptureDefaultPidSettings();
 	void ResolvePhysicsComponent();
 	void RunControlStep(double ControlDeltaTime);
 
 	FSuperHeavyVehicleState CaptureState(double ControlDeltaTime) const;
 	FSuperHeavyActuatorCommand ComputeCommand(const FSuperHeavyVehicleState& State, double ControlDeltaTime);
+	FSuperHeavyActuatorCommand SanitizeActuatorCommand(const FSuperHeavyActuatorCommand& Command) const;
 	double ComputeThrottleForVerticalSpeed(const FSuperHeavyVehicleState& State, double TargetVerticalSpeedMps, double ControlDeltaTime);
 	void ApplyAttitudeHold(const FSuperHeavyVehicleState& State, double ControlDeltaTime, FSuperHeavyActuatorCommand& Command);
 	void ApplyCommand(const FSuperHeavyActuatorCommand& Command);
+	void UpdateTelemetry();
+	void LogPhaseProfileValidation(const FSuperHeavyFlightPhaseValidationResult& ValidationResult) const;
 
 	double GetAvailableThrottleThrustN() const;
-	void SetGroupThrottle(const FSuperHeavyEngineGroupConfig& Group, double Throttle);
-	void SetGroupGimbal(const FSuperHeavyEngineGroupConfig& Group, double PitchDeg, double RollDeg);
-	bool InvokeNameFloatFunction(FName FunctionName, FName Id, double Value) const;
-	bool InvokeNameTwoFloatFunction(FName FunctionName, FName Id, double FirstValue, double SecondValue) const;
-	static void SetInputParamsByType(UFunction* Function, void* Params, const FName* NameValue, const double* FirstValue, const double* SecondValue);
+	double EstimateCommandedThrustN(const FSuperHeavyActuatorCommand& Command) const;
+	static double EstimateGroupThrustN(const FSuperHeavyEngineGroupConfig& Group, double Throttle);
+	static double GetBodyAxisValue(const FVector& Vector, ESuperHeavyBodyAxis Axis);
+	static FVector ComputeAttitudeErrorBodyDeg(const FQuat& CurrentWorldQuat, const FQuat& TargetWorldQuat);
 };

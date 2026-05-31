@@ -58,6 +58,23 @@ struct SUPERHEAVYSIM_API FSuperHeavyPidController
 		return ClampOutput((Kp * Error) + (Ki * Integral) + (Kd * Derivative));
 	}
 
+	double UpdateWithMeasuredRate(double Error, double MeasuredRate, double DeltaTime)
+	{
+		if (DeltaTime > UE_SMALL_NUMBER)
+		{
+			Integral += Error * DeltaTime;
+			if (IntegralLimit > 0.0)
+			{
+				Integral = FMath::Clamp(Integral, -IntegralLimit, IntegralLimit);
+			}
+		}
+
+		PreviousError = Error;
+		bHasPreviousError = true;
+
+		return ClampOutput((Kp * Error) + (Ki * Integral) - (Kd * MeasuredRate));
+	}
+
 	void Reset()
 	{
 		Integral = 0.0;
