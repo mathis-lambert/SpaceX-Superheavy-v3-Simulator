@@ -99,6 +99,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
 	FSuperHeavyGncTelemetry LastTelemetry;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
+	FSuperHeavyGncDebugState LastDebugState;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Flight Phases|Validation")
 	FSuperHeavyFlightPhaseValidationResult LastPhaseProfileValidation;
 
@@ -151,6 +154,9 @@ public:
 	FSuperHeavyGncTelemetry GetLastTelemetry() const { return LastTelemetry; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Telemetry")
+	FSuperHeavyGncDebugState GetLastDebugState() const { return LastDebugState; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Telemetry")
 	ESuperHeavyFlightPhase GetCurrentFlightPhase() const { return CurrentFlightPhase; }
 
 protected:
@@ -172,8 +178,9 @@ protected:
 	FSuperHeavyVehicleState CaptureState(double ControlDeltaTime) const;
 	FSuperHeavyActuatorCommand ComputeCommand(const FSuperHeavyVehicleState& State, double ControlDeltaTime);
 	FSuperHeavyActuatorCommand SanitizeActuatorCommand(const FSuperHeavyActuatorCommand& Command) const;
-	double ComputeThrottleForVerticalSpeed(const FSuperHeavyVehicleState& State, double TargetVerticalSpeedMps, double ControlDeltaTime);
+	double ComputeThrottleForVerticalSpeed(const FSuperHeavyVehicleState& State, double TargetVerticalSpeedMps, double ControlDeltaTime, FSuperHeavyGncDebugState& DebugState);
 	void ApplyAttitudeHold(const FSuperHeavyVehicleState& State, double ControlDeltaTime, FSuperHeavyActuatorCommand& Command);
+	FSuperHeavyCommandSaturation ComputeSaturation(const FSuperHeavyActuatorCommand& RawCommand, const FSuperHeavyActuatorCommand& SanitizedCommand) const;
 	void ApplyCommand(const FSuperHeavyActuatorCommand& Command);
 	void UpdateTelemetry();
 	void LogPhaseProfileValidation(const FSuperHeavyFlightPhaseValidationResult& ValidationResult) const;

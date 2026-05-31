@@ -34,6 +34,7 @@ SuperHeavyFlightPhaseProfile
 - Applies guidance modes and attitude hold.
 - Emits `FSuperHeavyActuatorCommand`.
 - Exposes `FSuperHeavyGncTelemetry` for UI/debug.
+- Exposes `FSuperHeavyGncDebugState` with control errors, thrust demand, raw command, and saturation flags.
 - Exposes runtime APIs for assigning a phase profile, setting target bundles, and validating phase configuration.
 
 `USuperHeavyFlightPhaseProfile`
@@ -134,6 +135,7 @@ At runtime, prefer these component APIs:
 6. Validate the profile.
 7. In BeginPlay or UI input, call `SetFlightPhase(LandingBurn)`.
 8. Watch `GetLastTelemetry()` for phase, guidance mode, vehicle state, TWR, and last command.
+9. Watch `GetLastDebugState()` for control errors, raw throttle demand, required thrust, available thrust, and saturation flags.
 
 ## Extension Path
 

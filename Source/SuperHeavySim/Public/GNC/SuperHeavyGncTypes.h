@@ -143,6 +143,84 @@ struct SUPERHEAVYSIM_API FSuperHeavyActuatorCommand
 };
 
 USTRUCT(BlueprintType)
+struct SUPERHEAVYSIM_API FSuperHeavyCommandSaturation
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
+	bool bOuterThrottleSaturated = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
+	bool bInnerThrottleSaturated = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
+	bool bCenterThrottleSaturated = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
+	bool bInnerGimbalSaturated = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
+	bool bCenterGimbalSaturated = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
+	bool bGridFinSaturated = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
+	bool bAnySaturated = false;
+};
+
+USTRUCT(BlueprintType)
+struct SUPERHEAVYSIM_API FSuperHeavyGncDebugState
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double AltitudeErrorM = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double TargetVerticalSpeedMps = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double VerticalSpeedErrorMps = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double DesiredAccelerationMps2 = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double AvailableThrustN = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double RequiredThrustN = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double RawCollectiveThrottle = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double UpAlignment = 1.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	FVector AttitudeErrorBodyDeg = FVector::ZeroVector;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double PitchErrorDeg = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double RollErrorDeg = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double PitchRateDegPerSec = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	double RollRateDegPerSec = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	FSuperHeavyActuatorCommand RawCommand;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GNC Debug")
+	FSuperHeavyCommandSaturation Saturation;
+};
+
+USTRUCT(BlueprintType)
 struct SUPERHEAVYSIM_API FSuperHeavyEngineGroupUsage
 {
 	GENERATED_BODY()
@@ -229,4 +307,7 @@ struct SUPERHEAVYSIM_API FSuperHeavyGncTelemetry
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
 	FSuperHeavyActuatorCommand LastCommand;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
+	FSuperHeavyGncDebugState Debug;
 };
