@@ -76,16 +76,16 @@ public:
 	FSuperHeavyPidController AttitudeRollPid;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
-	ESuperHeavyBodyAxis PitchControlBodyAxis = ESuperHeavyBodyAxis::X;
+	ESuperHeavyBodyAxis PitchControlBodyAxis = ESuperHeavyBodyAxis::Y;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
-	ESuperHeavyBodyAxis RollControlBodyAxis = ESuperHeavyBodyAxis::Y;
+	ESuperHeavyBodyAxis RollControlBodyAxis = ESuperHeavyBodyAxis::X;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
-	double GimbalPitchCommandSign = -1.0;
+	double GimbalPitchCommandSign = 1.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
-	double GimbalRollCommandSign = -1.0;
+	double GimbalRollCommandSign = 1.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Application")
 	bool bApplyCommandsToVehicle = true;

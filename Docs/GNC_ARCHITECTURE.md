@@ -95,6 +95,8 @@ SetGridFinAngleCommand
 - Pitch-down command moves Raptors toward `+Y`.
 - Roll-right command moves Raptors toward `-X`.
 - Roll-left command moves Raptors toward `+X`.
+- GNC attitude mapping uses body `Y` for pitch control and body `X` for roll control.
+- Gimbal pitch and roll command signs are both `+1`.
 - Grid fins rotate around their local `X`; sign inversion stays inside `BP_GridFin`.
 
 ## Flight Phase Profile Setup
