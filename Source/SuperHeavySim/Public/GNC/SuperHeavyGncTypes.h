@@ -112,6 +112,24 @@ struct SUPERHEAVYSIM_API FSuperHeavyActuatorCommand
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	bool bApplyOuterThrottle = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	bool bApplyInnerThrottle = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	bool bApplyCenterThrottle = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	bool bApplyInnerGimbal = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	bool bApplyCenterGimbal = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	bool bApplyGridFins = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
 	double OuterThrottle = 0.0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")

@@ -10,16 +10,34 @@ ASuperHeavyVehicleActor::ASuperHeavyVehicleActor()
 
 void ASuperHeavyVehicleActor::ApplyActuatorCommand_Implementation(const FSuperHeavyActuatorCommand& Command)
 {
-	ApplyThrottleToGroup(OuterEngineIds, Command.OuterThrottle);
-	ApplyThrottleToGroup(InnerEngineIds, Command.InnerThrottle);
-	ApplyThrottleToGroup(CenterEngineIds, Command.CenterThrottle);
+	if (Command.bApplyOuterThrottle)
+	{
+		ApplyThrottleToGroup(OuterEngineIds, Command.OuterThrottle);
+	}
+	if (Command.bApplyInnerThrottle)
+	{
+		ApplyThrottleToGroup(InnerEngineIds, Command.InnerThrottle);
+	}
+	if (Command.bApplyCenterThrottle)
+	{
+		ApplyThrottleToGroup(CenterEngineIds, Command.CenterThrottle);
+	}
 
-	ApplyGimbalToGroup(InnerEngineIds, Command.InnerGimbalPitchDeg, Command.InnerGimbalRollDeg);
-	ApplyGimbalToGroup(CenterEngineIds, Command.CenterGimbalPitchDeg, Command.CenterGimbalRollDeg);
+	if (Command.bApplyInnerGimbal)
+	{
+		ApplyGimbalToGroup(InnerEngineIds, Command.InnerGimbalPitchDeg, Command.InnerGimbalRollDeg);
+	}
+	if (Command.bApplyCenterGimbal)
+	{
+		ApplyGimbalToGroup(CenterEngineIds, Command.CenterGimbalPitchDeg, Command.CenterGimbalRollDeg);
+	}
 
-	SetGridFinAngleCommand(GridFinXPId, Command.GridFinXPCommandDeg);
-	SetGridFinAngleCommand(GridFinXMId, Command.GridFinXMCommandDeg);
-	SetGridFinAngleCommand(GridFinYMId, Command.GridFinYMCommandDeg);
+	if (Command.bApplyGridFins)
+	{
+		SetGridFinAngleCommand(GridFinXPId, Command.GridFinXPCommandDeg);
+		SetGridFinAngleCommand(GridFinXMId, Command.GridFinXMCommandDeg);
+		SetGridFinAngleCommand(GridFinYMId, Command.GridFinYMCommandDeg);
+	}
 }
 
 void ASuperHeavyVehicleActor::ConfigureDefaultActuatorIds()

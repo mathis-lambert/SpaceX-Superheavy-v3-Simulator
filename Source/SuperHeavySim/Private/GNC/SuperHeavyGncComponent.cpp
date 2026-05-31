@@ -381,6 +381,12 @@ FSuperHeavyActuatorCommand USuperHeavyGncComponent::ComputeCommand(const FSuperH
 	Command.OuterThrottle = OuterEngines.bUseForThrottleControl ? CollectiveThrottle : 0.0;
 	Command.InnerThrottle = InnerEngines.bUseForThrottleControl ? CollectiveThrottle : 0.0;
 	Command.CenterThrottle = CenterEngines.bUseForThrottleControl ? CollectiveThrottle : 0.0;
+	Command.bApplyOuterThrottle = OuterEngines.bUseForThrottleControl;
+	Command.bApplyInnerThrottle = InnerEngines.bUseForThrottleControl;
+	Command.bApplyCenterThrottle = CenterEngines.bUseForThrottleControl;
+	Command.bApplyInnerGimbal = InnerEngines.bUseForGimbalControl && bEnableAttitudeHold;
+	Command.bApplyCenterGimbal = CenterEngines.bUseForGimbalControl && bEnableAttitudeHold;
+	Command.bApplyGridFins = false;
 
 	if (bEnableAttitudeHold)
 	{
@@ -394,26 +400,32 @@ FSuperHeavyActuatorCommand USuperHeavyGncComponent::SanitizeActuatorCommand(cons
 {
 	FSuperHeavyActuatorCommand Sanitized = Command;
 
-	Sanitized.OuterThrottle = OuterEngines.bUseForThrottleControl
+	Sanitized.bApplyOuterThrottle = OuterEngines.bUseForThrottleControl && Command.bApplyOuterThrottle;
+	Sanitized.bApplyInnerThrottle = InnerEngines.bUseForThrottleControl && Command.bApplyInnerThrottle;
+	Sanitized.bApplyCenterThrottle = CenterEngines.bUseForThrottleControl && Command.bApplyCenterThrottle;
+	Sanitized.bApplyInnerGimbal = InnerEngines.bUseForGimbalControl && Command.bApplyInnerGimbal;
+	Sanitized.bApplyCenterGimbal = CenterEngines.bUseForGimbalControl && Command.bApplyCenterGimbal;
+
+	Sanitized.OuterThrottle = Sanitized.bApplyOuterThrottle
 		? FMath::Clamp(Sanitized.OuterThrottle, ActuatorLimits.MinThrottle, ActuatorLimits.MaxThrottle)
 		: 0.0;
-	Sanitized.InnerThrottle = InnerEngines.bUseForThrottleControl
+	Sanitized.InnerThrottle = Sanitized.bApplyInnerThrottle
 		? FMath::Clamp(Sanitized.InnerThrottle, ActuatorLimits.MinThrottle, ActuatorLimits.MaxThrottle)
 		: 0.0;
-	Sanitized.CenterThrottle = CenterEngines.bUseForThrottleControl
+	Sanitized.CenterThrottle = Sanitized.bApplyCenterThrottle
 		? FMath::Clamp(Sanitized.CenterThrottle, ActuatorLimits.MinThrottle, ActuatorLimits.MaxThrottle)
 		: 0.0;
 
-	Sanitized.InnerGimbalPitchDeg = InnerEngines.bUseForGimbalControl
+	Sanitized.InnerGimbalPitchDeg = Sanitized.bApplyInnerGimbal
 		? FMath::Clamp(Sanitized.InnerGimbalPitchDeg, -ActuatorLimits.MaxGimbalDeg, ActuatorLimits.MaxGimbalDeg)
 		: 0.0;
-	Sanitized.InnerGimbalRollDeg = InnerEngines.bUseForGimbalControl
+	Sanitized.InnerGimbalRollDeg = Sanitized.bApplyInnerGimbal
 		? FMath::Clamp(Sanitized.InnerGimbalRollDeg, -ActuatorLimits.MaxGimbalDeg, ActuatorLimits.MaxGimbalDeg)
 		: 0.0;
-	Sanitized.CenterGimbalPitchDeg = CenterEngines.bUseForGimbalControl
+	Sanitized.CenterGimbalPitchDeg = Sanitized.bApplyCenterGimbal
 		? FMath::Clamp(Sanitized.CenterGimbalPitchDeg, -ActuatorLimits.MaxGimbalDeg, ActuatorLimits.MaxGimbalDeg)
 		: 0.0;
-	Sanitized.CenterGimbalRollDeg = CenterEngines.bUseForGimbalControl
+	Sanitized.CenterGimbalRollDeg = Sanitized.bApplyCenterGimbal
 		? FMath::Clamp(Sanitized.CenterGimbalRollDeg, -ActuatorLimits.MaxGimbalDeg, ActuatorLimits.MaxGimbalDeg)
 		: 0.0;
 
