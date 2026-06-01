@@ -164,25 +164,35 @@ void USuperHeavyAutopilotComponent::ConfigureDefaultEngineGroups()
 	OuterEngines.GroupName = TEXT("Outer");
 	OuterEngines.bUseForThrottleControl = true;
 	OuterEngines.bUseForGimbalControl = false;
-	OuterEngines.EngineIds.Reset();
+	OuterEngines.Engines.Reset();
 	for (int32 Index = 1; Index <= 20; ++Index)
 	{
-		OuterEngines.EngineIds.Add(FName(*FString::Printf(TEXT("R%02d"), Index)));
+		FSuperHeavyEngineDefinition Engine;
+		Engine.EngineId = FName(*FString::Printf(TEXT("R%02d"), Index));
+		Engine.AzimuthDeg = (Index - 1) * 18.0;
+		OuterEngines.Engines.Add(Engine);
 	}
 
 	InnerEngines.GroupName = TEXT("Inner");
 	InnerEngines.bUseForThrottleControl = true;
 	InnerEngines.bUseForGimbalControl = true;
-	InnerEngines.EngineIds.Reset();
+	InnerEngines.Engines.Reset();
 	for (int32 Index = 1; Index <= 10; ++Index)
 	{
-		InnerEngines.EngineIds.Add(FName(*FString::Printf(TEXT("RGI%02d"), Index)));
+		FSuperHeavyEngineDefinition Engine;
+		Engine.EngineId = FName(*FString::Printf(TEXT("RGI%02d"), Index));
+		Engine.AzimuthDeg = (Index - 1) * 36.0;
+		InnerEngines.Engines.Add(Engine);
 	}
 
 	CenterEngines.GroupName = TEXT("Center");
 	CenterEngines.bUseForThrottleControl = true;
 	CenterEngines.bUseForGimbalControl = true;
-	CenterEngines.EngineIds = { TEXT("RGC01"), TEXT("RGC02"), TEXT("RGC03") };
+	CenterEngines.Engines = {
+		{ TEXT("RGC01"), 90.0 },
+		{ TEXT("RGC02"), 210.0 },
+		{ TEXT("RGC03"), 330.0 }
+	};
 }
 
 void USuperHeavyAutopilotComponent::ResetVehicleToMissionStart() const
@@ -272,21 +282,28 @@ void USuperHeavyAutopilotComponent::ApplyPhaseActuatorHandoff(const FSuperHeavyF
 	}
 
 	FSuperHeavyActuatorCommand HandoffCommand;
-	HandoffCommand.bApplyOuterThrottle = OuterEngines.bUseForThrottleControl && !NextPhaseConfig.EngineGroupUsage.bOuterThrottleEnabled;
-	HandoffCommand.bApplyInnerThrottle = InnerEngines.bUseForThrottleControl && !NextPhaseConfig.EngineGroupUsage.bInnerThrottleEnabled;
-	HandoffCommand.bApplyCenterThrottle = CenterEngines.bUseForThrottleControl && !NextPhaseConfig.EngineGroupUsage.bCenterThrottleEnabled;
-	HandoffCommand.bApplyInnerGimbal = InnerEngines.bUseForGimbalControl && !NextPhaseConfig.EngineGroupUsage.bInnerGimbalEnabled;
-	HandoffCommand.bApplyCenterGimbal = CenterEngines.bUseForGimbalControl && !NextPhaseConfig.EngineGroupUsage.bCenterGimbalEnabled;
+	if (OuterEngines.bUseForThrottleControl && !NextPhaseConfig.EngineGroupUsage.bOuterThrottleEnabled)
+	{
+		AppendThrottleCommands(HandoffCommand, OuterEngines, 0.0);
+	}
+	if (InnerEngines.bUseForThrottleControl && !NextPhaseConfig.EngineGroupUsage.bInnerThrottleEnabled)
+	{
+		AppendThrottleCommands(HandoffCommand, InnerEngines, 0.0);
+	}
+	if (CenterEngines.bUseForThrottleControl && !NextPhaseConfig.EngineGroupUsage.bCenterThrottleEnabled)
+	{
+		AppendThrottleCommands(HandoffCommand, CenterEngines, 0.0);
+	}
+	if (InnerEngines.bUseForGimbalControl && !NextPhaseConfig.EngineGroupUsage.bInnerGimbalEnabled)
+	{
+		AppendGimbalCommands(HandoffCommand, InnerEngines, 0.0, 0.0, 0.0);
+	}
+	if (CenterEngines.bUseForGimbalControl && !NextPhaseConfig.EngineGroupUsage.bCenterGimbalEnabled)
+	{
+		AppendGimbalCommands(HandoffCommand, CenterEngines, 0.0, 0.0, 0.0);
+	}
 
-	const bool bHasThrottleHandoff =
-		HandoffCommand.bApplyOuterThrottle
-		|| HandoffCommand.bApplyInnerThrottle
-		|| HandoffCommand.bApplyCenterThrottle;
-	const bool bHasGimbalHandoff =
-		HandoffCommand.bApplyInnerGimbal
-		|| HandoffCommand.bApplyCenterGimbal;
-
-	if (!bHasThrottleHandoff && !bHasGimbalHandoff)
+	if (HandoffCommand.EngineCommands.IsEmpty())
 	{
 		return;
 	}
@@ -314,6 +331,7 @@ void USuperHeavyAutopilotComponent::ResetControllers()
 	CurrentPhaseConfig.Control.LateralVelocityYPid.Reset();
 	CurrentPhaseConfig.Control.AttitudePitchPid.Reset();
 	CurrentPhaseConfig.Control.AttitudeRollPid.Reset();
+	CurrentPhaseConfig.Control.AttitudeYawPid.Reset();
 }
 
 void USuperHeavyAutopilotComponent::RunControlStep(double ControlDeltaTime)
@@ -373,6 +391,10 @@ bool USuperHeavyAutopilotComponent::IsTransitionConditionMet(const FSuperHeavyPh
 		return State.VelocityWorldMps.Length() <= Transition.Threshold;
 	case ESuperHeavyPhaseTransitionCondition::VerticalSpeedBelow:
 		return FMath::Abs(State.VelocityWorldMps.Z) <= Transition.Threshold;
+	case ESuperHeavyPhaseTransitionCondition::VerticalVelocityBelow:
+		return State.VelocityWorldMps.Z <= Transition.Threshold;
+	case ESuperHeavyPhaseTransitionCondition::VerticalVelocityAbove:
+		return State.VelocityWorldMps.Z >= Transition.Threshold;
 	case ESuperHeavyPhaseTransitionCondition::HorizontalDistanceBelow:
 		return State.HorizontalDistanceToLandingTargetM <= Transition.Threshold;
 	case ESuperHeavyPhaseTransitionCondition::DistanceToTargetBelow:
@@ -409,22 +431,45 @@ FSuperHeavyActuatorCommand USuperHeavyAutopilotComponent::ComputeVerticalAscentC
 
 	const double VelocityErrorMps = CurrentPhaseConfig.TargetVelocityWorldMps.Z - State.VelocityWorldMps.Z;
 	const double DesiredVerticalAccelMps2 = CurrentPhaseConfig.Control.VerticalVelocityPid.Update(VelocityErrorMps, ControlDeltaTime);
-	const double UpAlignment = FMath::Clamp(FVector::DotProduct(State.BodyUpWorld.GetSafeNormal(), FVector::UpVector), 0.2, 1.0);
-	const double RequiredThrustN = State.MassKg * (GravityMps2 + DesiredVerticalAccelMps2) / UpAlignment;
+	FVector LateralAccelerationWorldMps2 = FVector::ZeroVector;
+
+	if (CurrentPhaseConfig.bUseMissionLaunchPositionXY && MissionProfile)
+	{
+		const FVector LaunchPositionM = MissionProfile->Target.LaunchTransform.GetLocation() / 100.0;
+		const FVector PositionErrorM(LaunchPositionM.X - State.LocationWorldM.X, LaunchPositionM.Y - State.LocationWorldM.Y, 0.0);
+		const FVector VelocityErrorWorldMps(-State.VelocityWorldMps.X, -State.VelocityWorldMps.Y, 0.0);
+		LateralAccelerationWorldMps2.X =
+			CurrentPhaseConfig.Control.LateralPositionXPid.Update(PositionErrorM.X, ControlDeltaTime)
+			+ CurrentPhaseConfig.Control.LateralVelocityXPid.Update(VelocityErrorWorldMps.X, ControlDeltaTime);
+		LateralAccelerationWorldMps2.Y =
+			CurrentPhaseConfig.Control.LateralPositionYPid.Update(PositionErrorM.Y, ControlDeltaTime)
+			+ CurrentPhaseConfig.Control.LateralVelocityYPid.Update(VelocityErrorWorldMps.Y, ControlDeltaTime);
+
+		const double MaxLateralAccelerationMps2 = FMath::Max(0.0, CurrentPhaseConfig.Control.MaxLateralAccelerationMps2);
+		if (MaxLateralAccelerationMps2 > UE_SMALL_NUMBER)
+		{
+			LateralAccelerationWorldMps2 = LateralAccelerationWorldMps2.GetClampedToMaxSize(MaxLateralAccelerationMps2);
+		}
+	}
+
+	const FVector DesiredSpecificForceWorldMps2 =
+		LateralAccelerationWorldMps2 + FVector(0.0, 0.0, GravityMps2 + DesiredVerticalAccelMps2);
+	const double RequiredThrustN = State.MassKg * DesiredSpecificForceWorldMps2.Length();
 	const double Throttle = RequiredThrustN / AvailableThrustN;
 
-	LastDebugState.VelocityErrorMps = FVector(0.0, 0.0, VelocityErrorMps);
-	LastDebugState.DesiredAccelerationWorldMps2 = FVector(0.0, 0.0, DesiredVerticalAccelMps2);
+	LastDebugState.VelocityErrorMps = FVector(-State.VelocityWorldMps.X, -State.VelocityWorldMps.Y, VelocityErrorMps);
+	LastDebugState.DesiredAccelerationWorldMps2 = FVector(LateralAccelerationWorldMps2.X, LateralAccelerationWorldMps2.Y, DesiredVerticalAccelMps2);
 	LastDebugState.RequiredThrustN = RequiredThrustN;
 
-	Command.bApplyOuterThrottle = OuterEngines.bUseForThrottleControl;
-	Command.bApplyInnerThrottle = InnerEngines.bUseForThrottleControl;
-	Command.bApplyCenterThrottle = CenterEngines.bUseForThrottleControl;
-	Command.OuterThrottle = Throttle;
-	Command.InnerThrottle = Throttle;
-	Command.CenterThrottle = Throttle;
+	AppendThrottleCommands(Command, OuterEngines, Throttle);
+	AppendThrottleCommands(Command, InnerEngines, Throttle);
+	AppendThrottleCommands(Command, CenterEngines, Throttle);
 
-	ApplyAttitudeControl(State, CurrentPhaseConfig.TargetAttitudeWorldDeg, ControlDeltaTime, Command);
+	const FVector DesiredUpWorld = DesiredSpecificForceWorldMps2.GetSafeNormal(UE_SMALL_NUMBER, FVector::UpVector);
+	const FQuat CurrentYawQuat = FRotator(0.0, CurrentPhaseConfig.TargetAttitudeWorldDeg.Yaw, 0.0).Quaternion();
+	const FVector DesiredForwardProjected = FVector::VectorPlaneProject(CurrentYawQuat.GetForwardVector(), DesiredUpWorld).GetSafeNormal(UE_SMALL_NUMBER, FVector::ForwardVector);
+	const FMatrix TargetMatrix = FRotationMatrix::MakeFromXZ(DesiredForwardProjected, DesiredUpWorld);
+	ApplyAttitudeControl(State, TargetMatrix.Rotator(), ControlDeltaTime, Command);
 	return Command;
 }
 
@@ -496,12 +541,9 @@ FSuperHeavyActuatorCommand USuperHeavyAutopilotComponent::ComputeLandingCommand(
 	LastDebugState.DesiredAccelerationWorldMps2 = DesiredAccelerationWorldMps2;
 	LastDebugState.RequiredThrustN = RequiredThrustN;
 
-	Command.bApplyOuterThrottle = OuterEngines.bUseForThrottleControl;
-	Command.bApplyInnerThrottle = InnerEngines.bUseForThrottleControl;
-	Command.bApplyCenterThrottle = CenterEngines.bUseForThrottleControl;
-	Command.OuterThrottle = Throttle;
-	Command.InnerThrottle = Throttle;
-	Command.CenterThrottle = Throttle;
+	AppendThrottleCommands(Command, OuterEngines, Throttle);
+	AppendThrottleCommands(Command, InnerEngines, Throttle);
+	AppendThrottleCommands(Command, CenterEngines, Throttle);
 
 	const FVector DesiredUpWorld = DesiredSpecificForceWorldMps2.GetSafeNormal(UE_SMALL_NUMBER, FVector::UpVector);
 	const FQuat CurrentYawQuat = FRotator(0.0, CurrentPhaseConfig.TargetAttitudeWorldDeg.Yaw, 0.0).Quaternion();
@@ -517,20 +559,68 @@ void USuperHeavyAutopilotComponent::ApplyAttitudeControl(const FSuperHeavyNaviga
 	const FVector AttitudeErrorBodyDeg = SuperHeavyControlMath::ComputeAttitudeErrorBodyDeg(State.RotationWorldQuat, TargetAttitudeWorldDeg.Quaternion());
 	const double PitchErrorDeg = SuperHeavyControlMath::GetBodyAxisValue(AttitudeErrorBodyDeg, PitchControlBodyAxis);
 	const double RollErrorDeg = SuperHeavyControlMath::GetBodyAxisValue(AttitudeErrorBodyDeg, RollControlBodyAxis);
+	const double YawErrorDeg = SuperHeavyControlMath::GetBodyAxisValue(AttitudeErrorBodyDeg, ESuperHeavyBodyAxis::Z);
 	const double PitchRateDegPerSec = SuperHeavyControlMath::GetBodyAxisValue(State.AngularVelocityBodyDegPerSec, PitchControlBodyAxis);
 	const double RollRateDegPerSec = SuperHeavyControlMath::GetBodyAxisValue(State.AngularVelocityBodyDegPerSec, RollControlBodyAxis);
+	const double YawRateDegPerSec = SuperHeavyControlMath::GetBodyAxisValue(State.AngularVelocityBodyDegPerSec, ESuperHeavyBodyAxis::Z);
 
 	const double PitchCommandDeg = CurrentPhaseConfig.Control.AttitudePitchPid.UpdateWithMeasuredRate(PitchErrorDeg, PitchRateDegPerSec, ControlDeltaTime) * GimbalPitchCommandSign;
 	const double RollCommandDeg = CurrentPhaseConfig.Control.AttitudeRollPid.UpdateWithMeasuredRate(RollErrorDeg, RollRateDegPerSec, ControlDeltaTime) * GimbalRollCommandSign;
+	const double YawCommandDeg = FMath::Clamp(
+		CurrentPhaseConfig.Control.AttitudeYawPid.UpdateWithMeasuredRate(YawErrorDeg, YawRateDegPerSec, ControlDeltaTime) * GimbalYawCommandSign,
+		-CurrentPhaseConfig.Control.MaxYawGimbalMixDeg,
+		CurrentPhaseConfig.Control.MaxYawGimbalMixDeg);
 
 	LastDebugState.AttitudeErrorBodyDeg = AttitudeErrorBodyDeg;
 
-	Command.bApplyInnerGimbal = InnerEngines.bUseForGimbalControl;
-	Command.bApplyCenterGimbal = CenterEngines.bUseForGimbalControl;
-	Command.InnerGimbalPitchDeg = PitchCommandDeg;
-	Command.InnerGimbalRollDeg = RollCommandDeg;
-	Command.CenterGimbalPitchDeg = PitchCommandDeg;
-	Command.CenterGimbalRollDeg = RollCommandDeg;
+	AppendGimbalCommands(Command, InnerEngines, PitchCommandDeg, RollCommandDeg, YawCommandDeg);
+	AppendGimbalCommands(Command, CenterEngines, PitchCommandDeg, RollCommandDeg, YawCommandDeg);
+}
+
+void USuperHeavyAutopilotComponent::AppendThrottleCommands(FSuperHeavyActuatorCommand& Command, const FSuperHeavyEngineGroupConfig& Group, double Throttle) const
+{
+	if (!Group.bUseForThrottleControl)
+	{
+		return;
+	}
+
+	for (const FSuperHeavyEngineDefinition& Engine : Group.Engines)
+	{
+		FSuperHeavyEngineActuatorCommand& EngineCommand = Command.EngineCommands.AddDefaulted_GetRef();
+		EngineCommand.EngineId = Engine.EngineId;
+		EngineCommand.bApplyThrottle = true;
+		EngineCommand.Throttle = Throttle;
+	}
+}
+
+void USuperHeavyAutopilotComponent::AppendGimbalCommands(FSuperHeavyActuatorCommand& Command, const FSuperHeavyEngineGroupConfig& Group, double PitchDeg, double RollDeg, double YawDeg) const
+{
+	if (!Group.bUseForGimbalControl)
+	{
+		return;
+	}
+
+	for (const FSuperHeavyEngineDefinition& Engine : Group.Engines)
+	{
+		const double AzimuthRad = FMath::DegreesToRadians(Engine.AzimuthDeg);
+		const FVector2D TangentialDirection(-FMath::Sin(AzimuthRad), FMath::Cos(AzimuthRad));
+		const double MixedPitchDeg = PitchDeg + YawDeg * TangentialDirection.X;
+		const double MixedRollDeg = RollDeg + YawDeg * TangentialDirection.Y;
+
+		FSuperHeavyEngineActuatorCommand* EngineCommand = Command.EngineCommands.FindByPredicate([&Engine](const FSuperHeavyEngineActuatorCommand& ExistingCommand)
+		{
+			return ExistingCommand.EngineId == Engine.EngineId;
+		});
+		if (!EngineCommand)
+		{
+			EngineCommand = &Command.EngineCommands.AddDefaulted_GetRef();
+			EngineCommand->EngineId = Engine.EngineId;
+		}
+
+		EngineCommand->bApplyGimbal = true;
+		EngineCommand->GimbalPitchDeg = MixedPitchDeg;
+		EngineCommand->GimbalRollDeg = MixedRollDeg;
+	}
 }
 
 void USuperHeavyAutopilotComponent::ApplyCommand(const FSuperHeavyActuatorCommand& Command)

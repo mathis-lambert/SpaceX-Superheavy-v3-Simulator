@@ -45,6 +45,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
 	double GimbalRollCommandSign = 1.0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Command Mapping")
+	double GimbalYawCommandSign = 1.0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Engines")
 	FSuperHeavyEngineGroupConfig OuterEngines;
 
@@ -123,6 +126,8 @@ protected:
 	FSuperHeavyActuatorCommand ComputeVerticalAscentCommand(const FSuperHeavyNavigationState& State, double ControlDeltaTime);
 	FSuperHeavyActuatorCommand ComputeLandingCommand(const FSuperHeavyNavigationState& State, double ControlDeltaTime);
 	void ApplyAttitudeControl(const FSuperHeavyNavigationState& State, const FRotator& TargetAttitudeWorldDeg, double ControlDeltaTime, FSuperHeavyActuatorCommand& Command);
+	void AppendThrottleCommands(FSuperHeavyActuatorCommand& Command, const FSuperHeavyEngineGroupConfig& Group, double Throttle) const;
+	void AppendGimbalCommands(FSuperHeavyActuatorCommand& Command, const FSuperHeavyEngineGroupConfig& Group, double PitchDeg, double RollDeg, double YawDeg) const;
 	void ApplyCommand(const FSuperHeavyActuatorCommand& Command);
 	void UpdateTelemetry(const FSuperHeavyNavigationState& State);
 	double GetAvailableThrottleThrustN() const;

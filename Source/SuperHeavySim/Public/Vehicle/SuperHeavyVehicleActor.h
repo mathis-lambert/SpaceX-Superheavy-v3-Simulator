@@ -17,15 +17,6 @@ public:
 	virtual void ApplyActuatorCommand_Implementation(const FSuperHeavyActuatorCommand& Command) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Heavy|Vehicle API")
-	TArray<FName> OuterEngineIds;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Heavy|Vehicle API")
-	TArray<FName> InnerEngineIds;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Heavy|Vehicle API")
-	TArray<FName> CenterEngineIds;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Heavy|Vehicle API")
 	FName GridFinXPId = TEXT("GF_XP");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Heavy|Vehicle API")
@@ -68,7 +59,4 @@ protected:
 
 	UPROPERTY(Transient)
 	bool bWarnedUnhandledCameraCommand = false;
-
-	void ApplyThrottleToGroup(const TArray<FName>& EngineIds, double Throttle);
-	void ApplyGimbalToGroup(const TArray<FName>& EngineIds, double PitchDeg, double RollDeg);
 };

@@ -7,6 +7,11 @@ namespace SuperHeavyControlMath
 double GetBodyAxisValue(const FVector& Vector, ESuperHeavyBodyAxis Axis);
 FVector ComputeAttitudeErrorBodyDeg(const FQuat& CurrentWorldQuat, const FQuat& TargetWorldQuat);
 double EstimateGroupThrustN(const FSuperHeavyEngineGroupConfig& Group, double Throttle);
+double GetEngineMaxThrustN(
+	const FSuperHeavyEngineGroupConfig& OuterEngines,
+	const FSuperHeavyEngineGroupConfig& InnerEngines,
+	const FSuperHeavyEngineGroupConfig& CenterEngines,
+	FName EngineId);
 double EstimateCommandedThrustN(
 	const FSuperHeavyEngineGroupConfig& OuterEngines,
 	const FSuperHeavyEngineGroupConfig& InnerEngines,

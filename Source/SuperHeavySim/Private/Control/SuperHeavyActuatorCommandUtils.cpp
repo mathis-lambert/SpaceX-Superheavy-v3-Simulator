@@ -2,15 +2,18 @@
 
 namespace
 {
-double ClampIfApplied(bool bApply, double Value, double MinValue, double MaxValue)
-{
-	return bApply ? FMath::Clamp(Value, MinValue, MaxValue) : 0.0;
-}
-
 bool Differs(double A, double B)
 {
 	constexpr double Tolerance = 1.0e-6;
 	return !FMath::IsNearlyEqual(A, B, Tolerance);
+}
+
+const FSuperHeavyEngineActuatorCommand* FindEngineCommand(const TArray<FSuperHeavyEngineActuatorCommand>& Commands, FName EngineId)
+{
+	return Commands.FindByPredicate([EngineId](const FSuperHeavyEngineActuatorCommand& Command)
+	{
+		return Command.EngineId == EngineId;
+	});
 }
 }
 
@@ -25,20 +28,28 @@ FSuperHeavyActuatorCommand Sanitize(
 {
 	FSuperHeavyActuatorCommand Sanitized = Command;
 
-	Sanitized.bApplyOuterThrottle = OuterEngines.bUseForThrottleControl && Command.bApplyOuterThrottle;
-	Sanitized.bApplyInnerThrottle = InnerEngines.bUseForThrottleControl && Command.bApplyInnerThrottle;
-	Sanitized.bApplyCenterThrottle = CenterEngines.bUseForThrottleControl && Command.bApplyCenterThrottle;
-	Sanitized.bApplyInnerGimbal = InnerEngines.bUseForGimbalControl && Command.bApplyInnerGimbal;
-	Sanitized.bApplyCenterGimbal = CenterEngines.bUseForGimbalControl && Command.bApplyCenterGimbal;
+	for (FSuperHeavyEngineActuatorCommand& EngineCommand : Sanitized.EngineCommands)
+	{
+		if (EngineCommand.bApplyThrottle)
+		{
+			EngineCommand.Throttle = FMath::Clamp(EngineCommand.Throttle, Limits.MinThrottle, Limits.MaxThrottle);
+		}
+		else
+		{
+			EngineCommand.Throttle = 0.0;
+		}
 
-	Sanitized.OuterThrottle = ClampIfApplied(Sanitized.bApplyOuterThrottle, Sanitized.OuterThrottle, Limits.MinThrottle, Limits.MaxThrottle);
-	Sanitized.InnerThrottle = ClampIfApplied(Sanitized.bApplyInnerThrottle, Sanitized.InnerThrottle, Limits.MinThrottle, Limits.MaxThrottle);
-	Sanitized.CenterThrottle = ClampIfApplied(Sanitized.bApplyCenterThrottle, Sanitized.CenterThrottle, Limits.MinThrottle, Limits.MaxThrottle);
-
-	Sanitized.InnerGimbalPitchDeg = ClampIfApplied(Sanitized.bApplyInnerGimbal, Sanitized.InnerGimbalPitchDeg, -Limits.MaxGimbalDeg, Limits.MaxGimbalDeg);
-	Sanitized.InnerGimbalRollDeg = ClampIfApplied(Sanitized.bApplyInnerGimbal, Sanitized.InnerGimbalRollDeg, -Limits.MaxGimbalDeg, Limits.MaxGimbalDeg);
-	Sanitized.CenterGimbalPitchDeg = ClampIfApplied(Sanitized.bApplyCenterGimbal, Sanitized.CenterGimbalPitchDeg, -Limits.MaxGimbalDeg, Limits.MaxGimbalDeg);
-	Sanitized.CenterGimbalRollDeg = ClampIfApplied(Sanitized.bApplyCenterGimbal, Sanitized.CenterGimbalRollDeg, -Limits.MaxGimbalDeg, Limits.MaxGimbalDeg);
+		if (EngineCommand.bApplyGimbal)
+		{
+			EngineCommand.GimbalPitchDeg = FMath::Clamp(EngineCommand.GimbalPitchDeg, -Limits.MaxGimbalDeg, Limits.MaxGimbalDeg);
+			EngineCommand.GimbalRollDeg = FMath::Clamp(EngineCommand.GimbalRollDeg, -Limits.MaxGimbalDeg, Limits.MaxGimbalDeg);
+		}
+		else
+		{
+			EngineCommand.GimbalPitchDeg = 0.0;
+			EngineCommand.GimbalRollDeg = 0.0;
+		}
+	}
 
 	Sanitized.GridFinXPCommandDeg = FMath::Clamp(Sanitized.GridFinXPCommandDeg, -Limits.MaxGridFinDeg, Limits.MaxGridFinDeg);
 	Sanitized.GridFinXMCommandDeg = FMath::Clamp(Sanitized.GridFinXMCommandDeg, -Limits.MaxGridFinDeg, Limits.MaxGridFinDeg);
@@ -53,26 +64,31 @@ FSuperHeavyCommandSaturation ComputeSaturation(
 {
 	FSuperHeavyCommandSaturation Saturation;
 
-	Saturation.bOuterThrottleSaturated = Differs(RawCommand.OuterThrottle, SanitizedCommand.OuterThrottle);
-	Saturation.bInnerThrottleSaturated = Differs(RawCommand.InnerThrottle, SanitizedCommand.InnerThrottle);
-	Saturation.bCenterThrottleSaturated = Differs(RawCommand.CenterThrottle, SanitizedCommand.CenterThrottle);
-	Saturation.bInnerGimbalSaturated =
-		Differs(RawCommand.InnerGimbalPitchDeg, SanitizedCommand.InnerGimbalPitchDeg)
-		|| Differs(RawCommand.InnerGimbalRollDeg, SanitizedCommand.InnerGimbalRollDeg);
-	Saturation.bCenterGimbalSaturated =
-		Differs(RawCommand.CenterGimbalPitchDeg, SanitizedCommand.CenterGimbalPitchDeg)
-		|| Differs(RawCommand.CenterGimbalRollDeg, SanitizedCommand.CenterGimbalRollDeg);
+	for (const FSuperHeavyEngineActuatorCommand& RawEngineCommand : RawCommand.EngineCommands)
+	{
+		const FSuperHeavyEngineActuatorCommand* SanitizedEngineCommand = FindEngineCommand(SanitizedCommand.EngineCommands, RawEngineCommand.EngineId);
+		if (!SanitizedEngineCommand)
+		{
+			continue;
+		}
+
+		Saturation.bEngineThrottleSaturated |=
+			RawEngineCommand.bApplyThrottle
+			&& Differs(RawEngineCommand.Throttle, SanitizedEngineCommand->Throttle);
+		Saturation.bEngineGimbalSaturated |=
+			RawEngineCommand.bApplyGimbal
+			&& (Differs(RawEngineCommand.GimbalPitchDeg, SanitizedEngineCommand->GimbalPitchDeg)
+				|| Differs(RawEngineCommand.GimbalRollDeg, SanitizedEngineCommand->GimbalRollDeg));
+	}
+
 	Saturation.bGridFinSaturated =
 		Differs(RawCommand.GridFinXPCommandDeg, SanitizedCommand.GridFinXPCommandDeg)
 		|| Differs(RawCommand.GridFinXMCommandDeg, SanitizedCommand.GridFinXMCommandDeg)
 		|| Differs(RawCommand.GridFinYMCommandDeg, SanitizedCommand.GridFinYMCommandDeg);
 
 	Saturation.bAnySaturated =
-		Saturation.bOuterThrottleSaturated
-		|| Saturation.bInnerThrottleSaturated
-		|| Saturation.bCenterThrottleSaturated
-		|| Saturation.bInnerGimbalSaturated
-		|| Saturation.bCenterGimbalSaturated
+		Saturation.bEngineThrottleSaturated
+		|| Saturation.bEngineGimbalSaturated
 		|| Saturation.bGridFinSaturated;
 
 	return Saturation;

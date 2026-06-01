@@ -51,6 +51,8 @@ enum class ESuperHeavyPhaseTransitionCondition : uint8
 	AltitudeBelow UMETA(DisplayName = "Altitude Below"),
 	SpeedBelow UMETA(DisplayName = "Speed Below"),
 	VerticalSpeedBelow UMETA(DisplayName = "Vertical Speed Below"),
+	VerticalVelocityBelow UMETA(DisplayName = "Vertical Velocity Below"),
+	VerticalVelocityAbove UMETA(DisplayName = "Vertical Velocity Above"),
 	HorizontalDistanceBelow UMETA(DisplayName = "Horizontal Distance Below"),
 	DistanceToTargetBelow UMETA(DisplayName = "Distance To Target Below"),
 	Touchdown UMETA(DisplayName = "Touchdown")
@@ -124,6 +126,9 @@ struct SUPERHEAVYSIM_API FSuperHeavyPhaseControlConfig
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
 	FSuperHeavyPidController AttitudeRollPid;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
+	FSuperHeavyPidController AttitudeYawPid;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guidance Shaping", meta = (ClampMin = "0.0", ClampMax = "85.0"))
 	double MaxTargetTiltDeg = 25.0;
 
@@ -138,6 +143,9 @@ struct SUPERHEAVYSIM_API FSuperHeavyPhaseControlConfig
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guidance Shaping", meta = (ClampMin = "0.1"))
 	double MinVerticalBrakingDistanceM = 1.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gimbal Mixing", meta = (ClampMin = "0.0"))
+	double MaxYawGimbalMixDeg = 5.0;
 };
 
 USTRUCT(BlueprintType)
@@ -165,6 +173,9 @@ struct SUPERHEAVYSIM_API FSuperHeavyFlightPhaseConfig
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targets")
 	bool bUseMissionLandingTarget = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Targets")
+	bool bUseMissionLaunchPositionXY = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
 	FSuperHeavyPhaseControlConfig Control;

@@ -43,14 +43,46 @@ double EstimateGroupThrustN(const FSuperHeavyEngineGroupConfig& Group, double Th
 	return Group.GetMaxThrustN() * FMath::Clamp(Throttle, 0.0, 1.0);
 }
 
+double GetEngineMaxThrustN(
+	const FSuperHeavyEngineGroupConfig& OuterEngines,
+	const FSuperHeavyEngineGroupConfig& InnerEngines,
+	const FSuperHeavyEngineGroupConfig& CenterEngines,
+	FName EngineId)
+{
+	const auto FindInGroup = [EngineId](const FSuperHeavyEngineGroupConfig& Group) -> double
+	{
+		return Group.Engines.ContainsByPredicate([EngineId](const FSuperHeavyEngineDefinition& Engine)
+		{
+			return Engine.EngineId == EngineId;
+		}) ? Group.MaxThrustPerEngineN : 0.0;
+	};
+
+	if (const double OuterThrustN = FindInGroup(OuterEngines); OuterThrustN > 0.0)
+	{
+		return OuterThrustN;
+	}
+	if (const double InnerThrustN = FindInGroup(InnerEngines); InnerThrustN > 0.0)
+	{
+		return InnerThrustN;
+	}
+	return FindInGroup(CenterEngines);
+}
+
 double EstimateCommandedThrustN(
 	const FSuperHeavyEngineGroupConfig& OuterEngines,
 	const FSuperHeavyEngineGroupConfig& InnerEngines,
 	const FSuperHeavyEngineGroupConfig& CenterEngines,
 	const FSuperHeavyActuatorCommand& Command)
 {
-	return EstimateGroupThrustN(OuterEngines, Command.OuterThrottle)
-		+ EstimateGroupThrustN(InnerEngines, Command.InnerThrottle)
-		+ EstimateGroupThrustN(CenterEngines, Command.CenterThrottle);
+	double ThrustN = 0.0;
+	for (const FSuperHeavyEngineActuatorCommand& EngineCommand : Command.EngineCommands)
+	{
+		if (EngineCommand.bApplyThrottle)
+		{
+			ThrustN += GetEngineMaxThrustN(OuterEngines, InnerEngines, CenterEngines, EngineCommand.EngineId)
+				* FMath::Clamp(EngineCommand.Throttle, 0.0, 1.0);
+		}
+	}
+	return ThrustN;
 }
 }

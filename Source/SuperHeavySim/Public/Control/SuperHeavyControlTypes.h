@@ -33,6 +33,18 @@ struct SUPERHEAVYSIM_API FSuperHeavyEngineGroupUsage
 };
 
 USTRUCT(BlueprintType)
+struct SUPERHEAVYSIM_API FSuperHeavyEngineDefinition
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Engine Group")
+	FName EngineId = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Engine Group")
+	double AzimuthDeg = 0.0;
+};
+
+USTRUCT(BlueprintType)
 struct SUPERHEAVYSIM_API FSuperHeavyEngineGroupConfig
 {
 	GENERATED_BODY()
@@ -41,7 +53,7 @@ struct SUPERHEAVYSIM_API FSuperHeavyEngineGroupConfig
 	FName GroupName = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Engine Group")
-	TArray<FName> EngineIds;
+	TArray<FSuperHeavyEngineDefinition> Engines;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Engine Group")
 	bool bUseForThrottleControl = true;
@@ -54,7 +66,7 @@ struct SUPERHEAVYSIM_API FSuperHeavyEngineGroupConfig
 
 	double GetMaxThrustN() const
 	{
-		return bUseForThrottleControl ? MaxThrustPerEngineN * EngineIds.Num() : 0.0;
+		return bUseForThrottleControl ? MaxThrustPerEngineN * Engines.Num() : 0.0;
 	}
 };
 
@@ -77,48 +89,39 @@ struct SUPERHEAVYSIM_API FSuperHeavyActuatorLimits
 };
 
 USTRUCT(BlueprintType)
+struct SUPERHEAVYSIM_API FSuperHeavyEngineActuatorCommand
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	FName EngineId = NAME_None;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	bool bApplyThrottle = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	bool bApplyGimbal = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	double Throttle = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	double GimbalPitchDeg = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
+	double GimbalRollDeg = 0.0;
+};
+
+USTRUCT(BlueprintType)
 struct SUPERHEAVYSIM_API FSuperHeavyActuatorCommand
 {
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	bool bApplyOuterThrottle = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	bool bApplyInnerThrottle = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	bool bApplyCenterThrottle = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	bool bApplyInnerGimbal = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	bool bApplyCenterGimbal = false;
+	TArray<FSuperHeavyEngineActuatorCommand> EngineCommands;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
 	bool bApplyGridFins = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	double OuterThrottle = 0.0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	double InnerThrottle = 0.0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	double CenterThrottle = 0.0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	double InnerGimbalPitchDeg = 0.0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	double InnerGimbalRollDeg = 0.0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	double CenterGimbalPitchDeg = 0.0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
-	double CenterGimbalRollDeg = 0.0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Command")
 	double GridFinXPCommandDeg = 0.0;
@@ -136,19 +139,10 @@ struct SUPERHEAVYSIM_API FSuperHeavyCommandSaturation
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
-	bool bOuterThrottleSaturated = false;
+	bool bEngineThrottleSaturated = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
-	bool bInnerThrottleSaturated = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
-	bool bCenterThrottleSaturated = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
-	bool bInnerGimbalSaturated = false;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
-	bool bCenterGimbalSaturated = false;
+	bool bEngineGimbalSaturated = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Saturation")
 	bool bGridFinSaturated = false;

@@ -10,26 +10,16 @@ ASuperHeavyVehicleActor::ASuperHeavyVehicleActor()
 
 void ASuperHeavyVehicleActor::ApplyActuatorCommand_Implementation(const FSuperHeavyActuatorCommand& Command)
 {
-	if (Command.bApplyOuterThrottle)
+	for (const FSuperHeavyEngineActuatorCommand& EngineCommand : Command.EngineCommands)
 	{
-		ApplyThrottleToGroup(OuterEngineIds, Command.OuterThrottle);
-	}
-	if (Command.bApplyInnerThrottle)
-	{
-		ApplyThrottleToGroup(InnerEngineIds, Command.InnerThrottle);
-	}
-	if (Command.bApplyCenterThrottle)
-	{
-		ApplyThrottleToGroup(CenterEngineIds, Command.CenterThrottle);
-	}
-
-	if (Command.bApplyInnerGimbal)
-	{
-		ApplyGimbalToGroup(InnerEngineIds, Command.InnerGimbalPitchDeg, Command.InnerGimbalRollDeg);
-	}
-	if (Command.bApplyCenterGimbal)
-	{
-		ApplyGimbalToGroup(CenterEngineIds, Command.CenterGimbalPitchDeg, Command.CenterGimbalRollDeg);
+		if (EngineCommand.bApplyThrottle)
+		{
+			SetEngineThrottleCommand(EngineCommand.EngineId, EngineCommand.Throttle);
+		}
+		if (EngineCommand.bApplyGimbal)
+		{
+			SetEngineGimbalCommand(EngineCommand.EngineId, EngineCommand.GimbalPitchDeg, EngineCommand.GimbalRollDeg);
+		}
 	}
 
 	if (Command.bApplyGridFins)
@@ -42,20 +32,6 @@ void ASuperHeavyVehicleActor::ApplyActuatorCommand_Implementation(const FSuperHe
 
 void ASuperHeavyVehicleActor::ConfigureDefaultActuatorIds()
 {
-	OuterEngineIds.Reset();
-	for (int32 Index = 1; Index <= 20; ++Index)
-	{
-		OuterEngineIds.Add(FName(*FString::Printf(TEXT("R%02d"), Index)));
-	}
-
-	InnerEngineIds.Reset();
-	for (int32 Index = 1; Index <= 10; ++Index)
-	{
-		InnerEngineIds.Add(FName(*FString::Printf(TEXT("RGI%02d"), Index)));
-	}
-
-	CenterEngineIds = { TEXT("RGC01"), TEXT("RGC02"), TEXT("RGC03") };
-
 	GridFinXPId = TEXT("GF_XP");
 	GridFinXMId = TEXT("GF_XM");
 	GridFinYMId = TEXT("GF_YM");
@@ -94,21 +70,5 @@ void ASuperHeavyVehicleActor::SetActiveCameraByIndexCommand_Implementation(int32
 	{
 		UE_LOG(LogSuperHeavyGnc, Warning, TEXT("SuperHeavyVehicleActor: SetActiveCameraByIndexCommand is not implemented by %s."), *GetName());
 		bWarnedUnhandledCameraCommand = true;
-	}
-}
-
-void ASuperHeavyVehicleActor::ApplyThrottleToGroup(const TArray<FName>& EngineIds, double Throttle)
-{
-	for (const FName EngineId : EngineIds)
-	{
-		SetEngineThrottleCommand(EngineId, Throttle);
-	}
-}
-
-void ASuperHeavyVehicleActor::ApplyGimbalToGroup(const TArray<FName>& EngineIds, double PitchDeg, double RollDeg)
-{
-	for (const FName EngineId : EngineIds)
-	{
-		SetEngineGimbalCommand(EngineId, PitchDeg, RollDeg);
 	}
 }
