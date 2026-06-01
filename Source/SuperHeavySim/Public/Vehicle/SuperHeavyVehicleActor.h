@@ -2,8 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "GNC/SuperHeavyGncTypes.h"
-#include "GNC/SuperHeavyVehicleControlInterface.h"
+#include "Control/SuperHeavyControlTypes.h"
+#include "Vehicle/SuperHeavyVehicleControlInterface.h"
 #include "SuperHeavyVehicleActor.generated.h"
 
 UCLASS(Blueprintable)
@@ -52,6 +52,10 @@ public:
 	void SetGridFinAngleCommand(FName GridFinId, double AngleDeg);
 	virtual void SetGridFinAngleCommand_Implementation(FName GridFinId, double AngleDeg);
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Super Heavy|Vehicle API")
+	void SetActiveCameraByIndexCommand(int32 CameraIndex);
+	virtual void SetActiveCameraByIndexCommand_Implementation(int32 CameraIndex);
+
 protected:
 	UPROPERTY(Transient)
 	bool bWarnedUnhandledThrottleCommand = false;
@@ -61,6 +65,9 @@ protected:
 
 	UPROPERTY(Transient)
 	bool bWarnedUnhandledGridFinCommand = false;
+
+	UPROPERTY(Transient)
+	bool bWarnedUnhandledCameraCommand = false;
 
 	void ApplyThrottleToGroup(const TArray<FName>& EngineIds, double Throttle);
 	void ApplyGimbalToGroup(const TArray<FName>& EngineIds, double PitchDeg, double RollDeg);

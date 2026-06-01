@@ -1,7 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GNC/SuperHeavyGncTypes.h"
+#include "Control/SuperHeavyControlTypes.h"
 
 namespace SuperHeavyActuatorCommandUtils
 {

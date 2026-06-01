@@ -88,6 +88,15 @@ void ASuperHeavyVehicleActor::SetGridFinAngleCommand_Implementation(FName GridFi
 	}
 }
 
+void ASuperHeavyVehicleActor::SetActiveCameraByIndexCommand_Implementation(int32 CameraIndex)
+{
+	if (bWarnOnUnhandledActuatorCommands && !bWarnedUnhandledCameraCommand)
+	{
+		UE_LOG(LogSuperHeavyGnc, Warning, TEXT("SuperHeavyVehicleActor: SetActiveCameraByIndexCommand is not implemented by %s."), *GetName());
+		bWarnedUnhandledCameraCommand = true;
+	}
+}
+
 void ASuperHeavyVehicleActor::ApplyThrottleToGroup(const TArray<FName>& EngineIds, double Throttle)
 {
 	for (const FName EngineId : EngineIds)

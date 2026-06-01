@@ -1,4 +1,4 @@
-#include "GNC/SuperHeavyActuatorCommandUtils.h"
+#include "Control/SuperHeavyActuatorCommandUtils.h"
 
 namespace
 {

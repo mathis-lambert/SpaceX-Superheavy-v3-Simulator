@@ -1,94 +1,207 @@
-# Super Heavy GNC Architecture
+# Super Heavy Autopilot Architecture
 
-This document defines the C++/Blueprint contract for the Super Heavy vehicle guidance, navigation, and control stack.
+This document defines the C++/Blueprint contract for the Super Heavy mission autopilot.
 
 ## Design Rules
 
-- GNC code owns guidance state, control laws, actuator commands, and telemetry.
-- Vehicle code owns actuator routing and physical components.
-- Blueprint implements only vehicle-specific lookups and component calls.
+- C++ owns mission state, phase sequencing, navigation, guidance, control, actuator commands, validation, and telemetry.
+- Blueprint owns Unreal asset wiring: meshes, child actors, Niagara, cameras, and atomic actuator calls.
 - Control logic uses SI units internally: meters, meters per second, kilograms, newtons.
-- Unreal unit conversion stays at system boundaries: world transforms are read in centimeters and converted immediately.
-- Attitude control uses quaternion/body-frame error, not Euler pitch/roll deltas.
-- The controller never directly touches child actor components, meshes, pivots, or Niagara systems.
+- Unreal centimeters are converted at the navigation boundary.
+- Attitude control uses quaternion/body-frame error.
+- The autopilot never directly touches engine child actors, grid fin child actors, meshes, pivots, or Niagara systems.
 
 ## Runtime Flow
 
 ```text
-SuperHeavyFlightPhaseProfile
-  -> SuperHeavyGncComponent flight phase sequencer
-  -> optional SuperHeavyGncComponent::SetFlightPhase / StartFlightSequence
-  -> SuperHeavyGncComponent fixed-rate control step
+SuperHeavyMissionProfile
+  -> SuperHeavyAutopilotComponent::StartAutopilotMission
+  -> SuperHeavyNavigationComponent::CaptureNavigationState
+  -> mission phase sequencer
+  -> guidance/control law
   -> FSuperHeavyActuatorCommand
   -> SuperHeavyVehicleControlInterface::ApplyActuatorCommand
-  -> ASuperHeavyVehicleActor group routing
-  -> BP_SuperHeavy actuator functions
-  -> BP_RaptorEngine / BP_GridFin
+  -> SuperHeavyVehicleActor group routing
+  -> BP_SuperHeavy atomic Blueprint functions
+  -> BP_RaptorEngine / BP_GridFin / cameras / VFX
+```
+
+## Source Layout
+
+```text
+Source/SuperHeavySim/
+├── Public/
+│   ├── Autopilot/
+│   ├── Control/
+│   ├── Navigation/
+│   ├── Telemetry/
+│   ├── Vehicle/
+│   └── Logging/
+└── Private/
+    ├── Autopilot/
+    ├── Control/
+    ├── Navigation/
+    ├── Vehicle/
+    └── Logging/
 ```
 
 ## Core C++ Types
 
-`USuperHeavyGncComponent`
+`USuperHeavyMissionProfile`
 
-- Captures vehicle state from the physics component.
-- Runs the fixed-rate control loop, default 100 Hz.
-- Runs the flight phase sequencer from the assigned phase profile.
-- Applies guidance modes and attitude hold.
-- Emits `FSuperHeavyActuatorCommand`.
-- Exposes `FSuperHeavyGncTelemetry` for UI/debug.
-- Exposes `FSuperHeavyGncDebugState` with control errors, thrust demand, raw command, and saturation flags.
-- Exposes runtime APIs for assigning a phase profile, setting target bundles, and validating phase configuration.
+- DataAsset defining a complete mission.
+- Contains launch transform, landing transform, altitude reference, initial phase, abort phase, and phase configs.
+- Owns editable/tweakable phase parameters and transition conditions.
 
-`USuperHeavyFlightPhaseProfile`
+`USuperHeavyAutopilotComponent`
 
-- DataAsset that stores editable phase configs.
-- Stores declarative transitions between phases.
-- Provides `FindConfigForPhase`, `IsPhaseConfigured`, and `ValidateProfile`.
-- Keeps flight phase tuning out of Blueprint graphs.
+- Main runtime API for UI and game logic.
+- Starts, stops, aborts, and restarts missions.
+- Runs a fixed-rate control loop.
+- Executes phase transitions from the active mission profile.
+- Computes full XYZ guidance/control commands for landing phases.
+- Emits `FSuperHeavyTelemetry`.
+
+`USuperHeavyNavigationComponent`
+
+- Reads Unreal physics state from the configured physics component.
+- Converts Unreal units to SI.
+- Produces `FSuperHeavyNavigationState`.
+- Computes position and velocity relative to the mission landing target.
+
+`Control`
+
+- Contains PID controllers, actuator command types, actuator limits, command saturation, thrust estimates, and quaternion/body-frame math.
+
+`Telemetry`
+
+- Contains UI/debug snapshots.
+- UI should read telemetry; UI should not recompute control state.
 
 `ASuperHeavyVehicleActor`
 
-- C++ base class intended as the parent of `BP_SuperHeavy`.
+- C++ base class intended as parent of `BP_SuperHeavy`.
 - Implements `SuperHeavyVehicleControlInterface`.
-- Routes command groups to engine and grid-fin IDs.
-- Leaves only atomic actuator calls for Blueprint implementation.
-
-`USuperHeavyVehicleControlInterface`
-
-- Stable command boundary between GNC and the vehicle actor.
-- Exposes `ApplyActuatorCommand(FSuperHeavyActuatorCommand)`.
+- Expands grouped actuator commands to engine/gridfin IDs.
+- Leaves only atomic actuator/camera implementation to Blueprint.
 
 ## Blueprint Contract
 
-`BP_SuperHeavy` should be reparented to `SuperHeavyVehicleActor`.
+`BP_SuperHeavy` should inherit from `SuperHeavyVehicleActor`.
 
-Implement these BlueprintNativeEvent overrides:
+Keep these Blueprint functions:
 
-- `SetEngineThrottleCommand(EngineId, Throttle)`
-- `SetEngineGimbalCommand(EngineId, PitchDeg, RollDeg)`
-- `SetGridFinAngleCommand(GridFinId, AngleDeg)`
+- `InitializeEngines`
+- `InitializeGridFins`
+- `GetEngine`
+- `GetGridFin`
+- `SetEngineThrottle`
+- `SetEngineGimbal`
+- `SetGridFinAngle`
+- `SetActiveCameraByIndex`
 
-Recommended Blueprint routing:
+Implement these C++ BlueprintNativeEvent overrides:
 
-```text
-SetEngineThrottleCommand
-  -> SetEngineThrottle(EngineId, Throttle)
+- `SetEngineThrottleCommand(EngineId, Throttle)` -> `SetEngineThrottle`
+- `SetEngineGimbalCommand(EngineId, PitchDeg, RollDeg)` -> `SetEngineGimbal`
+- `SetGridFinAngleCommand(GridFinId, AngleDeg)` -> `SetGridFinAngle`
+- `SetActiveCameraByIndexCommand(CameraIndex)` -> `SetActiveCameraByIndex`
 
-SetEngineGimbalCommand
-  -> SetEngineGimbal(EngineId, PitchDeg, RollDeg)
+Blueprint should not own:
 
-SetGridFinAngleCommand
-  -> SetGridFinAngle(GridFinId, AngleDeg)
-```
+- phase transitions
+- autopilot modes
+- landing-burn logic
+- XYZ guidance
+- PID/controller calculations
+- TWR/velocity/altitude recomputation
 
-`ASuperHeavyVehicleActor` handles group expansion:
+## Required Components On `BP_SuperHeavy`
 
-- `OuterThrottle` -> `R01..R20`
-- `InnerThrottle` -> `RGI01..RGI10`
-- `CenterThrottle` -> `RGC01..RGC03`
-- `InnerGimbalPitchDeg/RollDeg` -> `RGI01..RGI10`
-- `CenterGimbalPitchDeg/RollDeg` -> `RGC01..RGC03`
-- `GridFinXP/XM/YMCommandDeg` -> `GF_XP/GF_XM/GF_YM`
+- `SuperHeavyNavigationComponent`
+- `SuperHeavyAutopilotComponent`
+
+Navigation:
+
+- `PhysicsComponentName = COL_Body_Main`
+- `AltitudeReferenceWorldZCm` can be overwritten by the mission profile.
+
+Autopilot:
+
+- assign `MissionProfile`
+- leave `NavigationComponentName` empty unless there are multiple navigation components
+- keep command mapping as validated in Unreal:
+- `PitchControlBodyAxis = Body Y`
+- `RollControlBodyAxis = Body X`
+- `GimbalPitchCommandSign = 1`
+- `GimbalRollCommandSign = 1`
+
+## Mission Profile Setup
+
+Create a `SuperHeavyMissionProfile` DataAsset.
+
+Mission-level fields:
+
+- `MissionId`
+- `DisplayName`
+- `Target.LaunchTransform`
+- `Target.LandingTransform`
+- `Target.AltitudeReferenceWorldZCm`
+- `InitialPhase`
+- `AbortPhase`
+- `bResetVehicleToLaunchTransformOnStart`
+- initial linear/angular velocity
+
+Recommended phases:
+
+- `GroundIdle`
+- `Liftoff`
+- `Ascent`
+- `MainEngineCutoff`
+- `Coast`
+- `Boostback`
+- `Entry`
+- `Approach`
+- `LandingBurn`
+- `Touchdown`
+- `Abort`
+
+Each phase config contains:
+
+- `GuidanceMode`
+- `ControlRateHz`
+- target altitude / target velocity / target attitude
+- `bUseMissionLandingTarget`
+- PID gains
+- actuator limits
+- engine group usage
+- transitions
+
+Landing phases must use the mission landing target. The landing controller consumes:
+
+- world position XYZ
+- world velocity XYZ
+- landing target XYZ
+- landing target velocity
+- quaternion attitude error
+- body angular velocity
+- mass
+- available thrust
+
+## Runtime API For UI
+
+Use only these high-level functions from UI/input:
+
+- `StartAutopilotMission()`
+- `StopAutopilot()`
+- `EnterManualMode()`
+- `AbortMission()`
+- `RestartMission()`
+- `SetManualCommand(Command)`
+- `GetTelemetry()`
+- `GetDebugState()`
+
+Do not call individual phases from UI during normal operation.
 
 ## Coordinate Conventions
 
@@ -99,62 +212,25 @@ SetGridFinAngleCommand
 - Pitch-down command moves Raptors toward `+Y`.
 - Roll-right command moves Raptors toward `-X`.
 - Roll-left command moves Raptors toward `+X`.
-- GNC attitude mapping uses body `Y` for pitch control and body `X` for roll control.
+- Autopilot attitude mapping uses body `Y` for pitch control and body `X` for roll control.
 - Gimbal pitch and roll command signs are both `+1`.
 - Grid fins rotate around their local `X`; sign inversion stays inside `BP_GridFin`.
 
-## Flight Phase Profile Setup
-
-Create a `SuperHeavyFlightPhaseProfile` DataAsset and add one config per automatic phase.
-
-For each phase:
-
-- Set `Phase`.
-- Set `bEnableGnc`.
-- Set `GuidanceMode`.
-- Set `bEnableAttitudeHold`.
-- Set `ControlRateHz`.
-- Set `Targets`.
-- Set `ActuatorLimits`.
-- Set engine group usage.
-- Add PID overrides only when the phase needs different gains.
-- Add transitions from this phase to the next phase.
-
-Supported transition conditions:
-
-- `ElapsedTime`: transition after `Threshold` seconds in the current phase.
-- `AltitudeBelow`: transition when altitude in meters is `<= Threshold`.
-- `AltitudeAbove`: transition when altitude in meters is `>= Threshold`.
-- `VerticalSpeedBelow`: transition when vertical speed in m/s is `<= Threshold`.
-- `VerticalSpeedAbove`: transition when vertical speed in m/s is `>= Threshold`.
-- `Touchdown`: transition when altitude is `<= Threshold` and absolute vertical speed is `<= SecondaryThreshold`.
-
-Call `ValidateProfile()` before using the profile. Treat `Errors` as blocking. Treat `Warnings` as setup reminders.
-
-At runtime, prefer these component APIs:
-
-- `SetPhaseProfile(Profile, bLogValidation)`
-- `ValidatePhaseProfile(bLogResult)`
-- `SetControlTargets(Targets)`
-- `SetFlightPhase(Phase)`
-- `StartFlightSequence(StartPhase)`
-- `StopFlightSequence(bEnterManual)`
-
-## Minimal PIE Test
+## Minimal Unreal Setup
 
 1. Reparent `BP_SuperHeavy` to `SuperHeavyVehicleActor`.
-2. Implement the three atomic actuator events.
-3. Add or keep `SuperHeavyGncComponent` on `BP_SuperHeavy`.
-4. Assign `PhysicsComponentName = COL_Body_Main`.
-5. Create and assign a `SuperHeavyFlightPhaseProfile`.
-6. Validate the profile.
-7. Enable `bStartInitialPhaseOnBeginPlay` and set `InitialFlightPhase`, or call `StartFlightSequence(InitialPhase)`.
-8. Watch `GetLastTelemetry()` for phase, guidance mode, vehicle state, TWR, and last command.
-9. Watch `GetLastDebugState()` for control errors, raw throttle demand, required thrust, available thrust, and saturation flags.
+2. Implement the four BlueprintNativeEvent overrides listed above.
+3. Add `SuperHeavyNavigationComponent`.
+4. Add `SuperHeavyAutopilotComponent`.
+5. Create a `SuperHeavyMissionProfile`.
+6. Assign the mission profile to `SuperHeavyAutopilotComponent`.
+7. Configure phases and transitions in the mission profile.
+8. UI calls `StartAutopilotMission`.
+9. HUD reads `GetTelemetry()` on a timer.
 
 ## Extension Path
 
-- Add guidance modes without changing vehicle Blueprint routing.
-- Add LQR/MPC controllers by producing the same `FSuperHeavyActuatorCommand`.
-- Add navigation filters by improving `FSuperHeavyVehicleState` generation.
-- Add UI by reading `FSuperHeavyGncTelemetry`, not by coupling UI to control internals.
+- Add aerodynamics as force/torque models fed by navigation state and actuator state.
+- Replace PID control laws with LQR/MPC behind the same `FSuperHeavyActuatorCommand` output.
+- Add launch pad / tower DataAssets and reference them from mission profiles.
+- Add automated tests for mission validation, transition conditions, and controller outputs.

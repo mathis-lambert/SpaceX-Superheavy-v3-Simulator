@@ -1,8 +1,7 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Control/SuperHeavyControlTypes.h"
 #include "UObject/Interface.h"
-#include "GNC/SuperHeavyGncTypes.h"
 #include "SuperHeavyVehicleControlInterface.generated.h"
 
 UINTERFACE(BlueprintType)
@@ -16,6 +15,6 @@ class SUPERHEAVYSIM_API ISuperHeavyVehicleControlInterface
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Super Heavy|Vehicle Control")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Super Heavy|Vehicle Control")
 	void ApplyActuatorCommand(const FSuperHeavyActuatorCommand& Command);
 };

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GNC/SuperHeavyGncTypes.h"
+#include "Control/SuperHeavyControlTypes.h"
 
-namespace SuperHeavyGncMath
+namespace SuperHeavyControlMath
 {
 double GetBodyAxisValue(const FVector& Vector, ESuperHeavyBodyAxis Axis);
 FVector ComputeAttitudeErrorBodyDeg(const FQuat& CurrentWorldQuat, const FQuat& TargetWorldQuat);

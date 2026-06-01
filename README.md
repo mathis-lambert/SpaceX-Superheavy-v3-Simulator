@@ -287,6 +287,12 @@ The project includes a C++ GNC foundation:
 - [SuperHeavyVehicleActor.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/Vehicle/SuperHeavyVehicleActor.h)
   C++ vehicle base that routes grouped actuator commands.
 
+- [SuperHeavyScenarioProfile.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/Scenarios/SuperHeavyScenarioProfile.h)
+  DataAsset-based playable scenario definitions.
+
+- [SuperHeavyScenarioComponent.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/Scenarios/SuperHeavyScenarioComponent.h)
+  Runtime scenario launcher that resets vehicle state, assigns GNC phase profiles, starts phase sequences, and selects cameras.
+
 ## Assets
 
 The repository contains:
@@ -299,6 +305,7 @@ The repository contains:
 
 ## Next Steps
 
+- create a `SuperHeavyScenarioProfile` with `LandingBurn`, `Liftoff`, and `Hover`
 - configure automatic phase transitions in the profile
 - add aerodynamics
 - expand guidance beyond vertical speed / altitude / attitude hold

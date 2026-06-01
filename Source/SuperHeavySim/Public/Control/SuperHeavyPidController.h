@@ -17,7 +17,7 @@ struct SUPERHEAVYSIM_API FSuperHeavyPidController
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PID")
 	double Kd = 0.0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PID")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PID", meta = (ClampMin = "0.0"))
 	double IntegralLimit = 0.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PID")
@@ -29,14 +29,16 @@ struct SUPERHEAVYSIM_API FSuperHeavyPidController
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PID", meta = (EditCondition = "bClampOutput"))
 	double OutputMax = 0.0;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "PID")
 	double Integral = 0.0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "PID")
 	double PreviousError = 0.0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "PID")
 	bool bHasPreviousError = false;
+
+	void Reset()
+	{
+		Integral = 0.0;
+		PreviousError = 0.0;
+		bHasPreviousError = false;
+	}
 
 	double Update(double Error, double DeltaTime)
 	{
@@ -71,18 +73,9 @@ struct SUPERHEAVYSIM_API FSuperHeavyPidController
 
 		PreviousError = Error;
 		bHasPreviousError = true;
-
 		return ClampOutput((Kp * Error) + (Ki * Integral) - (Kd * MeasuredRate));
 	}
 
-	void Reset()
-	{
-		Integral = 0.0;
-		PreviousError = 0.0;
-		bHasPreviousError = false;
-	}
-
-private:
 	double ClampOutput(double Output) const
 	{
 		return bClampOutput ? FMath::Clamp(Output, OutputMin, OutputMax) : Output;

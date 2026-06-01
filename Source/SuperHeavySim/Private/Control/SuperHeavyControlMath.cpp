@@ -1,6 +1,6 @@
-#include "GNC/SuperHeavyGncMath.h"
+#include "Control/SuperHeavyControlMath.h"
 
-namespace SuperHeavyGncMath
+namespace SuperHeavyControlMath
 {
 double GetBodyAxisValue(const FVector& Vector, ESuperHeavyBodyAxis Axis)
 {
@@ -33,9 +33,8 @@ FVector ComputeAttitudeErrorBodyDeg(const FQuat& CurrentWorldQuat, const FQuat& 
 	FVector ErrorAxisWorld = FVector::ZeroVector;
 	double ErrorAngleRad = 0.0;
 	ErrorWorldQuat.ToAxisAndAngle(ErrorAxisWorld, ErrorAngleRad);
-	ErrorAxisWorld = ErrorAxisWorld.GetSafeNormal();
 
-	const FVector ErrorWorldDeg = ErrorAxisWorld * FMath::RadiansToDegrees(ErrorAngleRad);
+	const FVector ErrorWorldDeg = ErrorAxisWorld.GetSafeNormal() * FMath::RadiansToDegrees(ErrorAngleRad);
 	return CurrentWorldQuat.Inverse().RotateVector(ErrorWorldDeg);
 }
 
