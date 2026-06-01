@@ -23,6 +23,12 @@ bool HasGimbalGroup(const FSuperHeavyEngineGroupUsage& Usage)
 {
 	return Usage.bInnerGimbalEnabled || Usage.bCenterGimbalEnabled;
 }
+
+FString TransitionConditionToString(ESuperHeavyPhaseTransitionCondition Condition)
+{
+	const UEnum* Enum = StaticEnum<ESuperHeavyPhaseTransitionCondition>();
+	return Enum ? Enum->GetDisplayNameTextByValue(static_cast<int64>(Condition)).ToString() : FString::FromInt(static_cast<int32>(Condition));
+}
 }
 
 bool USuperHeavyFlightPhaseProfile::FindConfigForPhase(ESuperHeavyFlightPhase Phase, FSuperHeavyFlightPhaseConfig& OutConfig) const
@@ -98,6 +104,43 @@ FSuperHeavyFlightPhaseValidationResult USuperHeavyFlightPhaseProfile::ValidatePr
 		if (!Config.bEnableGnc && Config.GuidanceMode != ESuperHeavyGuidanceMode::Disabled)
 		{
 			Result.Warnings.Add(FString::Printf(TEXT("Phase '%s' has a guidance mode set but GNC is disabled."), *PhaseName));
+		}
+
+		for (int32 TransitionIndex = 0; TransitionIndex < Config.Transitions.Num(); ++TransitionIndex)
+		{
+			const FSuperHeavyFlightPhaseTransition& Transition = Config.Transitions[TransitionIndex];
+			if (!Transition.bEnabled)
+			{
+				continue;
+			}
+
+			const FString TargetPhaseName = PhaseToString(Transition.TargetPhase);
+			const FString ConditionName = TransitionConditionToString(Transition.Condition);
+
+			if (Transition.TargetPhase == Config.Phase)
+			{
+				AddError(Result, FString::Printf(TEXT("Phase '%s' transition %d targets itself."), *PhaseName, TransitionIndex));
+			}
+
+			if (Transition.TargetPhase != ESuperHeavyFlightPhase::Manual && !IsPhaseConfigured(Transition.TargetPhase))
+			{
+				AddError(Result, FString::Printf(TEXT("Phase '%s' transition %d targets unconfigured phase '%s'."), *PhaseName, TransitionIndex, *TargetPhaseName));
+			}
+
+			if (Transition.Condition == ESuperHeavyPhaseTransitionCondition::ElapsedTime && Transition.Threshold < 0.0)
+			{
+				AddError(Result, FString::Printf(TEXT("Phase '%s' transition %d has negative elapsed time threshold."), *PhaseName, TransitionIndex));
+			}
+
+			if (Transition.Condition == ESuperHeavyPhaseTransitionCondition::Touchdown && Transition.SecondaryThreshold < 0.0)
+			{
+				AddError(Result, FString::Printf(TEXT("Phase '%s' transition %d has negative touchdown vertical-speed threshold."), *PhaseName, TransitionIndex));
+			}
+
+			if (Transition.TargetPhase == ESuperHeavyFlightPhase::Manual)
+			{
+				Result.Warnings.Add(FString::Printf(TEXT("Phase '%s' transition %d uses condition '%s' to enter Manual. This is valid but stops automatic guidance."), *PhaseName, TransitionIndex, *ConditionName));
+			}
 		}
 	}
 

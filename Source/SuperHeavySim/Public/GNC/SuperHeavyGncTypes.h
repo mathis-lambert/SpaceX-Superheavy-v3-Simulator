@@ -321,6 +321,12 @@ struct SUPERHEAVYSIM_API FSuperHeavyGncTelemetry
 	bool bAttitudeHoldEnabled = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
+	bool bPhaseSequencerEnabled = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
+	double CurrentPhaseElapsedTimeSeconds = 0.0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")
 	FSuperHeavyVehicleState State;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Telemetry")

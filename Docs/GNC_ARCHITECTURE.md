@@ -16,7 +16,8 @@ This document defines the C++/Blueprint contract for the Super Heavy vehicle gui
 
 ```text
 SuperHeavyFlightPhaseProfile
-  -> SuperHeavyGncComponent::SetFlightPhase
+  -> SuperHeavyGncComponent flight phase sequencer
+  -> optional SuperHeavyGncComponent::SetFlightPhase / StartFlightSequence
   -> SuperHeavyGncComponent fixed-rate control step
   -> FSuperHeavyActuatorCommand
   -> SuperHeavyVehicleControlInterface::ApplyActuatorCommand
@@ -31,6 +32,7 @@ SuperHeavyFlightPhaseProfile
 
 - Captures vehicle state from the physics component.
 - Runs the fixed-rate control loop, default 100 Hz.
+- Runs the flight phase sequencer from the assigned phase profile.
 - Applies guidance modes and attitude hold.
 - Emits `FSuperHeavyActuatorCommand`.
 - Exposes `FSuperHeavyGncTelemetry` for UI/debug.
@@ -40,6 +42,7 @@ SuperHeavyFlightPhaseProfile
 `USuperHeavyFlightPhaseProfile`
 
 - DataAsset that stores editable phase configs.
+- Stores declarative transitions between phases.
 - Provides `FindConfigForPhase`, `IsPhaseConfigured`, and `ValidateProfile`.
 - Keeps flight phase tuning out of Blueprint graphs.
 
@@ -115,6 +118,16 @@ For each phase:
 - Set `ActuatorLimits`.
 - Set engine group usage.
 - Add PID overrides only when the phase needs different gains.
+- Add transitions from this phase to the next phase.
+
+Supported transition conditions:
+
+- `ElapsedTime`: transition after `Threshold` seconds in the current phase.
+- `AltitudeBelow`: transition when altitude in meters is `<= Threshold`.
+- `AltitudeAbove`: transition when altitude in meters is `>= Threshold`.
+- `VerticalSpeedBelow`: transition when vertical speed in m/s is `<= Threshold`.
+- `VerticalSpeedAbove`: transition when vertical speed in m/s is `>= Threshold`.
+- `Touchdown`: transition when altitude is `<= Threshold` and absolute vertical speed is `<= SecondaryThreshold`.
 
 Call `ValidateProfile()` before using the profile. Treat `Errors` as blocking. Treat `Warnings` as setup reminders.
 
@@ -124,6 +137,8 @@ At runtime, prefer these component APIs:
 - `ValidatePhaseProfile(bLogResult)`
 - `SetControlTargets(Targets)`
 - `SetFlightPhase(Phase)`
+- `StartFlightSequence(StartPhase)`
+- `StopFlightSequence(bEnterManual)`
 
 ## Minimal PIE Test
 
@@ -133,7 +148,7 @@ At runtime, prefer these component APIs:
 4. Assign `PhysicsComponentName = COL_Body_Main`.
 5. Create and assign a `SuperHeavyFlightPhaseProfile`.
 6. Validate the profile.
-7. In BeginPlay or UI input, call `SetFlightPhase(LandingBurn)`.
+7. Enable `bStartInitialPhaseOnBeginPlay` and set `InitialFlightPhase`, or call `StartFlightSequence(InitialPhase)`.
 8. Watch `GetLastTelemetry()` for phase, guidance mode, vehicle state, TWR, and last command.
 9. Watch `GetLastDebugState()` for control errors, raw throttle demand, required thrust, available thrust, and saturation flags.
 

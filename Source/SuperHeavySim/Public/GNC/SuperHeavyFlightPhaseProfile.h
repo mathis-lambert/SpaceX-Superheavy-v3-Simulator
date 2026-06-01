@@ -21,6 +21,38 @@ struct SUPERHEAVYSIM_API FSuperHeavyFlightPhaseValidationResult
 	TArray<FString> Warnings;
 };
 
+UENUM(BlueprintType)
+enum class ESuperHeavyPhaseTransitionCondition : uint8
+{
+	ElapsedTime UMETA(DisplayName = "Elapsed Time"),
+	AltitudeBelow UMETA(DisplayName = "Altitude Below"),
+	AltitudeAbove UMETA(DisplayName = "Altitude Above"),
+	VerticalSpeedBelow UMETA(DisplayName = "Vertical Speed Below"),
+	VerticalSpeedAbove UMETA(DisplayName = "Vertical Speed Above"),
+	Touchdown UMETA(DisplayName = "Touchdown")
+};
+
+USTRUCT(BlueprintType)
+struct SUPERHEAVYSIM_API FSuperHeavyFlightPhaseTransition
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	bool bEnabled = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	ESuperHeavyFlightPhase TargetPhase = ESuperHeavyFlightPhase::Manual;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	ESuperHeavyPhaseTransitionCondition Condition = ESuperHeavyPhaseTransitionCondition::ElapsedTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition")
+	double Threshold = 0.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transition", meta = (EditCondition = "Condition == ESuperHeavyPhaseTransitionCondition::Touchdown"))
+	double SecondaryThreshold = 0.0;
+};
+
 USTRUCT(BlueprintType)
 struct SUPERHEAVYSIM_API FSuperHeavyFlightPhaseConfig
 {
@@ -73,6 +105,9 @@ struct SUPERHEAVYSIM_API FSuperHeavyFlightPhaseConfig
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PID", meta = (EditCondition = "bOverrideAttitudeRollPid"))
 	FSuperHeavyPidController AttitudeRollPid;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Transitions")
+	TArray<FSuperHeavyFlightPhaseTransition> Transitions;
 };
 
 UCLASS(BlueprintType, Blueprintable)

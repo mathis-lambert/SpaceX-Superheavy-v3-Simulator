@@ -279,7 +279,7 @@ The project includes a C++ GNC foundation:
   Shared state, target, actuator command, telemetry, and phase types.
 
 - [SuperHeavyFlightPhaseProfile.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/GNC/SuperHeavyFlightPhaseProfile.h)
-  DataAsset-based flight phase configuration.
+  DataAsset-based flight phase configuration and transition sequencing.
 
 - [SuperHeavyVehicleControlInterface.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/GNC/SuperHeavyVehicleControlInterface.h)
   Stable command interface between GNC and vehicle actor.
@@ -299,10 +299,7 @@ The repository contains:
 
 ## Next Steps
 
-- reparent `BP_SuperHeavy` to `SuperHeavyVehicleActor`
-- implement the three atomic actuator command events in `BP_SuperHeavy`
-- create and assign a `SuperHeavyFlightPhaseProfile`
-- validate a first automatic phase in PIE
+- configure automatic phase transitions in the profile
 - add aerodynamics
 - expand guidance beyond vertical speed / altitude / attitude hold
 - add LQR/MPC controllers behind the same actuator command interface
@@ -311,7 +308,6 @@ The repository contains:
 
 - grid fin aerodynamics are not yet connected
 - lateral landing guidance is not yet implemented
-- the C++ GNC component still needs a full PIE validation pass through `BP_SuperHeavy`
 
 ## Git
 

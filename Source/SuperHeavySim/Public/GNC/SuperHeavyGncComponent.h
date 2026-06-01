@@ -33,6 +33,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight Phases|Validation")
 	bool bValidatePhaseProfileOnBeginPlay = true;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight Phases")
+	bool bAutoAdvanceFlightPhases = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight Phases")
+	bool bStartInitialPhaseOnBeginPlay = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flight Phases")
+	ESuperHeavyFlightPhase InitialFlightPhase = ESuperHeavyFlightPhase::Idle;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Flight Phases")
+	double CurrentPhaseElapsedTimeSeconds = 0.0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GNC")
 	bool bEnableAttitudeHold = false;
 
@@ -139,7 +151,13 @@ public:
 	bool SetFlightPhase(ESuperHeavyFlightPhase NewPhase);
 
 	UFUNCTION(BlueprintCallable, Category = "Flight Phases")
-	void ApplyFlightPhaseConfig(const FSuperHeavyFlightPhaseConfig& Config);
+	bool StartFlightSequence(ESuperHeavyFlightPhase StartPhase);
+
+	UFUNCTION(BlueprintCallable, Category = "Flight Phases")
+	void StopFlightSequence(bool bEnterManual = true);
+
+	UFUNCTION(BlueprintCallable, Category = "Flight Phases")
+	void SetAutoAdvanceFlightPhases(bool bEnabled);
 
 	UFUNCTION(BlueprintCallable, Category = "Flight Phases|Validation")
 	FSuperHeavyFlightPhaseValidationResult ValidatePhaseProfile(bool bLogResult = true);
@@ -168,26 +186,27 @@ protected:
 	FSuperHeavyPidController DefaultVerticalSpeedPid;
 	FSuperHeavyPidController DefaultAttitudePitchPid;
 	FSuperHeavyPidController DefaultAttitudeRollPid;
+	FSuperHeavyFlightPhaseConfig CurrentPhaseConfig;
 	bool bWarnedMissingVehicleControlInterface = false;
 
 	void ConfigureDefaultEngineGroups();
 	void CaptureDefaultPidSettings();
 	void ResolvePhysicsComponent();
+	void ApplyFlightPhaseConfig(const FSuperHeavyFlightPhaseConfig& Config);
 	void RunControlStep(double ControlDeltaTime);
+	bool UpdatePhaseSequencer(const FSuperHeavyVehicleState& State);
+	bool IsTransitionConditionMet(const FSuperHeavyFlightPhaseTransition& Transition, const FSuperHeavyVehicleState& State) const;
+	void ResetPhaseElapsedTime();
 
-	FSuperHeavyVehicleState CaptureState(double ControlDeltaTime) const;
+	FSuperHeavyVehicleState CaptureState() const;
 	FSuperHeavyActuatorCommand ComputeCommand(const FSuperHeavyVehicleState& State, double ControlDeltaTime);
-	FSuperHeavyActuatorCommand SanitizeActuatorCommand(const FSuperHeavyActuatorCommand& Command) const;
 	double ComputeThrottleForVerticalSpeed(const FSuperHeavyVehicleState& State, double TargetVerticalSpeedMps, double ControlDeltaTime, FSuperHeavyGncDebugState& DebugState);
 	void ApplyAttitudeHold(const FSuperHeavyVehicleState& State, double ControlDeltaTime, FSuperHeavyActuatorCommand& Command);
-	FSuperHeavyCommandSaturation ComputeSaturation(const FSuperHeavyActuatorCommand& RawCommand, const FSuperHeavyActuatorCommand& SanitizedCommand) const;
 	void ApplyCommand(const FSuperHeavyActuatorCommand& Command);
 	void UpdateTelemetry();
+	void UpdateEstimatedPerformance(FSuperHeavyVehicleState& State) const;
 	void LogPhaseProfileValidation(const FSuperHeavyFlightPhaseValidationResult& ValidationResult) const;
 
 	double GetAvailableThrottleThrustN() const;
 	double EstimateCommandedThrustN(const FSuperHeavyActuatorCommand& Command) const;
-	static double EstimateGroupThrustN(const FSuperHeavyEngineGroupConfig& Group, double Throttle);
-	static double GetBodyAxisValue(const FVector& Vector, ESuperHeavyBodyAxis Axis);
-	static FVector ComputeAttitudeErrorBodyDeg(const FQuat& CurrentWorldQuat, const FQuat& TargetWorldQuat);
 };
