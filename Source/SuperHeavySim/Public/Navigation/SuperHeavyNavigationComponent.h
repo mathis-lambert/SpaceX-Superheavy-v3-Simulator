@@ -5,6 +5,7 @@
 #include "SuperHeavyNavigationComponent.generated.h"
 
 class UPrimitiveComponent;
+class USceneComponent;
 
 UCLASS(ClassGroup = (SuperHeavy), meta = (BlueprintSpawnableComponent))
 class SUPERHEAVYSIM_API USuperHeavyNavigationComponent : public UActorComponent
@@ -16,6 +17,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Navigation")
 	FName PhysicsComponentName = TEXT("COL_Body_Main");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Navigation")
+	FName AltitudeComponentName = TEXT("SKT_Bottom");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Navigation")
 	double AltitudeReferenceWorldZCm = 0.0;
@@ -36,9 +40,13 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UPrimitiveComponent> PhysicsComponent;
 
+	UPROPERTY(Transient)
+	TObjectPtr<USceneComponent> AltitudeComponent;
+
 	FVector PreviousVelocityWorldMps = FVector::ZeroVector;
 	double PreviousTimeSeconds = 0.0;
 	bool bHasPreviousState = false;
 
 	void ResolvePhysicsComponent();
+	void ResolveAltitudeComponent();
 };

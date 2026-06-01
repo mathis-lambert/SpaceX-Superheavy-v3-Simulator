@@ -440,19 +440,31 @@ FSuperHeavyActuatorCommand USuperHeavyAutopilotComponent::ComputeLandingCommand(
 	const FVector TargetPositionM = CurrentPhaseConfig.bUseMissionLandingTarget && MissionProfile
 		? MissionProfile->Target.LandingTransform.GetLocation() / 100.0
 		: FVector(State.LocationWorldM.X, State.LocationWorldM.Y, CurrentPhaseConfig.TargetAltitudeM);
+	const double TargetAltitudeM = CurrentPhaseConfig.bUseMissionLandingTarget && MissionProfile && NavigationComponent
+		? (MissionProfile->Target.LandingTransform.GetLocation().Z - NavigationComponent->AltitudeReferenceWorldZCm) / 100.0
+		: CurrentPhaseConfig.TargetAltitudeM;
 	const FVector TargetVelocityMps = CurrentPhaseConfig.bUseMissionLandingTarget && MissionProfile
 		? MissionProfile->Target.LandingTargetVelocityMps
 		: CurrentPhaseConfig.TargetVelocityWorldMps;
 
-	const FVector PositionErrorM = TargetPositionM - State.LocationWorldM;
+	FVector PositionErrorM = TargetPositionM - State.LocationWorldM;
+	PositionErrorM.Z = TargetAltitudeM - State.AltitudeM;
 	const FVector VelocityErrorMps = TargetVelocityMps - State.VelocityWorldMps;
 
 	const double LateralAccelX = CurrentPhaseConfig.Control.LateralPositionXPid.Update(PositionErrorM.X, ControlDeltaTime)
 		+ CurrentPhaseConfig.Control.LateralVelocityXPid.Update(VelocityErrorMps.X, ControlDeltaTime);
 	const double LateralAccelY = CurrentPhaseConfig.Control.LateralPositionYPid.Update(PositionErrorM.Y, ControlDeltaTime)
 		+ CurrentPhaseConfig.Control.LateralVelocityYPid.Update(VelocityErrorMps.Y, ControlDeltaTime);
-	const double VerticalAccel = CurrentPhaseConfig.Control.VerticalPositionPid.Update(PositionErrorM.Z, ControlDeltaTime)
+	double VerticalAccel = CurrentPhaseConfig.Control.VerticalPositionPid.Update(PositionErrorM.Z, ControlDeltaTime)
 		+ CurrentPhaseConfig.Control.VerticalVelocityPid.Update(VelocityErrorMps.Z, ControlDeltaTime);
+	const double HeightAboveTargetM = FMath::Max(State.AltitudeM - TargetAltitudeM, CurrentPhaseConfig.Control.MinVerticalBrakingDistanceM);
+	const double DescentSpeedMps = FMath::Max(0.0, -State.VelocityWorldMps.Z);
+	const double TargetDescentSpeedMps = FMath::Max(0.0, -TargetVelocityMps.Z);
+	const double RequiredBrakingAccelerationMps2 = FMath::Max(
+		0.0,
+		((DescentSpeedMps * DescentSpeedMps) - (TargetDescentSpeedMps * TargetDescentSpeedMps)) / (2.0 * HeightAboveTargetM))
+		* FMath::Max(1.0, CurrentPhaseConfig.Control.VerticalBrakingSafetyFactor);
+	VerticalAccel = FMath::Max(VerticalAccel, RequiredBrakingAccelerationMps2);
 
 	FVector LateralAccelerationWorldMps2(LateralAccelX, LateralAccelY, 0.0);
 	const double MaxLateralAccelerationMps2 = FMath::Max(0.0, CurrentPhaseConfig.Control.MaxLateralAccelerationMps2);
