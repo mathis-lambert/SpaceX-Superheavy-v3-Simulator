@@ -1,6 +1,7 @@
 #include "Navigation/SuperHeavyNavigationComponent.h"
 
 #include "Components/PrimitiveComponent.h"
+#include "Components/SceneComponent.h"
 #include "GameFramework/Actor.h"
 
 USuperHeavyNavigationComponent::USuperHeavyNavigationComponent()
@@ -20,6 +21,10 @@ FSuperHeavyNavigationState USuperHeavyNavigationComponent::CaptureNavigationStat
 	if (!PhysicsComponent)
 	{
 		ResolvePhysicsComponent();
+	}
+	if (!AltitudeComponent)
+	{
+		ResolveAltitudeComponent();
 	}
 
 	FSuperHeavyNavigationState State;
@@ -41,7 +46,8 @@ FSuperHeavyNavigationState USuperHeavyNavigationComponent::CaptureNavigationStat
 	State.BodyUpWorld = Body->GetUpVector();
 	State.AngularVelocityWorldDegPerSec = Body->GetPhysicsAngularVelocityInDegrees();
 	State.AngularVelocityBodyDegPerSec = State.RotationWorldQuat.Inverse().RotateVector(State.AngularVelocityWorldDegPerSec);
-	State.AltitudeM = (Body->GetComponentLocation().Z - AltitudeReferenceWorldZCm) / 100.0;
+	const USceneComponent* AltitudeReferenceComponent = AltitudeComponent ? AltitudeComponent.Get() : Body;
+	State.AltitudeM = (AltitudeReferenceComponent->GetComponentLocation().Z - AltitudeReferenceWorldZCm) / 100.0;
 	State.MassKg = Body->GetMass();
 
 	const double DeltaTime = State.TimeSeconds - PreviousTimeSeconds;
@@ -52,6 +58,7 @@ FSuperHeavyNavigationState USuperHeavyNavigationComponent::CaptureNavigationStat
 
 	const FVector LandingTargetWorldM = LandingTargetWorldTransform.GetLocation() / 100.0;
 	State.PositionErrorToLandingTargetM = LandingTargetWorldM - State.LocationWorldM;
+	State.PositionErrorToLandingTargetM.Z = (LandingTargetWorldTransform.GetLocation().Z - AltitudeReferenceWorldZCm) / 100.0 - State.AltitudeM;
 	State.VelocityRelativeToLandingTargetMps = LandingTargetVelocityMps - State.VelocityWorldMps;
 	State.HorizontalDistanceToLandingTargetM = FVector2D(State.PositionErrorToLandingTargetM.X, State.PositionErrorToLandingTargetM.Y).Length();
 	State.DistanceToLandingTargetM = State.PositionErrorToLandingTargetM.Length();
@@ -86,4 +93,26 @@ void USuperHeavyNavigationComponent::ResolvePhysicsComponent()
 	}
 
 	PhysicsComponent = Cast<UPrimitiveComponent>(Owner->GetRootComponent());
+}
+
+void USuperHeavyNavigationComponent::ResolveAltitudeComponent()
+{
+	AltitudeComponent = nullptr;
+
+	AActor* Owner = GetOwner();
+	if (!Owner || AltitudeComponentName == NAME_None)
+	{
+		return;
+	}
+
+	TArray<USceneComponent*> SceneComponents;
+	Owner->GetComponents<USceneComponent>(SceneComponents);
+	for (USceneComponent* Component : SceneComponents)
+	{
+		if (Component && Component->GetFName() == AltitudeComponentName)
+		{
+			AltitudeComponent = Component;
+			return;
+		}
+	}
 }

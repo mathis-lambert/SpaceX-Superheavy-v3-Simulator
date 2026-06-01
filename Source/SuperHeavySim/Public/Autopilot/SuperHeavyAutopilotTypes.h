@@ -132,6 +132,12 @@ struct SUPERHEAVYSIM_API FSuperHeavyPhaseControlConfig
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guidance Shaping", meta = (ClampMin = "0.0"))
 	double MaxVerticalAccelerationMps2 = 40.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guidance Shaping", meta = (ClampMin = "1.0"))
+	double VerticalBrakingSafetyFactor = 1.25;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guidance Shaping", meta = (ClampMin = "0.1"))
+	double MinVerticalBrakingDistanceM = 1.0;
 };
 
 USTRUCT(BlueprintType)
