@@ -123,6 +123,15 @@ struct SUPERHEAVYSIM_API FSuperHeavyPhaseControlConfig
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
 	FSuperHeavyPidController AttitudeRollPid;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guidance Shaping", meta = (ClampMin = "0.0", ClampMax = "85.0"))
+	double MaxTargetTiltDeg = 25.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guidance Shaping", meta = (ClampMin = "0.0"))
+	double MaxLateralAccelerationMps2 = 25.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Guidance Shaping", meta = (ClampMin = "0.0"))
+	double MaxVerticalAccelerationMps2 = 40.0;
 };
 
 USTRUCT(BlueprintType)

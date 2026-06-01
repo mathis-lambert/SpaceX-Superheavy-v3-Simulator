@@ -454,9 +454,29 @@ FSuperHeavyActuatorCommand USuperHeavyAutopilotComponent::ComputeLandingCommand(
 	const double VerticalAccel = CurrentPhaseConfig.Control.VerticalPositionPid.Update(PositionErrorM.Z, ControlDeltaTime)
 		+ CurrentPhaseConfig.Control.VerticalVelocityPid.Update(VelocityErrorMps.Z, ControlDeltaTime);
 
-	const FVector DesiredAccelerationWorldMps2(LateralAccelX, LateralAccelY, VerticalAccel);
-	const FVector DesiredForceWorldN = State.MassKg * (DesiredAccelerationWorldMps2 + FVector(0.0, 0.0, GravityMps2));
-	const double RequiredThrustN = FMath::Max(0.0, FVector::DotProduct(DesiredForceWorldN, State.BodyUpWorld.GetSafeNormal()));
+	FVector LateralAccelerationWorldMps2(LateralAccelX, LateralAccelY, 0.0);
+	const double MaxLateralAccelerationMps2 = FMath::Max(0.0, CurrentPhaseConfig.Control.MaxLateralAccelerationMps2);
+	if (MaxLateralAccelerationMps2 > UE_SMALL_NUMBER)
+	{
+		LateralAccelerationWorldMps2 = LateralAccelerationWorldMps2.GetClampedToMaxSize(MaxLateralAccelerationMps2);
+	}
+
+	const double MaxVerticalAccelerationMps2 = FMath::Max(0.0, CurrentPhaseConfig.Control.MaxVerticalAccelerationMps2);
+	const double ShapedVerticalAccelerationMps2 = MaxVerticalAccelerationMps2 > UE_SMALL_NUMBER
+		? FMath::Clamp(VerticalAccel, -MaxVerticalAccelerationMps2, MaxVerticalAccelerationMps2)
+		: VerticalAccel;
+
+	const double UpwardSpecificForceMps2 = FMath::Max(0.0, GravityMps2 + ShapedVerticalAccelerationMps2);
+	const double MaxTiltRad = FMath::DegreesToRadians(FMath::Clamp(CurrentPhaseConfig.Control.MaxTargetTiltDeg, 0.0, 85.0));
+	const double MaxTiltLimitedLateralAccelerationMps2 = UpwardSpecificForceMps2 * FMath::Tan(MaxTiltRad);
+	LateralAccelerationWorldMps2 = LateralAccelerationWorldMps2.GetClampedToMaxSize(MaxTiltLimitedLateralAccelerationMps2);
+
+	const FVector DesiredAccelerationWorldMps2(
+		LateralAccelerationWorldMps2.X,
+		LateralAccelerationWorldMps2.Y,
+		ShapedVerticalAccelerationMps2);
+	const FVector DesiredSpecificForceWorldMps2 = DesiredAccelerationWorldMps2 + FVector(0.0, 0.0, GravityMps2);
+	const double RequiredThrustN = State.MassKg * DesiredSpecificForceWorldMps2.Length();
 	const double Throttle = RequiredThrustN / AvailableThrustN;
 
 	LastDebugState.PositionErrorM = PositionErrorM;
@@ -471,7 +491,7 @@ FSuperHeavyActuatorCommand USuperHeavyAutopilotComponent::ComputeLandingCommand(
 	Command.InnerThrottle = Throttle;
 	Command.CenterThrottle = Throttle;
 
-	const FVector DesiredUpWorld = DesiredForceWorldN.GetSafeNormal(UE_SMALL_NUMBER, FVector::UpVector);
+	const FVector DesiredUpWorld = DesiredSpecificForceWorldMps2.GetSafeNormal(UE_SMALL_NUMBER, FVector::UpVector);
 	const FQuat CurrentYawQuat = FRotator(0.0, CurrentPhaseConfig.TargetAttitudeWorldDeg.Yaw, 0.0).Quaternion();
 	const FVector DesiredForwardProjected = FVector::VectorPlaneProject(CurrentYawQuat.GetForwardVector(), DesiredUpWorld).GetSafeNormal(UE_SMALL_NUMBER, FVector::ForwardVector);
 	const FMatrix TargetMatrix = FRotationMatrix::MakeFromXZ(DesiredForwardProjected, DesiredUpWorld);
