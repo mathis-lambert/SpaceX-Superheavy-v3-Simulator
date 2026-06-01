@@ -20,7 +20,7 @@ public:
 	FSuperHeavyMissionTarget Target;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mission|Initial State")
-	bool bResetVehicleToLaunchTransformOnStart = true;
+	bool bResetVehicleToLaunchTransformOnStart = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mission|Initial State", meta = (EditCondition = "bResetVehicleToLaunchTransformOnStart"))
 	FVector InitialLinearVelocityMps = FVector::ZeroVector;

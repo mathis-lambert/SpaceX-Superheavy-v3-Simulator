@@ -112,6 +112,11 @@ bool USuperHeavyAutopilotComponent::StartAutopilotMission()
 
 	ResetVehicleToMissionStart();
 
+	if (NavigationComponent)
+	{
+		NavigationComponent->ResetNavigation();
+	}
+
 	AutopilotMode = ESuperHeavyAutopilotMode::Auto;
 	return SetFlightPhase(MissionProfile->InitialPhase);
 }
@@ -191,14 +196,6 @@ void USuperHeavyAutopilotComponent::ResetVehicleToMissionStart() const
 	AActor* Owner = GetOwner();
 	if (!Owner)
 	{
-		return;
-	}
-
-	if (PhysicsComponent && PhysicsComponent->IsSimulatingPhysics())
-	{
-		PhysicsComponent->SetWorldTransform(MissionProfile->Target.LaunchTransform, false, nullptr, ETeleportType::TeleportPhysics);
-		PhysicsComponent->SetPhysicsLinearVelocity(MissionProfile->InitialLinearVelocityMps * 100.0);
-		PhysicsComponent->SetPhysicsAngularVelocityInDegrees(MissionProfile->InitialAngularVelocityDegPerSec);
 		return;
 	}
 
