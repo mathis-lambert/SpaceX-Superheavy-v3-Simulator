@@ -247,6 +247,8 @@ bool USuperHeavyAutopilotComponent::SetFlightPhase(ESuperHeavyFlightPhase NewPha
 
 void USuperHeavyAutopilotComponent::ApplyPhaseConfig(const FSuperHeavyFlightPhaseConfig& PhaseConfig)
 {
+	ApplyPhaseActuatorHandoff(PhaseConfig);
+
 	CurrentPhaseConfig = PhaseConfig;
 	CurrentPhase = PhaseConfig.Phase;
 	PhaseElapsedTimeSeconds = 0.0;
@@ -260,6 +262,46 @@ void USuperHeavyAutopilotComponent::ApplyPhaseConfig(const FSuperHeavyFlightPhas
 	CenterEngines.bUseForGimbalControl = PhaseConfig.EngineGroupUsage.bCenterGimbalEnabled;
 
 	ResetControllers();
+}
+
+void USuperHeavyAutopilotComponent::ApplyPhaseActuatorHandoff(const FSuperHeavyFlightPhaseConfig& NextPhaseConfig)
+{
+	if (!bApplyCommandsToVehicle)
+	{
+		return;
+	}
+
+	FSuperHeavyActuatorCommand HandoffCommand;
+	HandoffCommand.bApplyOuterThrottle = OuterEngines.bUseForThrottleControl && !NextPhaseConfig.EngineGroupUsage.bOuterThrottleEnabled;
+	HandoffCommand.bApplyInnerThrottle = InnerEngines.bUseForThrottleControl && !NextPhaseConfig.EngineGroupUsage.bInnerThrottleEnabled;
+	HandoffCommand.bApplyCenterThrottle = CenterEngines.bUseForThrottleControl && !NextPhaseConfig.EngineGroupUsage.bCenterThrottleEnabled;
+	HandoffCommand.bApplyInnerGimbal = InnerEngines.bUseForGimbalControl && !NextPhaseConfig.EngineGroupUsage.bInnerGimbalEnabled;
+	HandoffCommand.bApplyCenterGimbal = CenterEngines.bUseForGimbalControl && !NextPhaseConfig.EngineGroupUsage.bCenterGimbalEnabled;
+
+	const bool bHasThrottleHandoff =
+		HandoffCommand.bApplyOuterThrottle
+		|| HandoffCommand.bApplyInnerThrottle
+		|| HandoffCommand.bApplyCenterThrottle;
+	const bool bHasGimbalHandoff =
+		HandoffCommand.bApplyInnerGimbal
+		|| HandoffCommand.bApplyCenterGimbal;
+
+	if (!bHasThrottleHandoff && !bHasGimbalHandoff)
+	{
+		return;
+	}
+
+	FSuperHeavyActuatorLimits HandoffLimits = NextPhaseConfig.ActuatorLimits;
+	HandoffLimits.MinThrottle = 0.0;
+
+	const FSuperHeavyActuatorCommand SanitizedHandoff = SuperHeavyActuatorCommandUtils::Sanitize(
+		HandoffCommand,
+		OuterEngines,
+		InnerEngines,
+		CenterEngines,
+		HandoffLimits);
+
+	ApplyCommand(SanitizedHandoff);
 }
 
 void USuperHeavyAutopilotComponent::ResetControllers()

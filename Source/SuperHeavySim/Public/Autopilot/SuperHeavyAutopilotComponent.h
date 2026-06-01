@@ -114,6 +114,7 @@ protected:
 	void ResetVehicleToMissionStart() const;
 	bool SetFlightPhase(ESuperHeavyFlightPhase NewPhase);
 	void ApplyPhaseConfig(const FSuperHeavyFlightPhaseConfig& PhaseConfig);
+	void ApplyPhaseActuatorHandoff(const FSuperHeavyFlightPhaseConfig& NextPhaseConfig);
 	void ResetControllers();
 	void RunControlStep(double ControlDeltaTime);
 	void EvaluatePhaseTransitions(const FSuperHeavyNavigationState& State);
