@@ -123,6 +123,7 @@ Unchecked means pending, in progress, or insufficiently verified. A requirement 
 
 - [ ] 85. Rework the excessively long terminal braking burn.
 - Current work: retained terminal trajectories replace the hover shelf, with physical rate tracking and fitting load transfer. Powered near-hover time decreases, but fuel consumption does not yet improve; [implementation and evidence](Validation/TERMINAL_REFERENCE_GUIDANCE.md).
+- Front approach follow-up: boostback/entry preserve braking distance ahead of the arm opening; terminal crossrange shaping and actual-body route checks pass 17 unit checks and nine flights. Current burns still take 69.4–81.1 s, so item 85 remains open. [Evidence and limits](Validation/FRONT_APPROACH.md).
 - [ ] 86. Calculate landing margins from available thrust and fuel.
 - [ ] 87. Improve boostback impact prediction.
 - [ ] 88. Account for consumption and uncertainty in boostback optimization.

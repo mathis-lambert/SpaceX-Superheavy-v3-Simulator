@@ -18,7 +18,7 @@ bool USuperHeavyRecoveryProfile::Validate(FString& Reason) const
        MaxEntryAngleDeg<=0 || MaxEntryAngleDeg>15 || AxialDragCoefficient<=0 || DragAreaM2<=0 || BodySideAreaM2<=0 || BodyNormalCoefficient<=0 ||
        ReactionControlTorqueNm<=0 || ReactionControlPropellantKg<=0 || LandingReserveKg<=0 || LandingReserveKg>PropellantMassKg*0.2 ||
        TailFirstDragCoefficient<=0 || GridFinDragCoefficient<0 || BoostbackReserveKg<=0 || BoostbackReserveKg+LandingReserveKg>PropellantMassKg ||
-       FMath::Abs(LandingDriftCorrectionS)>60 || LandingIgnitionCeilingM<500 || LandingIgnitionCeilingM>10000 ||
+       FMath::Abs(LandingDriftCorrectionS)>60 || FrontReturnOffsetM<400 || FrontReturnOffsetM>5000 || LandingWindLeadS<0 || LandingWindLeadS>60 || LandingIgnitionCeilingM<500 || LandingIgnitionCeilingM>10000 ||
        AscentMaxAccelerationMps2<10 || AscentMaxAccelerationMps2>50 || FMath::Abs(SeaLevelTemperatureOffsetK)>40 ||
        LandingDecelerationMps2<=0 || LandingBurnMarginM<0 || CaptureRadiusM<=0 || CaptureSpeedMps<=0 || CaptureDwellSeconds<=0 ||
        CaptureTiltDeg<=0 || CaptureTiltDeg>5 || CaptureHeadingToleranceDeg<=0 || CaptureHeadingToleranceDeg>10)

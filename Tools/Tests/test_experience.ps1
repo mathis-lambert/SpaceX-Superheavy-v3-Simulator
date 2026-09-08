@@ -9,6 +9,7 @@ $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 $project=Join-Path $root 'SuperHeavySim.uproject'
 $saved=Join-Path $root 'Saved/Recovery'
+. (Join-Path $root 'Tools/Shared/validation_evidence.ps1')
 $settings=Join-Path $root 'Saved/Config/WindowsEditor/GameUserSettings.ini'
 $previous=[IO.File]::ReadAllText($settings)
 function Confirm-Report([string]$Name,[datetime]$Started){
@@ -40,5 +41,6 @@ try {
     if(Select-String -Quiet -Path "$saved/experience-rendered-flight.log" -Pattern 'Failed to compile Material|Fatal error:'){throw 'Rendered flight used a failed material or crashed'}
     $flight=Confirm-Report 'ExperienceRenderedFlight.json' $started
     if(!$flight.left_rail_contact -or !$flight.right_rail_contact -or !$flight.contact_engine_shutdown){throw 'Physical capture contract failed'}
+    if(!(Test-RecoveryFrontApproach -Report $flight)){throw 'Front approach corridor contract failed'}
     $null=Confirm-Report 'experience-flight-audit.json' $started
 } finally {[IO.File]::WriteAllText($settings,$previous)}

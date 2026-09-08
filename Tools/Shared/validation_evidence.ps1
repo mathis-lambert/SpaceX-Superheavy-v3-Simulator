@@ -1,3 +1,8 @@
+function Test-RecoveryFrontApproach {
+    param([object]$Report)
+    return $Report.front_approach_samples -gt 0 -and $Report.front_ingress_verified -and $null -ne $Report.front_min_mast_clearance_m -and $null -ne $Report.front_min_corridor_margin_m -and $Report.front_min_mast_clearance_m -ge 0 -and $Report.front_min_corridor_margin_m -ge 0
+}
+
 function Write-RecoveryBuildEvidence {
     param([string]$Root,[string]$Destination,[string]$EngineRoot)
     $files=@(Get-Item -LiteralPath (Join-Path $Root 'SuperHeavySim.uproject'),(Join-Path $Root 'Binaries/Win64/UnrealEditor-SuperHeavySim.dll'))

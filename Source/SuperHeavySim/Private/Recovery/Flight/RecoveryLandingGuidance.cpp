@@ -52,6 +52,7 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
             Input.TargetM=Input.TargetFittingWorldM-ArrivalQ.RotateVector(LugMid-FVector(0,0,Centre))-FVector(0,0,.2);
         }
         const auto Candidate=RecoveryTerminalGuidance::Plan(Input,Config);
+        if(!State.TerminalPlan.bFeasible)State.TerminalInput=Input;
         State.TerminalCandidate=Candidate;
         if(!Candidate.bFeasible)++State.TerminalRejectedPlans;
         else
@@ -73,7 +74,7 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
         State.TerminalReferenceM=Reference;State.TerminalReferenceVelocityMps=Plan.VelocityAt(T);
         State.TerminalPeakTrackingErrorM=FMath::Max(State.TerminalPeakTrackingErrorM,(Reference-Position).Size());
         const FVector PositionError=Reference-Position,VelocityError=Plan.VelocityAt(T)-N.VelocityMps;
-        const FVector Feedback=PositionError*FVector(.06,.06,.4)+VelocityError*FVector(.45,.45,1.2);
+        const FVector Feedback=PositionError*FVector(.035,.035,.4)+VelocityError*FVector(.20,.20,1.2);
         FVector Net=Plan.AccelerationAt(T)+Feedback;
         const double ValveLead=FMath::Min(Config.Engines.OpeningTimeConstantS,Plan.HorizonS*.25);
         Net.Z=Plan.AccelerationAt(FMath::Min(T+ValveLead,Plan.HorizonS)).Z+Feedback.Z;

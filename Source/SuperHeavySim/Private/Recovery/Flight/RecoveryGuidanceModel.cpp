@@ -7,10 +7,16 @@ void FRecoveryGuidanceModel::Guide(const FRecoveryDynamicsState& Dynamics,const 
     PredictorClock+=Dt;
     if(PredictorClock>=0.25) { PredictorClock-=0.25; PredictBallistic(); }
     const FVector Downrange=Config.TowerRotation.GetForwardVector();
+    const FVector SiteWind=WindAt(Config.LandingIgnitionCeilingM);
+    FVector Crosswind=SiteWind-Downrange*FVector::DotProduct(SiteWind,Downrange);Crosswind.Z=0;
+    // The coast predictor has no powered-braking model. Reserve front distance
+    // and an estimated upwind offset before the final force-constrained transfer.
+    const FVector ReturnTarget=Config.CaptureWorldM+Downrange*Config.FrontReturnOffsetM-Crosswind*Config.LandingWindLeadS;
     const double AvailablePerEngine=Config.EngineThrustN*State.Navigation.EngineIspS/Config.SpecificImpulseSeaLevelS;
     FVector ForceAccel=FVector::ZeroVector,TargetUp=FVector::UpVector;
     State.Command.EngineCount=0;
     State.TargetPositionM=Config.CaptureWorldM;
+    if(State.Phase>=ERecoveryPhase::Separation && State.Phase<=ERecoveryPhase::Entry)State.TargetPositionM=ReturnTarget;
     if(State.Phase==ERecoveryPhase::Ascent)
     {
         const double Pitch=FMath::DegreesToRadians(Config.AscentPitchDeg)*FMath::SmoothStep(10.,Config.AscentDurationS,State.PhaseTimeS);
@@ -27,7 +33,7 @@ void FRecoveryGuidanceModel::Guide(const FRecoveryDynamicsState& Dynamics,const 
     if(State.Phase==ERecoveryPhase::Separation || State.Phase==ERecoveryPhase::Boostback)
     {
         const double Tgo=FMath::Max(40.,State.TimeToImpactS);
-        FVector DV=(Config.CaptureWorldM-State.PredictedImpactM)*(1.18/Tgo); DV.Z=0;
+        FVector DV=(ReturnTarget-State.PredictedImpactM)*(1.18/Tgo); DV.Z=0;
         const double ApogeeError=Config.ApogeeM-State.Navigation.AltitudeM;
         const double DesiredVz=FMath::Sign(ApogeeError)*FMath::Sqrt(2*State.Navigation.Gravity*FMath::Abs(ApogeeError))*0.75;
         ForceAccel=DV/6.; ForceAccel.Z=(DesiredVz-State.Navigation.VerticalSpeedMps)/8.+State.Navigation.Gravity;
@@ -42,7 +48,7 @@ void FRecoveryGuidanceModel::Guide(const FRecoveryDynamicsState& Dynamics,const 
         {
             State.BoostbackSeconds+=Dt;
             const double PredictedApogee=State.Navigation.AltitudeM+FMath::Square(FMath::Max(0.,State.Navigation.VerticalSpeedMps))/(2*State.Navigation.Gravity);
-            if(State.PhaseTimeS>5 && State.PredictedMissM<500 && PredictedApogee<Config.ApogeeM+3000)
+            if(State.PhaseTimeS>5 && FVector2D(State.PredictedImpactM-ReturnTarget).Size()<500 && PredictedApogee<Config.ApogeeM+3000)
             { Transition(ERecoveryPhase::Coast,ERecoveryGuidanceReason::Coast); State.Command.EngineCount=0; }
             else if(Dynamics.PropellantKg<Config.LandingReserveKg)
             { Fail(ERecoveryGuidanceReason::ReserveDepleted); State.Command.EngineCount=0; }
@@ -59,7 +65,7 @@ void FRecoveryGuidanceModel::Guide(const FRecoveryDynamicsState& Dynamics,const 
         if(State.Phase==ERecoveryPhase::Entry)
         {
             const double LookAhead=FMath::Max(8.,State.TimeToImpactS);
-            FVector DesiredA=(Config.CaptureWorldM-State.PredictedImpactM)*(2./(LookAhead*LookAhead)); DesiredA.Z=0;
+            FVector DesiredA=(ReturnTarget-State.PredictedImpactM)*(2./(LookAhead*LookAhead)); DesiredA.Z=0;
             const double Authority=State.Navigation.DynamicPressurePa*Config.BodySideAreaM2*Config.BodyNormalCoefficient/FMath::Max(1.,State.Navigation.MassKg);
             FVector Correction=(-DesiredA/FMath::Max(0.1,Authority)).GetClampedToMaxSize(FMath::Tan(FMath::DegreesToRadians(Config.MaxEntryAngleDeg)));
             TargetUp=(TargetUp+Correction).GetSafeNormal();

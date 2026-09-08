@@ -30,6 +30,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Propulsion | Estimated") double LandingReserveKg = 75000;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance | Estimated") double BoostbackReserveKg = 400000;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance | Estimated") double LandingDriftCorrectionS = -8;
+    // Estimated braking reserve in front of the opening; measured in tower-local +X.
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance | Approach", meta=(ClampMin="400", ClampMax="5000")) double FrontReturnOffsetM = 1400;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance | Estimated", meta=(ClampMin="0", ClampMax="60")) double LandingWindLeadS = 18;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance") double LandingIgnitionCeilingM = 4500;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actuators") double ThrottleTimeConstant = 0.25;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actuators | Estimated") double EngineShutdownTimeS = 0.35;

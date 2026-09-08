@@ -1,6 +1,16 @@
 # Validation — 8 September 2026
 
-## Current wave: terminal reference tracking
+## Current wave: front approach through the tower opening
+
+[Front approach evidence](Validation/FRONT_APPROACH.md) records the revised
+boostback/entry target, terminal lateral alignment and continuous audit of the
+actual recovery route. Seventeen unit checks and nine physical flights pass.
+The rendered Crosswind flight passes with front ingress, two supported fittings,
+zero structural contacts and stable Chase framing during secured support.
+The approach audit is independent of whether the fittings eventually find the
+rails; a path behind or over the mast cannot pass by subsequently making contact.
+
+## Previous wave: terminal reference tracking
 
 [Terminal guidance evidence](Validation/TERMINAL_REFERENCE_GUIDANCE.md) records
 the development regression, reference tracking, load-transfer correction and

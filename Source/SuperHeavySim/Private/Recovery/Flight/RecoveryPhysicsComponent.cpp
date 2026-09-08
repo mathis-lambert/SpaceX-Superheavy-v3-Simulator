@@ -158,6 +158,8 @@ FRecoveryGuidanceConfiguration URecoveryPhysicsComponent::BuildGuidanceConfigura
     Configuration.LandingReserveKg=P.LandingReserveKg;
     Configuration.BoostbackReserveKg=P.BoostbackReserveKg;
     Configuration.LandingDriftCorrectionS=P.LandingDriftCorrectionS;
+    Configuration.FrontReturnOffsetM=P.FrontReturnOffsetM;
+    Configuration.LandingWindLeadS=P.LandingWindLeadS;
     Configuration.LandingIgnitionCeilingM=P.LandingIgnitionCeilingM;
     Configuration.LandingBurnMarginM=P.LandingBurnMarginM;
     Configuration.LandingDecelerationMps2=P.LandingDecelerationMps2;

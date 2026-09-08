@@ -1,13 +1,26 @@
 #include "Recovery/Flight/RecoveryTerminalGuidance.h"
 #include "Recovery/Flight/RecoveryAtmosphere.h"
 #include "Recovery/Shared/FlightGeometry.h"
+#include "Recovery/Flight/RecoveryApproachGeometry.h"
 
 FVector FRecoveryTerminalPlan::PositionAt(double T) const
-{return PositionM+VelocityMps*T+InitialAccelerationMps2*(.5*T*T)+(CubicMps3+(QuarticMps4+QuinticMps5*T)*T)*(T*T*T);}
+{
+    const double S=HorizonS>0?T/HorizonS:0;
+    const double Blend=64*FMath::Pow(S*(1-S),3);
+    return PositionM+VelocityMps*T+InitialAccelerationMps2*(.5*T*T)+(CubicMps3+(QuarticMps4+QuinticMps5*T)*T)*(T*T*T)+CrossrangeCorrectionM*Blend;
+}
 FVector FRecoveryTerminalPlan::VelocityAt(double T) const
-{return VelocityMps+InitialAccelerationMps2*T+(3*CubicMps3+(4*QuarticMps4+5*QuinticMps5*T)*T)*(T*T);}
+{
+    const double S=HorizonS>0?T/HorizonS:0;
+    const double Blend=HorizonS>0?192*S*S*FMath::Square(1-S)*(1-2*S)/HorizonS:0;
+    return VelocityMps+InitialAccelerationMps2*T+(3*CubicMps3+(4*QuarticMps4+5*QuinticMps5*T)*T)*(T*T)+CrossrangeCorrectionM*Blend;
+}
 FVector FRecoveryTerminalPlan::AccelerationAt(double T) const
-{return InitialAccelerationMps2+(6*CubicMps3+(12*QuarticMps4+20*QuinticMps5*T)*T)*T;}
+{
+    const double S=HorizonS>0?T/HorizonS:0;
+    const double Blend=HorizonS>0?384*S*(1-S)*(1-5*S+5*S*S)/(HorizonS*HorizonS):0;
+    return InitialAccelerationMps2+(6*CubicMps3+(12*QuarticMps4+20*QuinticMps5*T)*T)*T+CrossrangeCorrectionM*Blend;
+}
 
 bool RecoveryTerminalGuidance::TryRequiredThrustAcceleration(const FVector& Net,const FVector& Velocity,
     const FVector& Position,double Mass,const FVector& Wind,const FRecoveryDynamicsConfiguration& C,
@@ -62,7 +75,8 @@ FRecoveryTerminalPlan RecoveryTerminalGuidance::Plan(const FRecoveryTerminalInpu
     if(I.MassKg<=0 || I.FuelKg<=0 || I.CoreThrustN<=0 || I.IspS<=0)return Result;
     constexpr int32 Samples=24;
     const double MinimumThrust=I.CoreThrustN*C.Engines.MinimumThrottle;
-    for(double T=1.;T<=45.;T+=.5)
+    for(double T=1.;T<=75.;T+=.5)
+    for(double LateralBias:{0.,.75,1.5})
     {
         ++Result.Candidates;
         FRecoveryTerminalPlan Candidate;
@@ -74,6 +88,11 @@ FRecoveryTerminalPlan RecoveryTerminalGuidance::Plan(const FRecoveryTerminalInpu
         Candidate.CubicMps3=Error*(10./(T*T*T))-DeltaV*(4./(T*T))+DeltaA*(.5/T);
         Candidate.QuarticMps4=Error*(-15./(T*T*T*T))+DeltaV*(7./(T*T*T))-DeltaA/(T*T);
         Candidate.QuinticMps5=Error*(6./(T*T*T*T*T))-DeltaV*(3./(T*T*T*T))+DeltaA*(.5/(T*T*T));
+        // A sixth-order crossrange correction lets the vehicle align before
+        // reaching the arm mouth. Position, velocity and acceleration remain
+        // unchanged at both endpoints; feasibility still checks actual loads.
+        const FVector Crossrange=I.TowerRotation.GetRightVector();
+        Candidate.CrossrangeCorrectionM=Crossrange*FVector::DotProduct(I.TargetM-Candidate.PositionAt(T*.5),Crossrange)*LateralBias;
         FVector PreviousUp=I.UpWorld;
         double Mass=I.MassKg,PreviousThrust=0;
         bool Feasible=true;
@@ -95,7 +114,7 @@ FRecoveryTerminalPlan RecoveryTerminalGuidance::Plan(const FRecoveryTerminalInpu
             // the command envelope on future samples, not retroactively on it.
             if(!FMath::IsFinite(Thrust) || Force.Z<=0 || (Sample>0 && (Thrust<MinimumThrust || (!CoreRange && !LandingRange))))
             {++Result.ThrustRejected;Feasible=false;break;}
-            if(Sample>0 && (Tilt>I.MaxTiltDeg || Rate>RecoveryActuators::MaximumBodyRateRadS*.85))
+            if(Sample>0 && (Tilt>I.MaxTiltDeg || Rate>(Sample==1?RecoveryActuators::MaximumBodyRateRadS*.85:.05)))
             {++Result.AttitudeRejected;Feasible=false;break;}
             const FVector Base=P-Up*I.CentreFromBaseM;
             const FVector Top=Base+Up*70.88;
@@ -109,11 +128,14 @@ FRecoveryTerminalPlan RecoveryTerminalGuidance::Plan(const FRecoveryTerminalInpu
             const FVector AtRail=Base+Up*((I.TargetFittingWorldM.Z-Base.Z)/FMath::Max(.1,Up.Z));
             const FVector RailLocal=I.TowerRotation.UnrotateVector(AtRail-I.TargetFittingWorldM);
             const bool InsideArmSpan=FMath::Abs(RailLocal.X+6)<17.5 && Base.Z<I.TargetFittingWorldM.Z && Top.Z>I.TargetFittingWorldM.Z;
-            if((Base.Z<I.TowerWorldM.Z+I.TowerHeightM+1 && Top.Z>I.TowerWorldM.Z &&
-                FMath::Abs(Middle.X)<Half.X+7 && FMath::Abs(Middle.Y)<Half.Y+7) ||
-                (InsideArmSpan && FMath::Abs(RailLocal.Y)+4.5/FMath::Max(.1,Up.Z)+.55>10.) ||
-                (Sample==Samples && Axis>.5) || H<-.6)
-            {++Result.ClearanceRejected;Feasible=false;break;}
+            const uint32 Clearance=
+                (RecoveryApproach::MastFrontMargin(Base,Up,I.TowerWorldM,I.TowerRotation)<0?1u:0u) |
+                (H<RecoveryApproach::FinalApproachHeightM && RecoveryApproach::CorridorMargin(Base+Attitude.RotateVector(I.FittingMidFromBaseM),I.TargetFittingWorldM,I.TowerRotation)<0?2u:0u) |
+                (Base.Z<I.TowerWorldM.Z+I.TowerHeightM+1 && Top.Z>I.TowerWorldM.Z && FMath::Abs(Middle.X)<Half.X+7 && FMath::Abs(Middle.Y)<Half.Y+7?4u:0u) |
+                (InsideArmSpan && FMath::Abs(RailLocal.Y)+4.5/FMath::Max(.1,Up.Z)+.55>10.?8u:0u) |
+                (Sample==Samples && Axis>.5?16u:0u) | (H<-.6?32u:0u);
+            if(Clearance)
+            {Result.ClearanceReasons|=Clearance;++Result.ClearanceRejected;Feasible=false;break;}
             if(Sample>0)
             {
                 const double Fuel=.5*(Thrust+PreviousThrust)*Dt/(I.IspS*RecoveryAtmosphere::G0);
@@ -129,6 +151,7 @@ FRecoveryTerminalPlan RecoveryTerminalGuidance::Plan(const FRecoveryTerminalInpu
             Candidate.bFeasible=true;Candidate.Candidates=Result.Candidates;
             Candidate.ThrustRejected=Result.ThrustRejected;Candidate.AttitudeRejected=Result.AttitudeRejected;
             Candidate.ClearanceRejected=Result.ClearanceRejected;Candidate.FuelRejected=Result.FuelRejected;
+            Candidate.ClearanceReasons=Result.ClearanceReasons;
             return Candidate;
         }
     }

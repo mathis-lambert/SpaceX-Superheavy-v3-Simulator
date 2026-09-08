@@ -18,6 +18,7 @@ const TCHAR* RecoveryGuidanceReasonText(ERecoveryGuidanceReason Reason)
     case ERecoveryGuidanceReason::EnvelopeExceeded:return TEXT("Flight envelope exceeded");
     case ERecoveryGuidanceReason::SupportLost:return TEXT("Physical support lost after engine shutdown");
     case ERecoveryGuidanceReason::SupportEvaluated:return TEXT("Physical rail support evaluated for eight seconds with engines off");
+    case ERecoveryGuidanceReason::ApproachEnvelopeExceeded:return TEXT("Front approach corridor violated before capture");
     default:return TEXT("");
     }
 }

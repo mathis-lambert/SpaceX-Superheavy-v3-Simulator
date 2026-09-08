@@ -23,9 +23,13 @@ struct FRecoveryTerminalPlan
     double HorizonS=0,ElapsedS=0,EstimatedFuelKg=0,PeakThrustN=0,PeakTiltDeg=0;
     int32 Candidates=0;
     int32 ThrustRejected=0,AttitudeRejected=0,ClearanceRejected=0,FuelRejected=0;
+    // Rejected candidate geometry: mast projection, front corridor, mast
+    // collision, arm opening, contact alignment, floor (bits 0 through 5).
+    uint32 ClearanceReasons=0;
     FVector PositionM=FVector::ZeroVector,VelocityMps=FVector::ZeroVector;
     FVector InitialAccelerationMps2=FVector::ZeroVector;
     FVector CubicMps3=FVector::ZeroVector,QuarticMps4=FVector::ZeroVector,QuinticMps5=FVector::ZeroVector;
+    FVector CrossrangeCorrectionM=FVector::ZeroVector;
     FVector PositionAt(double TimeS) const;
     FVector VelocityAt(double TimeS) const;
     FVector AccelerationAt(double TimeS) const;

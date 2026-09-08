@@ -11,6 +11,8 @@ struct FRecoveryGuidanceConfiguration : FRecoveryDynamicsConfiguration
     double TowerHeightM=0,CaptureHeadingDeg=0;
     double ApogeeM=0,AscentDurationS=0,AscentPitchDeg=0,AscentMaxAccelerationMps2=0;
     double LandingReserveKg=0,BoostbackReserveKg=0,LandingDriftCorrectionS=0;
+    double FrontReturnOffsetM=1400;
+    double LandingWindLeadS=18;
     double LandingIgnitionCeilingM=0,LandingBurnMarginM=0,LandingDecelerationMps2=0;
     double MaxEntryAngleDeg=0,MaxTiltDeg=0,TimeoutSeconds=0;
 };
@@ -19,7 +21,7 @@ enum class ERecoveryGuidanceReason : uint8
 {
     None, Separation, Boostback, Coast, ReserveDepleted, Entry, LandingBurn,
     Capture, Captured, PropellantExhausted, OperatorAbort, EnvelopeExceeded,
-    SupportLost, SupportEvaluated
+    SupportLost, SupportEvaluated, ApproachEnvelopeExceeded
 };
 
 // Resolve labels only when the game thread consumes an event or exports a result.
@@ -57,6 +59,10 @@ struct FRecoveryGuidanceState
     FVector TerminalReferenceM=FVector::ZeroVector,TerminalReferenceVelocityMps=FVector::ZeroVector;
     double TerminalPlannedSeconds=0,TerminalBrakingSeconds=0,TerminalPeakTrackingErrorM=0;
     uint64 TerminalReplans=0,TerminalRejectedPlans=0;
+    uint64 FrontApproachSamples=0;
+    double MinimumMastFrontMarginM=TNumericLimits<double>::Max();
+    double MinimumFrontCorridorMarginM=TNumericLimits<double>::Max();
+    bool bFrontIngressVerified=false;
     TArray<FRecoveryGuidanceEvent,TInlineAllocator<16>> Events;
     double MissionTimeS=0,SampleTimeS=0,PhaseTimeS=0,ArmClosure=0;
     double ElapsedS=0,MinimumStepS=TNumericLimits<double>::Max(),MaximumStepS=0;
@@ -90,6 +96,7 @@ private:
     FRecoveryBodyKinematics Body;
     FRecoveryFlightExperiment Experiment;
     void Navigate(const FRecoveryDynamicsState& Dynamics,bool Separated);
+    void AuditFrontApproach();
     void PredictBallistic();
     FVector WindAt(double Height) const;
     void Transition(ERecoveryPhase Phase,ERecoveryGuidanceReason Reason);

@@ -27,12 +27,20 @@ tower arms and upper-stage dynamics still use the game frame. See the
 
 Landing guidance uses separate switch-down/switch-up thresholds for the three- and thirteen-engine groups. This prevents consecutive-frame command chatter near one thrust threshold. It does not add thrust or constrain the body. Hardware restart counts, settling requirements and minimum stable operating duration still need a calibrated model.
 
-Terminal descent follows a retained, sampled quintic reference with aerodynamic
+Terminal descent follows a retained, sampled quintic reference with an optional
+sixth-order crossrange correction, aerodynamic
 inversion, valve anticipation and an angular-rate demand to the physical moment
 controller. Fitting load transfer holds the current rail command and waits for
 linear/angular settling before declaring support secured. See [terminal tracking
 and its limitations](Validation/TERMINAL_REFERENCE_GUIDANCE.md); this remains an
 estimated point-mass planner, not an optimal six-degree-of-freedom solver.
+
+Boostback and entry now reserve braking distance ahead of the arm opening,
+with an estimated upwind allowance. Candidate trajectories and the actual
+recovering body must stay in front of the mast and inside the final approach
+corridor. See [front approach geometry, tests and limits](Validation/FRONT_APPROACH.md).
+These conditions constrain the guidance plan and mission success criteria;
+they do not constrain or reposition the physical body.
 
 Reaction control uses six estimated pod locations, each representing two opposing one-way ports. The allocator closes the existing valve before reversing and applies forces at their locations. Valve response, maximum force and a separate gas supply bound authority. The six displayed pods are simplified artwork; detailed paired-nozzle geometry remains unfinished.
 
