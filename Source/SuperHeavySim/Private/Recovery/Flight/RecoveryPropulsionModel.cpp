@@ -30,8 +30,7 @@ FRecoveryPropulsionStep RecoveryPropulsion::AdvanceEngines(TArray<FRecoveryEngin
     const auto Requested=[&](int32 I)
     {
         const auto& E=Engines[I];
-        return I!=C.FailedEngine && (C.RequestedCount==33 ||
-            (C.RequestedCount>=13 && E.bGimballed) || (C.RequestedCount>0 && E.bCentral));
+        return RecoveryActuators::EngineRequested(E,I,C.RequestedCount,C.FailedEngine);
     };
     for(int32 I=0;I<Engines.Num();++I)if(Requested(I))Step.AvailableThrustN+=C.RatedThrustN;
     const double Throttle=Step.AvailableThrustN>0 && AvailableFuelKg>0 && C.SpecificImpulseS>0 ?

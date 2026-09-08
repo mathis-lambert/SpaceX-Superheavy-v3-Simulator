@@ -1,6 +1,27 @@
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Flight/SuperHeavyLaunchTower.h"
 
+const TCHAR* RecoveryGuidanceReasonText(ERecoveryGuidanceReason Reason)
+{
+    switch(Reason)
+    {
+    case ERecoveryGuidanceReason::Separation:return TEXT("MECO / stage separation / return attitude");
+    case ERecoveryGuidanceReason::Boostback:return TEXT("13-engine boostback / solving ballistic return");
+    case ERecoveryGuidanceReason::Coast:return TEXT("Boostback cutoff / unpowered coast to apogee");
+    case ERecoveryGuidanceReason::ReserveDepleted:return TEXT("Boostback depleted landing reserve");
+    case ERecoveryGuidanceReason::Entry:return TEXT("Engines OFF / atmospheric descent / grid-fin guidance");
+    case ERecoveryGuidanceReason::LandingBurn:return TEXT("Landing burn / 13 to 3 Raptor engines");
+    case ERecoveryGuidanceReason::Capture:return TEXT("Final descent / catch-fittings and heading alignment");
+    case ERecoveryGuidanceReason::Captured:return TEXT("Both fittings resting on rails / engines OFF / free rigid body");
+    case ERecoveryGuidanceReason::PropellantExhausted:return TEXT("Main propellant exhausted");
+    case ERecoveryGuidanceReason::OperatorAbort:return TEXT("Operator abort / engines shut down");
+    case ERecoveryGuidanceReason::EnvelopeExceeded:return TEXT("Flight envelope exceeded");
+    case ERecoveryGuidanceReason::SupportLost:return TEXT("Physical support lost after engine shutdown");
+    case ERecoveryGuidanceReason::SupportEvaluated:return TEXT("Physical rail support evaluated for eight seconds with engines off");
+    default:return TEXT("");
+    }
+}
+
 void ASuperHeavyRecoveryDirector::ConsumeGuidanceState()
 {
     const auto& G=GuidanceState;
@@ -10,7 +31,7 @@ void ASuperHeavyRecoveryDirector::ConsumeGuidanceState()
     for(;ConsumedGuidanceEvents<G.Events.Num();++ConsumedGuidanceEvents)
     {
         const auto& Event=G.Events[ConsumedGuidanceEvents];
-        MissionTime=Event.TimeS;SetPhase(Event.Phase,Event.Message);
+        RecordPhase(Event.Phase,RecoveryGuidanceReasonText(Event.Reason),Event.TimeS,Event.AltitudeM,Event.MassKg);
     }
     MissionTime=G.MissionTimeS;PhaseTime=G.PhaseTimeS;
     UpdateNavigation();
@@ -26,5 +47,5 @@ void ASuperHeavyRecoveryDirector::ConsumeGuidanceState()
     CaptureSpeedAtLatch=G.CaptureSpeedAtLatch;CaptureTiltAtLatch=G.CaptureTiltAtLatch;
     CaptureHeadingAtLatch=G.CaptureHeadingAtLatch;CaptureLugAtLatch=G.CaptureLugAtLatch;LatchPositionM=G.LatchPositionM;
     Tower->SetArmClosure(G.ArmClosure);
-    if(G.bResultReady && !bResultWritten)WriteResult(G.bSuccess,G.ResultReason);
+    if(G.bResultReady && !bResultWritten)WriteResult(G.bSuccess,RecoveryGuidanceReasonText(G.ResultReason));
 }

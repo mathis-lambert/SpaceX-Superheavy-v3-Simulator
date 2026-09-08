@@ -188,6 +188,7 @@ private:
     void TickUpperStage(double Dt);
     void PrepareGroundCommand();
     void SetPhase(ERecoveryPhase NewPhase, const FString& Message);
+    void RecordPhase(ERecoveryPhase NewPhase,const FString& Message,double TimeS,double EventAltitudeM,double EventMassKg);
     void UpdateNavigation();
     void SetFlightCommand(const FVector& ThrustAcceleration,const FVector& TargetUp);
     void UpdateMass();

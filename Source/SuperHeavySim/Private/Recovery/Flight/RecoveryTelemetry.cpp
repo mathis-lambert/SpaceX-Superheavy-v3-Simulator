@@ -97,6 +97,10 @@ void ASuperHeavyRecoveryDirector::WriteResult(bool bSuccess,const FString& Reaso
     Result->SetNumberField(TEXT("dynamics_steps"),DynamicsState.Steps);
     Result->SetNumberField(TEXT("guidance_steps"),GuidanceState.Steps);
     Result->SetNumberField(TEXT("guidance_elapsed_s"),GuidanceState.ElapsedS);
+    Result->SetNumberField(TEXT("terminal_planned_s"),GuidanceState.TerminalPlannedSeconds);
+    Result->SetNumberField(TEXT("terminal_braking_s"),GuidanceState.TerminalBrakingSeconds);
+    Result->SetNumberField(TEXT("terminal_replans"),GuidanceState.TerminalReplans);
+    Result->SetNumberField(TEXT("terminal_rejected_plans"),GuidanceState.TerminalRejectedPlans);
     Result->SetNumberField(TEXT("dynamics_time_s"),DynamicsState.ElapsedS);
     Result->SetNumberField(TEXT("launch_mass_kg"),InitialMassKg);
     Result->SetNumberField(TEXT("separation_mass_kg"),SeparationMassKg);
@@ -143,6 +147,20 @@ void ASuperHeavyRecoveryDirector::WriteResult(bool bSuccess,const FString& Reaso
     TArray<TSharedPtr<FJsonValue>> Events;
     for(const FString& Event:PhaseEvents) Events.Add(MakeShared<FJsonValueString>(Event));
     Result->SetArrayField(TEXT("phase_events"),Events);
+    TArray<TSharedPtr<FJsonValue>> Decisions;
+    for(const auto& Event:GuidanceState.Events)
+    {
+        auto Decision=MakeShared<FJsonObject>();
+        Decision->SetNumberField(TEXT("phase"),static_cast<uint8>(Event.Phase));
+        Decision->SetNumberField(TEXT("reason_code"),static_cast<uint8>(Event.Reason));
+        Decision->SetStringField(TEXT("reason"),RecoveryGuidanceReasonText(Event.Reason));
+        Decision->SetNumberField(TEXT("time_s"),Event.TimeS);
+        Decision->SetNumberField(TEXT("sample_time_s"),Event.SampleTimeS);
+        Decision->SetNumberField(TEXT("altitude_m"),Event.AltitudeM);
+        Decision->SetNumberField(TEXT("mass_kg"),Event.MassKg);
+        Decisions.Add(MakeShared<FJsonValueObject>(Decision));
+    }
+    Result->SetArrayField(TEXT("guidance_events"),Decisions);
     FString Json; FJsonSerializer::Serialize(Result,TJsonWriterFactory<>::Create(&Json));
     FFileHelper::SaveStringToFile(Json,*(Dir/FileName+TEXT(".json")));
     UE_LOG(LogRecovery,Display,TEXT("RECOVERY_RESULT %s"),*Json);

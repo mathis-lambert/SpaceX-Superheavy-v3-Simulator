@@ -1,10 +1,11 @@
 #pragma once
 #include "Recovery/Flight/RecoveryDynamicsModel.h"
+#include "Recovery/Flight/RecoveryTerminalGuidance.h"
 
 /** Authored mission and site values copied before simulation begins. */
 struct FRecoveryGuidanceConfiguration : FRecoveryDynamicsConfiguration
 {
-    FVector CaptureWorldM=FVector::ZeroVector,LaunchWorldM=FVector::ZeroVector;
+    FVector CaptureWorldM=FVector::ZeroVector,LaunchWorldM=FVector::ZeroVector,TowerWorldM=FVector::ZeroVector;
     FQuat TowerRotation=FQuat::Identity;
     FVector CatchLugPlusM=FVector::ZeroVector,CatchLugMinusM=FVector::ZeroVector;
     double TowerHeightM=0,CaptureHeadingDeg=0;
@@ -14,11 +15,21 @@ struct FRecoveryGuidanceConfiguration : FRecoveryDynamicsConfiguration
     double MaxEntryAngleDeg=0,MaxTiltDeg=0,TimeoutSeconds=0;
 };
 
+enum class ERecoveryGuidanceReason : uint8
+{
+    None, Separation, Boostback, Coast, ReserveDepleted, Entry, LandingBurn,
+    Capture, Captured, PropellantExhausted, OperatorAbort, EnvelopeExceeded,
+    SupportLost, SupportEvaluated
+};
+
+// Resolve labels only when the game thread consumes an event or exports a result.
+const TCHAR* RecoveryGuidanceReasonText(ERecoveryGuidanceReason Reason);
+
 struct FRecoveryGuidanceEvent
 {
     ERecoveryPhase Phase=ERecoveryPhase::Ready;
-    double TimeS=0;
-    FString Message;
+    ERecoveryGuidanceReason Reason=ERecoveryGuidanceReason::None;
+    double TimeS=0,SampleTimeS=0,AltitudeM=0,MassKg=0;
 };
 
 struct FRecoveryNavigationState
@@ -40,8 +51,11 @@ struct FRecoveryGuidanceState
     ERecoveryPhase Phase=ERecoveryPhase::Ready;
     FRecoveryDynamicsCommand Command;
     FRecoveryNavigationState Navigation;
-    TArray<FRecoveryGuidanceEvent> Events;
-    double MissionTimeS=0,PhaseTimeS=0,ArmClosure=0;
+    FRecoveryTerminalPlan TerminalPlan;
+    double TerminalPlannedSeconds=0,TerminalBrakingSeconds=0;
+    uint64 TerminalReplans=0,TerminalRejectedPlans=0;
+    TArray<FRecoveryGuidanceEvent,TInlineAllocator<16>> Events;
+    double MissionTimeS=0,SampleTimeS=0,PhaseTimeS=0,ArmClosure=0;
     double ElapsedS=0,MinimumStepS=TNumericLimits<double>::Max(),MaximumStepS=0;
     double TimeToImpactS=0,PredictedMissM=0;
     FVector PredictedImpactM=FVector::ZeroVector,TargetPositionM=FVector::ZeroVector;
@@ -52,7 +66,7 @@ struct FRecoveryGuidanceState
     FVector LatchPositionM=FVector::ZeroVector;
     bool bFlightStarted=false,bSeparationRequested=false,bContactShutdown=false,bApproachAligned=false;
     bool bUnpoweredViolation=false,bResultReady=false,bSuccess=false;
-    FString ResultReason;
+    ERecoveryGuidanceReason ResultReason=ERecoveryGuidanceReason::None;
     uint64 Steps=0;
 };
 
@@ -68,13 +82,16 @@ private:
     FRecoveryGuidanceConfiguration Config;
     FRecoveryGuidanceState State;
     double PredictorClock=0;
+    double TerminalClock=0;
     int32 LandingEngineGroup=13;
     FRecoveryBodyKinematics Body;
     FRecoveryFlightExperiment Experiment;
     void Navigate(const FRecoveryDynamicsState& Dynamics,bool Separated);
     void PredictBallistic();
     FVector WindAt(double Height) const;
-    void Transition(ERecoveryPhase Phase,const FString& Message);
-    void Fail(const FString& Reason);
+    void Transition(ERecoveryPhase Phase,ERecoveryGuidanceReason Reason);
+    void Fail(ERecoveryGuidanceReason Reason);
     void Guide(const FRecoveryDynamicsState& Dynamics,const FRecoveryDynamicsCommand& External,double Dt);
+    void GuideLanding(const FRecoveryDynamicsState& Dynamics,const FRecoveryDynamicsCommand& External,double Dt,
+        FVector& ThrustAcceleration,FVector& TargetUp);
 };

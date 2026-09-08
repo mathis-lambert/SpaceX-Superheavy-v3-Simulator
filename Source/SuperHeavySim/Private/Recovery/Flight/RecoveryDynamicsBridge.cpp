@@ -12,6 +12,7 @@ void ASuperHeavyRecoveryDirector::InitializeDynamics()
     auto Configuration=URecoveryPhysicsComponent::BuildGuidanceConfiguration(*RuntimeProfile);
     Configuration.CaptureWorldM=CaptureWorldM;Configuration.LaunchWorldM=LaunchWorldM;
     Configuration.TowerRotation=Tower->GetActorQuat();Configuration.TowerHeightM=Tower->TowerHeightM;
+    Configuration.TowerWorldM=Tower->GetActorLocation()/100.;
     GuidanceConfiguration=Configuration;
     GuidanceState=FRecoveryGuidanceState();ConsumedGuidanceEvents=0;
     PhysicsModel->InitializeMission(Configuration,Engines,PropellantKg,RcsPropellantKg,MissionGeneration);

@@ -36,7 +36,7 @@ FVector FRecoveryDynamicsModel::AttitudeMoment(const FRecoveryDynamicsCommand& C
         (State.RcsPropellantKg>0?Config.ReactionControlTorqueNm:0)+
         State.DynamicPressurePa*Config.GridFinAreaM2*Config.GridFinLiftSlope*.4*28.8;
     const double BrakingRate=.65*FMath::Sqrt(2*FMath::Max(.00001,Authority/EffectiveInertia)*Angle);
-    const double Rate=FMath::Min3(.20,BrakingRate,Angle*Gain/Damping);
+    const double Rate=FMath::Min3(RecoveryActuators::MaximumBodyRateRadS,BrakingRate,Angle*Gain/Damping);
     const FVector Alpha=(Axis*Rate-State.Body.AngularVelocityWorldRadS)*(Damping*C.Experiment.AttitudeResponse);
     const FVector Omega=Q.UnrotateVector(State.Body.AngularVelocityWorldRadS);
     return Inertia*Q.UnrotateVector(Alpha)+FVector::CrossProduct(Omega,Inertia*Omega);

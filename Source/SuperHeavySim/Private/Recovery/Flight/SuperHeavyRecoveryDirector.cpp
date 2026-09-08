@@ -229,10 +229,15 @@ FString ASuperHeavyRecoveryDirector::GetPhaseLabel() const
 
 void ASuperHeavyRecoveryDirector::SetPhase(ERecoveryPhase NewPhase,const FString& Message)
 {
+    RecordPhase(NewPhase,Message,MissionTime,AltitudeM,MassKg);
+}
+
+void ASuperHeavyRecoveryDirector::RecordPhase(ERecoveryPhase NewPhase,const FString& Message,double TimeS,double EventAltitudeM,double EventMassKg)
+{
     Phase=NewPhase; PhaseTime=0; StatusMessage=Message;
     if(NewPhase!=ERecoveryPhase::Aborted) LastFlightPhase=NewPhase;
-    PhaseEvents.Add(FString::Printf(TEXT("%s %.2fs %.0fm %.0fkg"),*GetPhaseLabel(),MissionTime,AltitudeM,MassKg));
-    UE_LOG(LogRecovery,Display,TEXT("RECOVERY phase=%s t=%.2f %s"),*GetPhaseLabel(),MissionTime,*Message);
+    PhaseEvents.Add(FString::Printf(TEXT("%s %.2fs %.0fm %.0fkg"),*GetPhaseLabel(),TimeS,EventAltitudeM,EventMassKg));
+    UE_LOG(LogRecovery,Display,TEXT("RECOVERY phase=%s t=%.2f %s"),*GetPhaseLabel(),TimeS,*Message);
 }
 
 void ASuperHeavyRecoveryDirector::Tick(float DeltaSeconds)

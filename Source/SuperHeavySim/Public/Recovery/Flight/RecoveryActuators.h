@@ -19,6 +19,13 @@ struct FRecoveryEngineState
 
 namespace RecoveryActuators
 {
+    inline constexpr double MaximumBodyRateRadS=0.20;
+
+    inline bool EngineRequested(const FRecoveryEngineState& Engine,int32 Index,int32 Count,int32 FailedEngine)
+    {
+        return Index!=FailedEngine && (Count==33 || (Count>=13 && Engine.bGimballed) || (Count>0 && Engine.bCentral));
+    }
+
     /** Least-squares lateral engine forces for a body-frame moment request.
      * Actual force limits and gimbal dynamics are applied by each actuator. */
     inline FVector SolveSymmetric(const FVector& C0,const FVector& C1,const FVector& C2,const FVector& B)

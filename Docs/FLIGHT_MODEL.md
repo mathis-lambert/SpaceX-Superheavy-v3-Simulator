@@ -19,9 +19,11 @@ held-command interval. Endpoint thrust drives artwork; step impulse determines
 the mean mechanical force and fuel consumption. The value-only engine-bank
 model has no Unreal object access. `RecoveryDynamicsModel` evaluates the booster
 engine bank, attitude loop, RCS, grid fins, conditioning flow and mass properties
-at every actual Chaos substep through `RecoveryPhysicsComponent`. Outer guidance
-and upper-stage dynamics still run at game-frame cadence. See the
-[solver integration boundary and evidence](Validation/SOLVER_DYNAMICS.md).
+at every actual Chaos substep through `RecoveryPhysicsComponent`.
+`RecoveryGuidanceModel` evaluates navigation, ballistic prediction and flight
+commands in that same callback. Ground sequencing, mechanical event delivery,
+tower arms and upper-stage dynamics still use the game frame. See the
+[current solver guidance boundary and evidence](Validation/SOLVER_GUIDANCE.md).
 
 Landing guidance uses separate switch-down/switch-up thresholds for the three- and thirteen-engine groups. This prevents consecutive-frame command chatter near one thrust threshold. It does not add thrust or constrain the body. Hardware restart counts, settling requirements and minimum stable operating duration still need a calibrated model.
 

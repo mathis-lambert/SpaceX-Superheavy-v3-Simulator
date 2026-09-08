@@ -1,6 +1,13 @@
 # Validation — 8 September 2026
 
-## Current wave: booster inner dynamics in Chaos
+## Current wave: flight guidance in Chaos
+
+[Solver guidance evidence](Validation/SOLVER_GUIDANCE.md) records the migrated
+navigation/predictor/phase loop, numerical decision snapshots, twelve unit checks
+and nine physical flights. Nominal cadence sensitivity decreases, but fixed-rate
+whole-flight control and terminal-descent calibration remain unfinished.
+
+## Previous wave: booster inner dynamics in Chaos
 
 [Solver dynamics evidence](Validation/SOLVER_DYNAMICS.md) documents the callback
 integration, shared state, independent physics checks and remaining outer-loop

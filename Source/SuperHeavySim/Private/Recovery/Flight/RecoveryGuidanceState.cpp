@@ -5,14 +5,14 @@
 void FRecoveryGuidanceModel::Reset(const FRecoveryGuidanceConfiguration& Configuration)
 {
     Config=Configuration;State=FRecoveryGuidanceState();State.Events.Reserve(16);
-    PredictorClock=0;LandingEngineGroup=13;
+    PredictorClock=0;TerminalClock=0;LandingEngineGroup=13;
 }
-void FRecoveryGuidanceModel::Transition(ERecoveryPhase Phase,const FString& Message)
+void FRecoveryGuidanceModel::Transition(ERecoveryPhase Phase,ERecoveryGuidanceReason Reason)
 {
     State.Phase=Phase;State.PhaseTimeS=0;
-    State.Events.Add({Phase,State.MissionTimeS,Message});
+    State.Events.Add({Phase,Reason,State.MissionTimeS,State.SampleTimeS,State.Navigation.AltitudeM,State.Navigation.MassKg});
 }
-void FRecoveryGuidanceModel::Fail(const FString& Reason)
+void FRecoveryGuidanceModel::Fail(ERecoveryGuidanceReason Reason)
 {
     if(State.Phase!=ERecoveryPhase::Aborted)Transition(ERecoveryPhase::Aborted,Reason);
     State.ResultReason=Reason;State.bResultReady=true;State.bSuccess=false;
@@ -44,26 +44,29 @@ void FRecoveryGuidanceModel::Step(const FRecoveryBodyKinematics& Kinematics,cons
     }
     ++State.Steps;
     State.ElapsedS+=Dt;State.MinimumStepS=FMath::Min(State.MinimumStepS,Dt);State.MaximumStepS=FMath::Max(State.MaximumStepS,Dt);
+    // Navigation reads the incoming body sample. The command covers the next
+    // interval and the mission clock below records that interval's endpoint.
+    State.SampleTimeS=State.MissionTimeS;
     if(!State.bResultReady)State.MissionTimeS+=Dt;
     State.PhaseTimeS+=Dt;
     State.Command.EngineCount=0;State.Command.ThrustAccelerationMps2=FVector::ZeroVector;
     State.Command.TargetUpWorld=FVector::UpVector;
     if(External.Phase==ERecoveryPhase::Aborted && State.Phase!=ERecoveryPhase::Aborted)
-        Fail(TEXT("Operator abort / engines shut down"));
+        Fail(ERecoveryGuidanceReason::OperatorAbort);
     if(State.Phase>=ERecoveryPhase::Ascent && State.Phase<=ERecoveryPhase::Capture)
     {
         if(State.MissionTimeS>Config.TimeoutSeconds || (State.Phase>=ERecoveryPhase::LandingBurn && State.Navigation.TiltDeg>70) ||
-            State.Navigation.AltitudeM < -3 || Body.OriginM.ContainsNaN())Fail(TEXT("Flight envelope exceeded"));
+            State.Navigation.AltitudeM < -3 || Body.OriginM.ContainsNaN())Fail(ERecoveryGuidanceReason::EnvelopeExceeded);
         else Guide(Dynamics,External,Dt);
     }
     if(State.Phase==ERecoveryPhase::Captured)
     {
         if((State.Navigation.BasePositionM-State.LatchPositionM).Size()>1. || State.Navigation.TiltDeg>5.)
-            Fail(TEXT("Physical support lost after engine shutdown"));
+            Fail(ERecoveryGuidanceReason::SupportLost);
         else if(State.PhaseTimeS>8 && !State.bResultReady)
         {
             State.bResultReady=true;State.bSuccess=State.Navigation.VelocityMps.Size()<.15 && External.SupportContactCount==2;
-            State.ResultReason=TEXT("Physical rail support evaluated for eight seconds with engines off");
+            State.ResultReason=ERecoveryGuidanceReason::SupportEvaluated;
         }
     }
     State.Command.Phase=State.Phase;State.Command.bContactShutdown=State.bContactShutdown;

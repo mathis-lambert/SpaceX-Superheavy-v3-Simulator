@@ -1,5 +1,8 @@
 # Booster dynamics in the Chaos solver — 8 September 2026
 
+Historical checkpoint. The subsequent [solver guidance wave](SOLVER_GUIDANCE.md)
+updates the outer-guidance boundary and records fresh validation.
+
 ## Boundary
 
 `RecoveryDynamicsModel` owns the booster fuel ledger, mass distribution, engine
