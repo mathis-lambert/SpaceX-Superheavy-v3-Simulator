@@ -36,6 +36,7 @@ namespace RecoveryTerminalGuidance
     /** Sampled point-mass feasibility with estimated body aero and changing mass.
      * The actuator model still independently enforces thrust, slew and fuel limits. */
     FRecoveryTerminalPlan Plan(const FRecoveryTerminalInput& Input,const FRecoveryDynamicsConfiguration& Config);
-    FVector RequiredThrustAcceleration(const FVector& NetAcceleration,const FVector& VelocityMps,
-        const FVector& PositionM,double MassKg,const FVector& WindMps,const FRecoveryDynamicsConfiguration& Config);
+    bool TryRequiredThrustAcceleration(const FVector& NetAcceleration,const FVector& VelocityMps,
+        const FVector& PositionM,double MassKg,const FVector& WindMps,const FRecoveryDynamicsConfiguration& Config,
+        const FVector& InitialUpWorld,FVector& ThrustAcceleration);
 }

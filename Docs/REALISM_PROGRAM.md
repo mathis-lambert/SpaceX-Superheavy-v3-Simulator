@@ -122,6 +122,7 @@ Unchecked means pending, in progress, or insufficiently verified. A requirement 
 ## Flight computer and trajectory (85–96)
 
 - [ ] 85. Rework the excessively long terminal braking burn.
+- Current work: retained terminal trajectories replace the hover shelf, with physical rate tracking and fitting load transfer. Powered near-hover time decreases, but fuel consumption does not yet improve; [implementation and evidence](Validation/TERMINAL_REFERENCE_GUIDANCE.md).
 - [ ] 86. Calculate landing margins from available thrust and fuel.
 - [ ] 87. Improve boostback impact prediction.
 - [ ] 88. Account for consumption and uncertainty in boostback optimization.

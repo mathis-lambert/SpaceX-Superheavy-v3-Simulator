@@ -51,6 +51,7 @@ void FRecoveryGuidanceModel::Step(const FRecoveryBodyKinematics& Kinematics,cons
     State.PhaseTimeS+=Dt;
     State.Command.EngineCount=0;State.Command.ThrustAccelerationMps2=FVector::ZeroVector;
     State.Command.TargetUpWorld=FVector::UpVector;
+    State.Command.TargetAngularVelocityWorldRadS=FVector::ZeroVector;
     if(External.Phase==ERecoveryPhase::Aborted && State.Phase!=ERecoveryPhase::Aborted)
         Fail(ERecoveryGuidanceReason::OperatorAbort);
     if(State.Phase>=ERecoveryPhase::Ascent && State.Phase<=ERecoveryPhase::Capture)

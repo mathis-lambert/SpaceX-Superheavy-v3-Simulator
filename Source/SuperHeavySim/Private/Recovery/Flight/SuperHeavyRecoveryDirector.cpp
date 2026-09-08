@@ -181,7 +181,7 @@ void ASuperHeavyRecoveryDirector::SelectScenario(int32 Index)
     AppliedGimbal=FVector::ZeroVector;
     PeakAltitudeM=0; PeakTiltDeg=0; SampleClock=0; bResultWritten=false;
     CaptureErrorAtLatch=0; CaptureSpeedAtLatch=0; CaptureTiltAtLatch=0; LatchPositionM=FVector::ZeroVector;
-    Csv=TEXT("time_s,phase,x_m,y_m,base_altitude_m,vx_mps,vy_mps,vz_mps,tilt_deg,target_error_m,throttle,engines,arm_closure,mass_kg,propellant_kg,density_kgm3,q_pa,mach,heading_error_deg,fin_xp_deg,fin_xm_deg,fin_ym_deg,thrust_n,predicted_miss_m,lug_error_m\n");
+    InitializeFlightCsv();
     Trace.Reset(); PhaseEvents.Reset();
     MainFuelConsumedKg=0; SeparationMassKg=0; CaptureHeadingAtLatch=0; CaptureLugAtLatch=0;
     LandingIgnitionAltitudeM=0; UnpoweredSeconds=0; BoostbackIgnitionAltitudeM=0; PeakDynamicPressurePa=0;
@@ -283,7 +283,7 @@ void ASuperHeavyRecoveryDirector::Tick(float DeltaSeconds)
         SampleClock=0;
         Trace.Add(FVector2D(MissionTime,AltitudeM));
         if(Trace.Num()>8000) Trace.RemoveAt(0);
-        Csv+=FString::Printf(TEXT("%.3f,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%d,%.3f,%.3f,%.3f,%.8f,%.3f,%.4f,%.4f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f\n"),MissionTime,*GetPhaseLabel(),BasePositionM.X,BasePositionM.Y,AltitudeM,VelocityMps.X,VelocityMps.Y,VelocityMps.Z,TiltDeg,HorizontalErrorM,Throttle,ActiveEngines,Tower->ArmClosure,MassKg,PropellantKg,DensityKgM3,DynamicPressurePa,Mach,HeadingErrorDeg,GridFinAnglesDeg.X,GridFinAnglesDeg.Y,GridFinAnglesDeg.Z,ActualThrustN,PredictedMissM,CatchLugErrorM);
+        RecordFlightCsvSample();
     }
 }
 

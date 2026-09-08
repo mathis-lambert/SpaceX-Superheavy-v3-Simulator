@@ -1,5 +1,9 @@
 # Terminal guidance development checkpoint — 8 September 2026
 
+Follow-up: [terminal reference tracking](TERMINAL_REFERENCE_GUIDANCE.md) records
+the subsequent corrections and fresh validation. The failures below describe
+the saved development checkpoint, not that later implementation.
+
 This is a work-in-progress source checkpoint, not a validated simulator release.
 It includes the solver-guidance changes documented in [SOLVER_GUIDANCE.md](SOLVER_GUIDANCE.md)
 and the subsequent terminal-transfer experiment. The nine successful flights in

@@ -9,9 +9,12 @@ FVector FRecoveryTerminalPlan::VelocityAt(double T) const
 FVector FRecoveryTerminalPlan::AccelerationAt(double T) const
 {return InitialAccelerationMps2+(6*CubicMps3+(12*QuarticMps4+20*QuinticMps5*T)*T)*T;}
 
-FVector RecoveryTerminalGuidance::RequiredThrustAcceleration(const FVector& Net,const FVector& Velocity,
-    const FVector& Position,double Mass,const FVector& Wind,const FRecoveryDynamicsConfiguration& C)
+bool RecoveryTerminalGuidance::TryRequiredThrustAcceleration(const FVector& Net,const FVector& Velocity,
+    const FVector& Position,double Mass,const FVector& Wind,const FRecoveryDynamicsConfiguration& C,
+    const FVector& InitialUp,FVector& ThrustAcceleration)
 {
+    ThrustAcceleration=FVector::ZeroVector;
+    if(Mass<=0 || !FMath::IsFinite(Mass) || InitialUp.Z<=0)return false;
     const auto Air=RecoveryAtmosphere::Sample(FlightGeometry::AltitudeM(Position*100.),C.SeaLevelTemperatureOffsetK);
     const FVector Relative=Velocity-Wind;
     const double Speed=FMath::Max(1.,Relative.Size()),Q=.5*Air.Density*Relative.SizeSquared();
@@ -29,7 +32,9 @@ FVector RecoveryTerminalGuidance::RequiredThrustAcceleration(const FVector& Net,
         const double Z=Net.Z+Air.Gravity-A.Z;
         return FVector(Z*Tilt.X+A.X-Net.X,Z*Tilt.Y+A.Y-Net.Y,0);
     };
-    FVector Tilt=FVector::ZeroVector;
+    // Continue the nearby aerodynamic equilibrium, rather than switching to
+    // a different root when body normal load exceeds thrust authority.
+    FVector Tilt=FVector(InitialUp.X,InitialUp.Y,0)/InitialUp.Z;
     // Solve the coupling between body normal load and thrust direction. A
     // non-finite/ill-conditioned candidate will fail the feasibility checks.
     for(int32 Iteration=0;Iteration<8;++Iteration)
@@ -40,13 +45,15 @@ FVector RecoveryTerminalGuidance::RequiredThrustAcceleration(const FVector& Net,
         const FVector X=(Residual(Tilt+FVector(E,0,0))-R)/E;
         const FVector Y=(Residual(Tilt+FVector(0,E,0))-R)/E;
         const double D=X.X*Y.Y-X.Y*Y.X;
-        if(FMath::Abs(D)<1.e-8)return FVector(1.e10,0,0);
+        if(!FMath::IsFinite(D) || FMath::Abs(D)<1.e-8)return false;
         const FVector Delta((R.X*Y.Y-R.Y*Y.X)/D,(X.X*R.Y-X.Y*R.X)/D,0);
         Tilt-=Delta.GetClampedToMaxSize(.3);
     }
-    if(Residual(Tilt).Size()>.05)return FVector(1.e10,0,0);
+    if(Tilt.ContainsNaN() || Residual(Tilt).Size()>.05)return false;
     const double Vertical=Net.Z+Air.Gravity-Aero(Tilt).Z;
-    return FVector(Tilt.X,Tilt.Y,1)*Vertical;
+    if(!FMath::IsFinite(Vertical) || Vertical<=0)return false;
+    ThrustAcceleration=FVector(Tilt.X,Tilt.Y,1)*Vertical;
+    return !ThrustAcceleration.ContainsNaN();
 }
 
 FRecoveryTerminalPlan RecoveryTerminalGuidance::Plan(const FRecoveryTerminalInput& I,const FRecoveryDynamicsConfiguration& C)
@@ -74,22 +81,27 @@ FRecoveryTerminalPlan RecoveryTerminalGuidance::Plan(const FRecoveryTerminalInpu
         {
             const double Time=T*Sample/Samples,Dt=T/Samples;
             const FVector P=Candidate.PositionAt(Time),V=Candidate.VelocityAt(Time);
-            const FVector Force=RequiredThrustAcceleration(Candidate.AccelerationAt(Time),V,P,Mass,I.WindMps,C)*Mass;
+            FVector ThrustAcceleration;
+            if(!TryRequiredThrustAcceleration(Candidate.AccelerationAt(Time),V,P,Mass,I.WindMps,C,PreviousUp,ThrustAcceleration))
+            {++Result.ThrustRejected;Feasible=false;break;}
+            const FVector Force=ThrustAcceleration*Mass;
             const double Thrust=Force.Size();
             const FVector Up=Force.GetSafeNormal();
             const double Tilt=FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(Up.Z,-1.,1.)));
             const double Rate=FMath::Acos(FMath::Clamp(FVector::DotProduct(Up,PreviousUp),-1.,1.))/Dt;
             const bool CoreRange=Thrust<=I.CoreThrustN*.95;
             const bool LandingRange=Thrust>=I.LandingThrustN*C.Engines.MinimumThrottle && Thrust<=I.LandingThrustN*.95;
-            if(!FMath::IsFinite(Thrust) || Force.Z<=0 || Thrust<MinimumThrust || (!CoreRange && !LandingRange))
+            // The initial sample is the existing actuator transient. Enforce
+            // the command envelope on future samples, not retroactively on it.
+            if(!FMath::IsFinite(Thrust) || Force.Z<=0 || (Sample>0 && (Thrust<MinimumThrust || (!CoreRange && !LandingRange))))
             {++Result.ThrustRejected;Feasible=false;break;}
-            if(Tilt>I.MaxTiltDeg || Rate>RecoveryActuators::MaximumBodyRateRadS*.85)
+            if(Sample>0 && (Tilt>I.MaxTiltDeg || Rate>RecoveryActuators::MaximumBodyRateRadS*.85))
             {++Result.AttitudeRejected;Feasible=false;break;}
             const FVector Base=P-Up*I.CentreFromBaseM;
             const FVector Top=Base+Up*70.88;
             const FVector Middle=I.TowerRotation.UnrotateVector((Base+Top)*.5-I.TowerWorldM);
             const FVector Half=I.TowerRotation.UnrotateVector((Top-Base)*.5).GetAbs()+FVector(4.5,4.5,0);
-            // Conservative swept body bounds against the mast, plus the final
+            // Conservative sampled body bounds against the mast, plus the final
             // opening. Actual arm/fitting contact is still resolved by Chaos.
             const double H=Base.Z-I.CaptureBaseHeightM;
             const FQuat Attitude=FRotationMatrix::MakeFromZX(Up,I.HeadingWorld).ToQuat();
@@ -115,6 +127,8 @@ FRecoveryTerminalPlan RecoveryTerminalGuidance::Plan(const FRecoveryTerminalInpu
         if(Feasible)
         {
             Candidate.bFeasible=true;Candidate.Candidates=Result.Candidates;
+            Candidate.ThrustRejected=Result.ThrustRejected;Candidate.AttitudeRejected=Result.AttitudeRejected;
+            Candidate.ClearanceRejected=Result.ClearanceRejected;Candidate.FuelRejected=Result.FuelRejected;
             return Candidate;
         }
     }

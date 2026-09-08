@@ -1,6 +1,12 @@
 # Validation — 8 September 2026
 
-## Current wave: flight guidance in Chaos
+## Current wave: terminal reference tracking
+
+[Terminal guidance evidence](Validation/TERMINAL_REFERENCE_GUIDANCE.md) records
+the development regression, reference tracking, load-transfer correction and
+fresh physical checks. Fuel optimization and full tower dynamics remain open.
+
+## Previous wave: flight guidance in Chaos
 
 [Solver guidance evidence](Validation/SOLVER_GUIDANCE.md) records the migrated
 navigation/predictor/phase loop, numerical decision snapshots, twelve unit checks

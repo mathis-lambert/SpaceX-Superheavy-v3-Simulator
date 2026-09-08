@@ -27,6 +27,13 @@ tower arms and upper-stage dynamics still use the game frame. See the
 
 Landing guidance uses separate switch-down/switch-up thresholds for the three- and thirteen-engine groups. This prevents consecutive-frame command chatter near one thrust threshold. It does not add thrust or constrain the body. Hardware restart counts, settling requirements and minimum stable operating duration still need a calibrated model.
 
+Terminal descent follows a retained, sampled quintic reference with aerodynamic
+inversion, valve anticipation and an angular-rate demand to the physical moment
+controller. Fitting load transfer holds the current rail command and waits for
+linear/angular settling before declaring support secured. See [terminal tracking
+and its limitations](Validation/TERMINAL_REFERENCE_GUIDANCE.md); this remains an
+estimated point-mass planner, not an optimal six-degree-of-freedom solver.
+
 Reaction control uses six estimated pod locations, each representing two opposing one-way ports. The allocator closes the existing valve before reversing and applies forces at their locations. Valve response, maximum force and a separate gas supply bound authority. The six displayed pods are simplified artwork; detailed paired-nozzle geometry remains unfinished.
 
 The controller uses current analytical inertia and includes the gyroscopic term. Chaos gyroscopic torque is enabled. Passive body/grid-fin aerodynamic loads remain after engine shutdown and contact; generic rigid-body damping is zero. Fin lift and body drag remain simplified coefficient models. Local angular airflow, transonic tables, pressure-centre motion and aeroelasticity are still work items.

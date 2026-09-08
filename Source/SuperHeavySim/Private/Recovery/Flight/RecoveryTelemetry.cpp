@@ -101,6 +101,7 @@ void ASuperHeavyRecoveryDirector::WriteResult(bool bSuccess,const FString& Reaso
     Result->SetNumberField(TEXT("terminal_braking_s"),GuidanceState.TerminalBrakingSeconds);
     Result->SetNumberField(TEXT("terminal_replans"),GuidanceState.TerminalReplans);
     Result->SetNumberField(TEXT("terminal_rejected_plans"),GuidanceState.TerminalRejectedPlans);
+    Result->SetNumberField(TEXT("terminal_peak_tracking_error_m"),GuidanceState.TerminalPeakTrackingErrorM);
     Result->SetNumberField(TEXT("dynamics_time_s"),DynamicsState.ElapsedS);
     Result->SetNumberField(TEXT("launch_mass_kg"),InitialMassKg);
     Result->SetNumberField(TEXT("separation_mass_kg"),SeparationMassKg);
@@ -165,4 +166,23 @@ void ASuperHeavyRecoveryDirector::WriteResult(bool bSuccess,const FString& Reaso
     FFileHelper::SaveStringToFile(Json,*(Dir/FileName+TEXT(".json")));
     UE_LOG(LogRecovery,Display,TEXT("RECOVERY_RESULT %s"),*Json);
     if(bExitAfterTest) FPlatformMisc::RequestExitWithStatus(false,bSuccess ? 0 : 1);
+}
+
+void ASuperHeavyRecoveryDirector::InitializeFlightCsv()
+{
+    Csv=TEXT("time_s,phase,x_m,y_m,base_altitude_m,vx_mps,vy_mps,vz_mps,tilt_deg,target_error_m,throttle,engines,arm_closure,mass_kg,propellant_kg,density_kgm3,q_pa,mach,heading_error_deg,fin_xp_deg,fin_xm_deg,fin_ym_deg,thrust_n,predicted_miss_m,lug_error_m,terminal_replan,terminal_feasible,terminal_horizon_s,terminal_thrust_rejections,terminal_attitude_rejections,terminal_clearance_rejections,terminal_fuel_rejections,plan_px,plan_py,plan_pz,plan_vx,plan_vy,plan_vz,plan_ax,plan_ay,plan_az,plan_ux,plan_uy,plan_uz,plan_tx,plan_ty,plan_tz,plan_wx,plan_wy,plan_wz,plan_mass,plan_fuel,plan_core_thrust,plan_landing_thrust,plan_isp,plan_centre,reference_px,reference_py,reference_pz,reference_vx,reference_vy,reference_vz\n");
+}
+
+void ASuperHeavyRecoveryDirector::RecordFlightCsvSample()
+{
+    Csv+=FString::Printf(TEXT("%.3f,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%d,%.3f,%.3f,%.3f,%.8f,%.3f,%.4f,%.4f,%.3f,%.3f,%.3f,%.3f,%.3f,%.4f"),MissionTime,*GetPhaseLabel(),BasePositionM.X,BasePositionM.Y,AltitudeM,VelocityMps.X,VelocityMps.Y,VelocityMps.Z,TiltDeg,HorizontalErrorM,Throttle,ActiveEngines,Tower->ArmClosure,MassKg,PropellantKg,DensityKgM3,DynamicPressurePa,Mach,HeadingErrorDeg,GridFinAnglesDeg.X,GridFinAnglesDeg.Y,GridFinAnglesDeg.Z,ActualThrustN,PredictedMissM,CatchLugErrorM);
+    const auto& P=GuidanceState.TerminalPlan;
+    const auto& I=GuidanceState.TerminalInput;
+    Csv+=FString::Printf(TEXT(",%llu,%d,%.6f,%d,%d,%d,%d"),GuidanceState.TerminalReplans,int32(P.bFeasible),P.HorizonS,
+        GuidanceState.TerminalCandidate.ThrustRejected,GuidanceState.TerminalCandidate.AttitudeRejected,GuidanceState.TerminalCandidate.ClearanceRejected,GuidanceState.TerminalCandidate.FuelRejected);
+    for(const FVector& V:{I.PositionM,I.VelocityMps,I.AccelerationMps2,I.UpWorld,I.TargetM,I.WindMps})
+        Csv+=FString::Printf(TEXT(",%.9f,%.9f,%.9f"),V.X,V.Y,V.Z);
+    Csv+=FString::Printf(TEXT(",%.9f,%.9f,%.9f,%.9f,%.9f,%.9f"),I.MassKg,I.FuelKg,I.CoreThrustN,I.LandingThrustN,I.IspS,I.CentreFromBaseM);
+    const FVector RP=GuidanceState.TerminalReferenceM,RV=GuidanceState.TerminalReferenceVelocityMps;
+    Csv+=FString::Printf(TEXT(",%.6f,%.6f,%.6f,%.6f,%.6f,%.6f\n"),RP.X,RP.Y,RP.Z,RV.X,RV.Y,RV.Z);
 }

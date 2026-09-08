@@ -202,4 +202,6 @@ private:
     TArray<FString> PhaseEvents;
     void UpdateCamera(double Dt);
     void WriteResult(bool bSuccess, const FString& Reason);
+    void InitializeFlightCsv();
+    void RecordFlightCsvSample();
 };

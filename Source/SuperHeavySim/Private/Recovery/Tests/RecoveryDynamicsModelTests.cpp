@@ -75,4 +75,32 @@ bool FRecoveryDynamicsLoadsTest::RunTest(const FString&)
     TestEqual(TEXT("Pause does not consume fuel"),Model.GetState().PropellantKg,Before.PropellantKg);
     return true;
 }
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRecoveryRateFeedforwardTest,"Recovery.Physics.AngularRateActuation",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FRecoveryRateFeedforwardTest::RunTest(const FString&)
+{
+    const auto Config=URecoveryPhysicsComponent::BuildConfiguration(*GetDefault<USuperHeavyRecoveryProfile>());
+    TArray<FRecoveryEngineState> Geometry;
+    for(int32 I=0;I<3;++I)
+    {
+        FRecoveryEngineState E;E.bCentral=true;E.bGimballed=true;
+        const double A=I*2*UE_DOUBLE_PI/3;
+        E.PositionFromBaseM=FVector(1.5*FMath::Cos(A),1.5*FMath::Sin(A),0);Geometry.Add(E);
+    }
+    FRecoveryBodyKinematics Body;Body.OriginM=FVector(0,0,200000+FlightGeometry::BoosterBaseOffsetM);
+    FRecoveryDynamicsCommand C;C.Phase=ERecoveryPhase::LandingBurn;C.bSeparated=true;
+    C.bGroundSupplyConnected=false;C.EngineCount=3;C.ThrustAccelerationMps2=FVector(0,0,1000);
+    C.TargetAngularVelocityWorldRadS=FVector(0,.05,0);
+    for(const bool Powered:{true,false})
+    {
+        FRecoveryDynamicsModel Model;Model.Reset(Config,Geometry,Powered?75000:0,0);
+        for(int32 Step=0;Step<120;++Step)Model.Step(Body,C,1./120.);
+        const auto& State=Model.GetState();
+        if(Powered)TestTrue(TEXT("Reference rotation demands a real engine moment even at zero attitude error"),State.EngineMomentBodyNm.Y>1.e5);
+        else TestTrue(TEXT("A turn-rate request cannot create engine torque without fuel"),State.EngineMomentBodyNm.IsNearlyZero(1.e-8));
+        TestTrue(TEXT("Actuation retains the supplied position"),State.Body.OriginM.Equals(Body.OriginM,0.));
+        TestTrue(TEXT("Actuation never assigns the requested angular velocity"),State.Body.AngularVelocityWorldRadS.IsZero());
+        TestTrue(TEXT("Reference tracking still obeys the gimbal limit"),State.PeakGimbalDeg<=Config.Engines.MaximumGimbalDeg+.001);
+    }
+    return true;
+}
 #endif

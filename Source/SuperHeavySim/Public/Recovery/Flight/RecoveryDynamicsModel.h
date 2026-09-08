@@ -34,6 +34,7 @@ struct FRecoveryDynamicsCommand
 {
     FVector ThrustAccelerationMps2=FVector::ZeroVector;
     FVector TargetUpWorld=FVector::UpVector;
+    FVector TargetAngularVelocityWorldRadS=FVector::ZeroVector;
     FVector HeadingWorld=FVector::ForwardVector;
     ERecoveryPhase Phase=ERecoveryPhase::Ready;
     int32 EngineCount=0;

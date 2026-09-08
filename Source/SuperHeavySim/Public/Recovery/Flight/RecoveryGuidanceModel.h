@@ -52,7 +52,10 @@ struct FRecoveryGuidanceState
     FRecoveryDynamicsCommand Command;
     FRecoveryNavigationState Navigation;
     FRecoveryTerminalPlan TerminalPlan;
-    double TerminalPlannedSeconds=0,TerminalBrakingSeconds=0;
+    FRecoveryTerminalPlan TerminalCandidate;
+    FRecoveryTerminalInput TerminalInput;
+    FVector TerminalReferenceM=FVector::ZeroVector,TerminalReferenceVelocityMps=FVector::ZeroVector;
+    double TerminalPlannedSeconds=0,TerminalBrakingSeconds=0,TerminalPeakTrackingErrorM=0;
     uint64 TerminalReplans=0,TerminalRejectedPlans=0;
     TArray<FRecoveryGuidanceEvent,TInlineAllocator<16>> Events;
     double MissionTimeS=0,SampleTimeS=0,PhaseTimeS=0,ArmClosure=0;
@@ -64,7 +67,7 @@ struct FRecoveryGuidanceState
     double SettledContactSeconds=0,CaptureErrorAtLatch=0,CaptureSpeedAtLatch=0,CaptureTiltAtLatch=0;
     double CaptureHeadingAtLatch=0,CaptureLugAtLatch=0;
     FVector LatchPositionM=FVector::ZeroVector;
-    bool bFlightStarted=false,bSeparationRequested=false,bContactShutdown=false,bApproachAligned=false;
+    bool bFlightStarted=false,bSeparationRequested=false,bContactShutdown=false;
     bool bUnpoweredViolation=false,bResultReady=false,bSuccess=false;
     ERecoveryGuidanceReason ResultReason=ERecoveryGuidanceReason::None;
     uint64 Steps=0;
