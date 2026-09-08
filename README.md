@@ -2,6 +2,11 @@
 
 An interactive Unreal Engine 5.8 simulator: launch, stage separation, boostback, ballistic coast, atmospheric control, landing burn and physical tower capture.
 
+The first Windows alpha is `0.1.0-alpha.1`. See [launch instructions and known
+limitations](Docs/Releases/ALPHA_0.1.0.md). Reproduce the standalone package with
+`./Tools/Runtime/package_alpha.ps1` from committed sources. Local release builds
+live in `Releases/`; generated binaries remain outside Git.
+
 Open `SuperHeavySim.uproject`, or launch the standalone viewer from PowerShell:
 
 ```powershell
@@ -28,7 +33,7 @@ Both scripts accept `-EngineRoot` if Unreal is installed elsewhere. The default 
 - [Measured performance and validation](Docs/VALIDATION.md)
 - [Viewer, rendering, audio and browser-delivery notes](Docs/EXPERIENCE_NOTES.md)
 - [Flight model and physical capture](Docs/FLIGHT_MODEL.md)
-- [100-item realism programme and delivery status](Docs/REALISM_ROADMAP.md)
+- [150-item realism programme and release freeze](Docs/REALISM_PROGRAM.md)
 - [Visual references and art direction](Docs/VISUAL_REFERENCES.md)
 - [Historical guidance architecture](Docs/Archive/GNC_ARCHITECTURE.md)
 

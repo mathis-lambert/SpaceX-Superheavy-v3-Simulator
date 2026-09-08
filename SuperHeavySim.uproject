@@ -1,8 +1,8 @@
 {
   "FileVersion": 3,
   "EngineAssociation": "5.8",
-  "Category": "",
-  "Description": "",
+  "Category": "Simulation",
+  "Description": "Starbase Flight Simulator - Windows Alpha 0.1.0",
   "Modules": [
     {
       "Name": "SuperHeavySim",
@@ -18,7 +18,8 @@
   "Plugins": [
     {
       "Name": "ModelingToolsEditorMode",
-      "Enabled": true
+      "Enabled": true,
+      "TargetAllowList": ["Editor"]
     },
     {
       "Name": "SunPosition",
@@ -38,11 +39,13 @@
     },
     {
       "Name": "ModelContextProtocol",
-      "Enabled": true
+      "Enabled": true,
+      "TargetAllowList": ["Editor"]
     },
     {
       "Name": "AllToolsets",
-      "Enabled": true
+      "Enabled": true,
+      "TargetAllowList": ["Editor"]
     },
     {
       "Name": "DLSS",
