@@ -1,6 +1,6 @@
 # Flight model
 
-Updated 2026-09-08. Chaos integrates the rigid bodies. Guidance commands bounded actuators; presentation reads their resulting physical state. Starship becomes an independent physical body at separation. The default return near 97 km is an estimated scenario, not a telemetry replay.
+Updated 2026-09-09. Chaos integrates the rigid bodies. Guidance commands bounded actuators; presentation reads their resulting physical state. Starship becomes an independent physical body at separation. The default return near 97 km is an estimated scenario, not a telemetry replay.
 
 ## Configuration and units
 
@@ -19,11 +19,14 @@ held-command interval. Endpoint thrust drives artwork; step impulse determines
 the mean mechanical force and fuel consumption. The value-only engine-bank
 model has no Unreal object access. `RecoveryDynamicsModel` evaluates the booster
 engine bank, attitude loop, RCS, grid fins, conditioning flow and mass properties
-at every actual Chaos substep through `RecoveryPhysicsComponent`.
+at every fixed 120 Hz Chaos step through `RecoveryPhysicsComponent`.
 `RecoveryGuidanceModel` evaluates navigation, ballistic prediction and flight
-commands in that same callback. Ground sequencing, mechanical event delivery,
-tower arms and upper-stage dynamics still use the game frame. See the
-[current solver guidance boundary and evidence](Validation/SOLVER_GUIDANCE.md).
+commands in that same callback. `RecoveryUpperStageModel` integrates Starship
+propulsion, fuel and passive loads on the same clock. A post-solve observer reads
+fitting/rail manifolds directly; support does not depend on game-frame hit events.
+Ground sequencing, operator commands, proxy allocation and the kinematic tower
+still involve game frames. See the [fixed clock, atomic separation and support
+boundary](Validation/FIXED_PHYSICS_CLOCK.md).
 
 Landing guidance uses separate switch-down/switch-up thresholds for the three- and thirteen-engine groups. This prevents consecutive-frame command chatter near one thrust threshold. It does not add thrust or constrain the body. Hardware restart counts, settling requirements and minimum stable operating duration still need a calibrated model.
 
@@ -61,7 +64,7 @@ The vapor renderer reads actual conditioning flow. Its condensation, transport a
 
 ## Stage separation
 
-The attached upper stage contributes to stack mass properties. `RecoveryStageDynamics` initializes independent Starship at the inherited rigid-stack location, orientation, point velocity and angular velocity. Booster velocity is transported to its new mass centre. This changes one rigid assembly into two bodies; it is not a guidance correction. There is no scripted separation kick or prescribed subsequent trajectory.
+The attached upper stage contributes to stack mass properties. `RecoveryStageDynamics` allocates the independent Starship proxy. The physics callback initializes both bodies atomically from the same live rigid-stack state, using `RecoverySeparation` to transport velocity to each new mass centre. The split preserves orientation and angular velocity; interpolated artwork never supplies its initial kinematics. This changes one rigid assembly into two bodies; it is not a guidance correction. There is no scripted separation kick or prescribed subsequent trajectory.
 
 Linear and angular momentum mismatches are recorded before subsequent engine integration. Starship then experiences its own gravity, approximate aerodynamics, six engine forces and fuel consumption. Its renderer and six exhaust plumes follow that independent body. Uniform axial inertia and symmetric fixed thrust directions remain approximations. Orbital guidance, distinct vacuum/sea-level performance, hot-stage impingement and detailed Starship tank modelling remain unfinished.
 

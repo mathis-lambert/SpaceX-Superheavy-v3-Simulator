@@ -67,7 +67,6 @@ void ASuperHeavyRecoveryDirector::UpdateNavigation()
     HeadingErrorDeg=N.HeadingErrorDeg;
     CatchLugErrorM=N.CatchLugErrorM;
     BrakingDistanceM=N.BrakingDistanceM;
-    SupportContactCount=int32(MissionTime-LastSupportContact[0]<0.2)+int32(MissionTime-LastSupportContact[1]<0.2);
     PeakDynamicPressurePa=FMath::Max(PeakDynamicPressurePa,DynamicPressurePa);
     PeakSpeedMps=FMath::Max(PeakSpeedMps,VelocityMps.Size());
     PeakDownrangeM=FMath::Max(PeakDownrangeM,FVector2D(BasePositionM-LaunchWorldM).Size());
@@ -141,10 +140,19 @@ void ASuperHeavyRecoveryDirector::WriteResult(bool bSuccess,const FString& Reaso
     Result->SetNumberField(TEXT("centre_of_mass_from_base_m"),DynamicsState.Mass.CentreFromBaseM);
     Result->SetNumberField(TEXT("upper_stage_propellant_kg"),UpperStagePropellantKg);
     Result->SetNumberField(TEXT("upper_stage_fuel_consumed_kg"),UpperStageFuelConsumedKg);
+    Result->SetNumberField(TEXT("upper_stage_delivered_impulse_ns"),UpperStageState.DeliveredImpulseNs);
+    Result->SetNumberField(TEXT("upper_stage_steps"),UpperStageState.Steps);
+    Result->SetNumberField(TEXT("upper_stage_elapsed_s"),UpperStageState.ElapsedS);
+    Result->SetNumberField(TEXT("upper_stage_propellant_balance_error_kg"),UpperStagePropellantKg+UpperStageFuelConsumedKg-
+        (RuntimeProfile->UpperStageMassKg-RuntimeProfile->UpperStageDryMassKg));
     Result->SetBoolField(TEXT("upper_stage_physical"),bSeparated && GetUpperStageBody() && GetUpperStageBody()->IsSimulatingPhysics());
     Result->SetBoolField(TEXT("launch_hold_released"),bLaunchHoldReleased);
     if(!ContactFixture.IsEmpty()) Result->SetStringField(TEXT("contact_fixture"),ContactFixture);
     Result->SetBoolField(TEXT("left_rail_contact"),EverSupportContact[0]);
+    Result->SetNumberField(TEXT("solver_support_samples"),DynamicsState.RailSupport.SolverSamples);
+    Result->SetNumberField(TEXT("solver_support_mask"),DynamicsState.RailSupport.CurrentMask);
+    Result->SetNumberField(TEXT("support_vertical_impulse_ns"),
+        DynamicsState.RailSupport.ReactionImpulseWorldNs[0].Z+DynamicsState.RailSupport.ReactionImpulseWorldNs[1].Z);
     Result->SetBoolField(TEXT("right_rail_contact"),EverSupportContact[1]);
     Result->SetBoolField(TEXT("contact_engine_shutdown"),bContactShutdown);
     Result->SetNumberField(TEXT("left_support_impulse_ns"),SupportImpulseNs.X);
@@ -176,7 +184,7 @@ void ASuperHeavyRecoveryDirector::WriteResult(bool bSuccess,const FString& Reaso
 
 void ASuperHeavyRecoveryDirector::InitializeFlightCsv()
 {
-    Csv=TEXT("time_s,phase,x_m,y_m,base_altitude_m,vx_mps,vy_mps,vz_mps,tilt_deg,target_error_m,throttle,engines,arm_closure,mass_kg,propellant_kg,density_kgm3,q_pa,mach,heading_error_deg,fin_xp_deg,fin_xm_deg,fin_ym_deg,thrust_n,predicted_miss_m,lug_error_m,terminal_replan,terminal_feasible,terminal_horizon_s,terminal_thrust_rejections,terminal_attitude_rejections,terminal_clearance_rejections,terminal_fuel_rejections,plan_px,plan_py,plan_pz,plan_vx,plan_vy,plan_vz,plan_ax,plan_ay,plan_az,plan_ux,plan_uy,plan_uz,plan_tx,plan_ty,plan_tz,plan_wx,plan_wy,plan_wz,plan_mass,plan_fuel,plan_core_thrust,plan_landing_thrust,plan_isp,plan_centre,reference_px,reference_py,reference_pz,reference_vx,reference_vy,reference_vz,terminal_clearance_mask,plan_crossrange_x,plan_crossrange_y,plan_crossrange_z\n");
+    Csv=TEXT("time_s,phase,x_m,y_m,base_altitude_m,vx_mps,vy_mps,vz_mps,tilt_deg,target_error_m,throttle,engines,arm_closure,mass_kg,propellant_kg,density_kgm3,q_pa,mach,heading_error_deg,fin_xp_deg,fin_xm_deg,fin_ym_deg,thrust_n,predicted_miss_m,lug_error_m,terminal_replan,terminal_feasible,terminal_horizon_s,terminal_thrust_rejections,terminal_attitude_rejections,terminal_clearance_rejections,terminal_fuel_rejections,plan_px,plan_py,plan_pz,plan_vx,plan_vy,plan_vz,plan_ax,plan_ay,plan_az,plan_ux,plan_uy,plan_uz,plan_tx,plan_ty,plan_tz,plan_wx,plan_wy,plan_wz,plan_mass,plan_fuel,plan_core_thrust,plan_landing_thrust,plan_isp,plan_centre,reference_px,reference_py,reference_pz,reference_vx,reference_vy,reference_vz,terminal_clearance_mask,plan_crossrange_x,plan_crossrange_y,plan_crossrange_z,solver_sample_time_s,solver_x_m,solver_y_m,solver_z_m,solver_vx_mps,solver_vy_mps,solver_vz_mps\n");
 }
 
 void ASuperHeavyRecoveryDirector::RecordFlightCsvSample()
@@ -190,5 +198,10 @@ void ASuperHeavyRecoveryDirector::RecordFlightCsvSample()
         Csv+=FString::Printf(TEXT(",%.9f,%.9f,%.9f"),V.X,V.Y,V.Z);
     Csv+=FString::Printf(TEXT(",%.9f,%.9f,%.9f,%.9f,%.9f,%.9f"),I.MassKg,I.FuelKg,I.CoreThrustN,I.LandingThrustN,I.IspS,I.CentreFromBaseM);
     const FVector RP=GuidanceState.TerminalReferenceM,RV=GuidanceState.TerminalReferenceVelocityMps;
-    Csv+=FString::Printf(TEXT(",%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%u,%.6f,%.6f,%.6f\n"),RP.X,RP.Y,RP.Z,RV.X,RV.Y,RV.Z,GuidanceState.TerminalCandidate.ClearanceReasons,P.CrossrangeCorrectionM.X,P.CrossrangeCorrectionM.Y,P.CrossrangeCorrectionM.Z);
+    Csv+=FString::Printf(TEXT(",%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%u,%.6f,%.6f,%.6f"),RP.X,RP.Y,RP.Z,RV.X,RV.Y,RV.Z,GuidanceState.TerminalCandidate.ClearanceReasons,P.CrossrangeCorrectionM.X,P.CrossrangeCorrectionM.Y,P.CrossrangeCorrectionM.Z);
+    // Pair physical kinematics with their incoming solver time, not the later
+    // actuator endpoint or the interpolated render transform.
+    const auto& B=DynamicsState.Body;
+    Csv+=FString::Printf(TEXT(",%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f\n"),
+        GuidanceState.SampleTimeS,B.OriginM.X,B.OriginM.Y,B.OriginM.Z,B.VelocityMps.X,B.VelocityMps.Y,B.VelocityMps.Z);
 }

@@ -13,13 +13,10 @@ void ASuperHeavyRecoveryDirector::OnVehicleContact(UPrimitiveComponent* HitCompo
         // not the cylindrical hull or a side hit. Both supports are independent.
         const FVector Local=Body->GetComponentQuat().UnrotateVector(Hit.ImpactPoint/100-BasePositionM);
         const FVector Plus=Local-RuntimeProfile->CatchLugPlusM,Minus=Local-RuntimeProfile->CatchLugMinusM;
-        const auto AtFitting=[](const FVector& P){return FMath::Abs(P.X)<0.9 && FMath::Abs(P.Y)<0.8 && FMath::Abs(P.Z)<0.5;};
-        if(AtFitting(Plus) || AtFitting(Minus))
+        if(RecoveryContactGeometry::AtFitting(Plus) || RecoveryContactGeometry::AtFitting(Minus))
         {
-            LastSupportContact[Side]=MissionTime;
-            SupportImpulseNs[Side]+=NormalImpulse.Size()/100.;
-            if(!EverSupportContact[Side]) UE_LOG(LogTemp,Display,TEXT("RAIL_CONTACT side=%d t=%.3f local=%s impulse=%.2f"),Side,MissionTime,*Local.ToString(),NormalImpulse.Size()/100.);
-            EverSupportContact[Side]=true;
+            // Support state and loads come directly from the solver manifold.
+            // Game-frame notifications remain diagnostic for structural hits.
             return;
         }
     }

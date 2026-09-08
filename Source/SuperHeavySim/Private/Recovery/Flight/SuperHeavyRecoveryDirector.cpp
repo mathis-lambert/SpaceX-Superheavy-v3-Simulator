@@ -188,7 +188,7 @@ void ASuperHeavyRecoveryDirector::SelectScenario(int32 Index)
     LandingBurnSeconds=0; BoostbackSeconds=0; FinControlSeconds=0; PeakDownrangeM=0; PeakSpeedMps=0;
     bUnpoweredViolation=false; GridFinAnglesDeg=FVector::ZeroVector; AeroForceN=FVector::ZeroVector;
     bContactShutdown=false;SupportContactCount=0;SupportImpulseNs=FVector2D::ZeroVector;
-    LastSupportContact[0]=LastSupportContact[1]=-100;EverSupportContact[0]=EverSupportContact[1]=false;
+    EverSupportContact[0]=EverSupportContact[1]=false;
     StructuralContactCount=0;
     GridFinAuthority=0; PredictedMissM=0; TimeToImpactS=0; PredictedImpactM=FVector::ZeroVector;
     ResetPhysicalActuators();
@@ -275,7 +275,6 @@ void ASuperHeavyRecoveryDirector::Tick(float DeltaSeconds)
         SetFlightCommand(FVector::ZeroVector,Body->GetUpVector());
     }
     SubmitDynamicsCommand();
-    TickUpperStage(Dt);
 
     SampleClock+=Dt;
     if(SampleClock>=0.1 && !bResultWritten)

@@ -5,6 +5,7 @@
 #include "Recovery/Flight/SuperHeavyRecoveryProfile.h"
 #include "Recovery/Flight/RecoveryActuators.h"
 #include "Recovery/Flight/RecoveryGuidanceModel.h"
+#include "Recovery/Flight/RecoveryUpperStageModel.h"
 #include "Recovery/Flight/RecoveryFlightPhase.h"
 #include "Recovery/Flight/RecoveryFlightInspection.h"
 #include "Recovery/Flight/RecoveryLaunchSequence.h"
@@ -93,6 +94,7 @@ public:
     UPrimitiveComponent* GetBody() const { return Body; }
     const FRecoveryDynamicsState& GetDynamicsState() const { return DynamicsState; }
     const FRecoveryGuidanceState& GetGuidanceState() const { return GuidanceState; }
+    const FRecoveryUpperStageState& GetUpperStageState() const { return UpperStageState; }
     FVector GetMassCentreCm() const;
     UPrimitiveComponent* GetUpperStageBody() const;
     FTransform GetUpperStageBaseTransform() const;
@@ -131,6 +133,7 @@ private:
     TArray<FRecoveryEngineState> Engines;
     UPROPERTY(VisibleAnywhere) TObjectPtr<URecoveryPhysicsComponent> PhysicsModel;
     FRecoveryDynamicsState DynamicsState;
+    FRecoveryUpperStageState UpperStageState;
     FRecoveryGuidanceState GuidanceState;
     FRecoveryGuidanceConfiguration GuidanceConfiguration;
     int32 ConsumedGuidanceEvents=0;
@@ -155,7 +158,6 @@ private:
     UPROPERTY(Transient) TObjectPtr<ACameraActor> Camera;
     UPROPERTY(Transient) TArray<TObjectPtr<UBoxComponent>> CatchColliders;
     UFUNCTION() void OnVehicleContact(UPrimitiveComponent* HitComponent,AActor* OtherActor,UPrimitiveComponent* OtherComponent,FVector NormalImpulse,const FHitResult& Hit);
-    double LastSupportContact[2]={-100,-100};
     bool EverSupportContact[2]={false,false};
     int32 StructuralContactCount=0;
     FString ContactFixture;
@@ -185,7 +187,6 @@ private:
     void ResetPhysicalActuators();
     void ReleaseLaunchHoldDown();
     void SeparateUpperStage();
-    void TickUpperStage(double Dt);
     void PrepareGroundCommand();
     void SetPhase(ERecoveryPhase NewPhase, const FString& Message);
     void RecordPhase(ERecoveryPhase NewPhase,const FString& Message,double TimeS,double EventAltitudeM,double EventMassKg);

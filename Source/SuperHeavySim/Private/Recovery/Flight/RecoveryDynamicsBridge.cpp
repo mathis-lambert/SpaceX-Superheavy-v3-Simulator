@@ -2,6 +2,7 @@
 #include "Recovery/Flight/RecoveryPhysicsComponent.h"
 #include "Recovery/Flight/SuperHeavyLaunchTower.h"
 #include "Components/PrimitiveComponent.h"
+#include "Components/BoxComponent.h"
 #include "Recovery/Shared/FlightGeometry.h"
 
 void ASuperHeavyRecoveryDirector::InitializeDynamics()
@@ -15,7 +16,9 @@ void ASuperHeavyRecoveryDirector::InitializeDynamics()
     Configuration.TowerWorldM=Tower->GetActorLocation()/100.;
     GuidanceConfiguration=Configuration;
     GuidanceState=FRecoveryGuidanceState();ConsumedGuidanceEvents=0;
-    PhysicsModel->InitializeMission(Configuration,Engines,PropellantKg,RcsPropellantKg,MissionGeneration);
+    UpperStageState=FRecoveryUpperStageState();
+    PhysicsModel->InitializeMission(Configuration,Engines,PropellantKg,RcsPropellantKg,
+        URecoveryPhysicsComponent::BuildUpperStageConfiguration(*RuntimeProfile),MissionGeneration);
     AppliedForces.Reset();
     DynamicsCommand=FRecoveryDynamicsCommand();
     UpdateNavigation();PrepareGroundCommand();SubmitDynamicsCommand();
@@ -26,7 +29,6 @@ void ASuperHeavyRecoveryDirector::SubmitDynamicsCommand()
     DynamicsCommand.Phase=Phase;DynamicsCommand.EngineCount=ActiveEngines;
     DynamicsCommand.bSeparated=bSeparated;DynamicsCommand.bContactShutdown=bContactShutdown;
     DynamicsCommand.Experiment=Experiment;
-    DynamicsCommand.SupportContactCount=SupportContactCount;
     DynamicsCommand.bExternalFlightFixture=!ContactFixture.IsEmpty();
     DynamicsCommand.HeadingWorld=Tower->GetActorQuat().RotateVector(FRotator(0,RuntimeProfile->CaptureHeadingDeg,0).Vector());
     if(Phase>=ERecoveryPhase::Captured)
@@ -34,13 +36,24 @@ void ASuperHeavyRecoveryDirector::SubmitDynamicsCommand()
         DynamicsCommand.EngineCount=0;
         DynamicsCommand.ThrustAccelerationMps2=FVector::ZeroVector;
     }
-    PhysicsModel->Submit(*Body,DynamicsCommand);
+    PhysicsModel->Submit(*Body,bSeparated?UpperStageBody.Get():nullptr,*Tower->LeftRail,*Tower->RightRail,DynamicsCommand);
 }
 
 void ASuperHeavyRecoveryDirector::ConsumeDynamicsState()
 {
-    if(!PhysicsModel->Consume(DynamicsState,GuidanceState))return;
+    if(!PhysicsModel->Consume(DynamicsState,GuidanceState,UpperStageState))return;
+    UpperStagePropellantKg=UpperStageState.PropellantKg;UpperStageThrustN=UpperStageState.ThrustN;
+    UpperStageFuelConsumedKg=UpperStageState.FuelConsumedKg;
+    if(UpperStageState.bSeparated)
+    {
+        SeparationMassKg=UpperStageState.SeparationMassKg;
+        SeparationVelocityErrorMps=UpperStageState.SeparationVelocityErrorMps;
+        SeparationMomentumRelativeError=UpperStageState.SeparationMomentumRelativeError;
+        SeparationAngularMomentumRelativeError=UpperStageState.SeparationAngularMomentumRelativeError;
+    }
     const auto& S=DynamicsState;
+    SupportContactCount=S.RailSupport.Count();SupportImpulseNs=S.RailSupport.ImpulseNs;
+    EverSupportContact[0]=(S.RailSupport.EverMask&1)!=0;EverSupportContact[1]=(S.RailSupport.EverMask&2)!=0;
     // Compatibility with the authored HUD/Blueprint properties is a read-only
     // projection. No consumer writes actuator or tank state back to the solver.
     MassKg=S.Mass.MassKg;PropellantKg=S.PropellantKg;RcsPropellantKg=S.RcsPropellantKg;

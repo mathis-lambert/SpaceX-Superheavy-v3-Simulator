@@ -1,6 +1,16 @@
-# Validation — 8 September 2026
+# Validation — 9 September 2026
 
-## Current wave: front approach through the tower opening
+## Current wave: fixed physical clock and solver contact observations
+
+[Fixed-clock evidence](Validation/FIXED_PHYSICS_CLOCK.md) records the 120 Hz
+booster/Starship integration, atomic mechanical separation and support observation
+directly from Chaos. Twenty model tests, three unpowered contact fixtures, nine
+flight scenarios, 59/144 FPS runs and repeated 200 ms display stalls pass.
+The 120/240/480 Hz runs expose unresolved whole-return timestep sensitivity;
+requirement 72 remains open. The user has frozen new feature work for an initial
+Windows alpha release.
+
+## Previous wave: front approach through the tower opening
 
 [Front approach evidence](Validation/FRONT_APPROACH.md) records the revised
 boostback/entry target, terminal lateral alignment and continuous audit of the

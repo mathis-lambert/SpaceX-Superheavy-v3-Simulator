@@ -5,19 +5,13 @@
 #include "Components/BoxComponent.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 
-namespace
-{
-    constexpr double StageBaseHeightM=71.02;
-    constexpr double StageCentreAboveBaseM=25.;
-}
-
 UPrimitiveComponent* ASuperHeavyRecoveryDirector::GetUpperStageBody() const { return UpperStageBody; }
 
 FTransform ASuperHeavyRecoveryDirector::GetUpperStageBaseTransform() const
 {
     if(bSeparated && UpperStageBody)
-        return FTransform(UpperStageBody->GetComponentQuat(),UpperStageBody->GetComponentLocation()-UpperStageBody->GetUpVector()*StageCentreAboveBaseM*100);
-    return Body?FTransform(Body->GetComponentQuat(),FlightGeometry::BoosterBaseCm(*Body)+Body->GetUpVector()*StageBaseHeightM*100):FTransform::Identity;
+        return FTransform(UpperStageBody->GetComponentQuat(),UpperStageBody->GetComponentLocation()-UpperStageBody->GetUpVector()*FlightGeometry::UpperStageCentreFromBaseM*100);
+    return Body?FTransform(Body->GetComponentQuat(),FlightGeometry::BoosterBaseCm(*Body)+Body->GetUpVector()*FlightGeometry::UpperStageBaseHeightM*100):FTransform::Identity;
 }
 
 void ASuperHeavyRecoveryDirector::ResetPhysicalActuators()
@@ -76,72 +70,18 @@ void ASuperHeavyRecoveryDirector::ReleaseLaunchHoldDown()
 void ASuperHeavyRecoveryDirector::SeparateUpperStage()
 {
     if(bSeparated || !Body || !UpperStageBody)return;
+    // Allocate/activate the proxy on the game thread. The solver initializes
+    // both separated bodies atomically before their first independent step.
     const FTransform StageBase=GetUpperStageBaseTransform();
-    const FVector StageCentre=StageBase.GetLocation()+StageBase.GetRotation().GetUpVector()*StageCentreAboveBaseM*100;
-    const FVector AngularVelocity=Body->GetPhysicsAngularVelocityInRadians();
-    const auto BeforeMass=RecoveryMass::Booster(*RuntimeProfile,PropellantKg,RcsPropellantKg,true);
-    const FVector BeforeCentre=BasePositionM+Body->GetUpVector()*BeforeMass.CentreFromBaseM;
-    const FVector PointVelocity=Body->GetPhysicsLinearVelocity()+FVector::CrossProduct(AngularVelocity,StageCentre-BeforeCentre*100.);
-    const FVector BeforeMomentum=Body->GetPhysicsLinearVelocity()/100.*MassKg;
-    const FQuat Q=Body->GetComponentQuat();
-    const FVector OmegaBody=Q.UnrotateVector(AngularVelocity);
-    const FVector BeforeAngularMomentum=Q.RotateVector(BeforeMass.InertiaKgM2*OmegaBody);
-    const auto BoosterMass=RecoveryMass::Booster(*RuntimeProfile,PropellantKg,RcsPropellantKg,false);
-    const FVector BoosterCentre=(BasePositionM+Body->GetUpVector()*BoosterMass.CentreFromBaseM)*100;
-    const FVector BoosterPointVelocity=Body->GetPhysicsLinearVelocity()+FVector::CrossProduct(AngularVelocity,BoosterCentre-BeforeCentre*100.);
-    // This is the initial state of the newly independent body. There is no kick
-    // or later pose writer: upper-stage engine forces create relative motion.
+    const FVector StageCentre=StageBase.GetLocation()+StageBase.GetRotation().GetUpVector()*FlightGeometry::UpperStageCentreFromBaseM*100.;
     UpperStageBody->SetWorldLocationAndRotation(StageCentre,StageBase.GetRotation(),false,nullptr,ETeleportType::TeleportPhysics);
     UpperStageBody->SetMassOverrideInKg(NAME_None,RuntimeProfile->UpperStageMassKg,true);
     UpperStageBody->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     UpperStageBody->SetSimulatePhysics(true);UpperStageBody->SetEnableGravity(true);
     UpperStageBody->BodyInstance.SetGyroscopicTorqueEnabled(true);
-    RecoveryMass::Apply(*UpperStageBody,RecoveryMass::UpperStage(RuntimeProfile->UpperStageMassKg),StageCentreAboveBaseM);
-    UpperStageBody->SetPhysicsLinearVelocity(PointVelocity);
-    UpperStageBody->SetPhysicsAngularVelocityInRadians(AngularVelocity);
-    SeparationVelocityErrorMps=(UpperStageBody->GetPhysicsLinearVelocity()-PointVelocity).Size()/100.;
-    bSeparated=true;UpdateMass();SeparationMassKg=MassKg;
-    // Transport the same rigid-stack velocity field to the two new centres of
-    // mass. This is a separation initial condition, never a guidance correction.
-    Body->SetPhysicsLinearVelocity(BoosterPointVelocity);
-    const FVector BoosterMomentum=Body->GetPhysicsLinearVelocity()/100.*MassKg;
-    const FVector ShipMomentum=UpperStageBody->GetPhysicsLinearVelocity()/100.*RuntimeProfile->UpperStageMassKg;
-    const FVector AfterAngularMomentum=Q.RotateVector((BoosterMass.InertiaKgM2+RecoveryMass::UpperStage(RuntimeProfile->UpperStageMassKg).InertiaKgM2)*OmegaBody)+
-        FVector::CrossProduct(BoosterCentre/100.-BeforeCentre,BoosterMomentum)+
-        FVector::CrossProduct(StageCentre/100.-BeforeCentre,ShipMomentum);
-    SeparationMomentumRelativeError=(BoosterMomentum+ShipMomentum-BeforeMomentum).Size()/FMath::Max(1.,BeforeMomentum.Size());
-    SeparationAngularMomentumRelativeError=(AfterAngularMomentum-BeforeAngularMomentum).Size()/FMath::Max(1.,BeforeAngularMomentum.Size());
-}
-
-void ASuperHeavyRecoveryDirector::TickUpperStage(double Dt)
-{
-    if(!bSeparated || !UpperStageBody || !UpperStageBody->IsSimulatingPhysics())return;
-    const FVector Position=UpperStageBody->GetComponentLocation();
-    const double Height=FlightGeometry::AltitudeM(Position);
-    const auto Air=RecoveryAtmosphere::Sample(Height,RuntimeProfile->SeaLevelTemperatureOffsetK);
-    const FVector Velocity=UpperStageBody->GetPhysicsLinearVelocity()/100.;
-    const FVector Relative=Velocity-WindAt(Height);
-    const FVector Local=UpperStageBody->GetComponentQuat().UnrotateVector(Relative);
-    const double Speed=FMath::Max(1.,Relative.Size());
-    const double Q=.5*Air.Density*Relative.SizeSquared();
-    const FVector Drag=-Q*64*.6*Relative/Speed;
-    const FVector Side=UpperStageBody->GetComponentQuat().RotateVector(-Q*450*FVector(Local.X,Local.Y,0)/Speed);
-    UpperStageBody->AddForce((Drag+Side)*100);
-    const double Target=UpperStagePropellantKg>0 ? 6*RuntimeProfile->UpperStageEngineThrustN : 0.;
-    UpperStageThrustN=FMath::Lerp(UpperStageThrustN,Target,1-FMath::Exp(-Dt/.4));
-    UpperStageThrustN=RecoveryActuators::FuelLimitedThrust(UpperStageThrustN,UpperStagePropellantKg,RuntimeProfile->UpperStageIspS,Dt);
-    const double Used=UpperStageThrustN/(RuntimeProfile->UpperStageIspS*RecoveryAtmosphere::G0)*Dt;
-    UpperStagePropellantKg=FMath::Max(0.,UpperStagePropellantKg-Used);UpperStageFuelConsumedKg+=Used;
-    const double Mass=RuntimeProfile->UpperStageDryMassKg+UpperStagePropellantKg;
-    RecoveryMass::Apply(*UpperStageBody,RecoveryMass::UpperStage(Mass),StageCentreAboveBaseM);
-    const FVector RadialDown=(FlightGeometry::EarthCenterCm()-Position).GetSafeNormal();
-    UpperStageBody->AddForce((RadialDown*Air.Gravity-FVector(0,0,GetWorld()->GetGravityZ()/100.))*Mass*100);
-    const FTransform StageBase=GetUpperStageBaseTransform();
-    // Symmetric sea-level and vacuum groups; fixed directions preserve angular
-    // momentum in vacuum. Orbital GNC and tank inertias are separate work items.
-    for(const FVector& PositionM:FlightGeometry::UpperStageNozzlePositionsM())
-    {
-        const FVector Nozzle=StageBase.TransformPosition(PositionM*100);
-        UpperStageBody->AddForceAtLocation(UpperStageBody->GetUpVector()*(UpperStageThrustN/6.)*100,Nozzle);
-    }
+    RecoveryMass::Apply(*UpperStageBody,RecoveryMass::UpperStage(RuntimeProfile->UpperStageMassKg),FlightGeometry::UpperStageCentreFromBaseM);
+    bSeparated=true;
+    // Publish in this same external frame so proxy creation and its initial
+    // conditions reach the solver together, including TG_PostPhysics delivery.
+    SubmitDynamicsCommand();
 }

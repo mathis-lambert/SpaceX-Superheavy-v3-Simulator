@@ -4,6 +4,7 @@
 #include "Recovery/Flight/RecoveryFlightInspection.h"
 #include "Recovery/Flight/RecoveryMassProperties.h"
 #include "Recovery/Flight/RecoveryPropulsionModel.h"
+#include "Recovery/Flight/RecoveryRailSupport.h"
 
 /** Immutable numeric configuration copied from the authored mission profile. */
 struct FRecoveryDynamicsConfiguration
@@ -52,6 +53,7 @@ struct FRecoveryDynamicsState
     TArray<FVector> ReactionForcesBodyN;
     TArray<FRecoveryForceSample> Forces;
     FRecoveryBodyKinematics Body;
+    FRecoveryRailSupport RailSupport;
     RecoveryMass::FProperties Mass;
     FVector GridFinAnglesDeg=FVector::ZeroVector,AeroForceN=FVector::ZeroVector;
     FVector EngineForceBodyN=FVector::ZeroVector,EngineMomentBodyNm=FVector::ZeroVector,RcsMomentBodyNm=FVector::ZeroVector;

@@ -9,6 +9,9 @@
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
 #include "Misc/FileHelper.h"
+#include "Misc/App.h"
+#include "Misc/CoreDelegates.h"
+#include "HAL/IConsoleManager.h"
 #include "PhysicsEngine/PhysicsSettings.h"
 #include "Serialization/JsonSerializer.h"
 
@@ -36,6 +39,9 @@ void URecoveryPhysicsAuditComponent::BeginPlay()
 {
     Super::BeginPlay();
     bEnabled=FParse::Param(FCommandLine::Get(),TEXT("RecoveryPhysicsAudit"));
+    bJitterClock=bEnabled && FApp::UseFixedTimeStep() && FParse::Param(FCommandLine::Get(),TEXT("RecoveryJitterClock"));
+    OriginalFixedDeltaS=FApp::GetFixedDeltaTime();
+    if(bJitterClock)DisplayClockHandle=FCoreDelegates::OnBeginFrame.AddUObject(this,&URecoveryPhysicsAuditComponent::AdvanceDisplayClock);
     SetComponentTickEnabled(bEnabled);
     if(bEnabled)
         if(auto* Scene=GetWorld()->GetPhysicsScene())
@@ -54,8 +60,25 @@ void URecoveryPhysicsAuditComponent::TickComponent(float Dt,ELevelTick Type,FAct
     ConsumePhysicsSteps();
 }
 
+void URecoveryPhysicsAuditComponent::AdvanceDisplayClock()
+{
+    // Run before the engine updates its clock. Component tasks inherit a time
+    // context in UE 5.8; changing that context did not change subsequent frames.
+    constexpr double Pattern[]={1./144,1./59,1./30,1./144,.2,1./60};
+    FApp::SetFixedDeltaTime(Pattern[FramePatternIndex++%UE_ARRAY_COUNT(Pattern)]);
+}
+
 void URecoveryPhysicsAuditComponent::EndPlay(const EEndPlayReason::Type Reason)
 {
+    if(bJitterClock)
+    {
+        FCoreDelegates::OnBeginFrame.Remove(DisplayClockHandle);
+        FApp::SetFixedDeltaTime(OriginalFixedDeltaS);
+        // Restore the root engine time context too, if another world follows.
+        const auto Restore=MakeShared<FDelegateHandle>();
+        *Restore=FCoreDelegates::OnBeginFrame.AddLambda([Restore,Delta=OriginalFixedDeltaS]()
+        {FApp::SetFixedDeltaTime(Delta);FCoreDelegates::OnBeginFrame.Remove(*Restore);});
+    }
     if(bEnabled)
     {
         ConsumePhysicsSteps();
@@ -70,7 +93,7 @@ void URecoveryPhysicsAuditComponent::EndPlay(const EEndPlayReason::Type Reason)
             Result->SetNumberField(TEXT("mean_s"),Steps.Count?Steps.TotalS/Steps.Count:0.);
             return Result;
         };
-        Report->SetNumberField(TEXT("schema_version"),3);
+        Report->SetNumberField(TEXT("schema_version"),4);
         Report->SetBoolField(TEXT("measured"),PhysicsSteps.Count>0 && GameSteps.Count>0);
         Report->SetObjectField(TEXT("solver_steps"),Stats(PhysicsSteps));
         Report->SetObjectField(TEXT("game_steps"),Stats(GameSteps));
@@ -86,13 +109,24 @@ void URecoveryPhysicsAuditComponent::EndPlay(const EEndPlayReason::Type Reason)
             Flight.Count=Guidance.Steps;Flight.TotalS=Guidance.ElapsedS;
             Flight.MinimumS=Guidance.MinimumStepS;Flight.MaximumS=Guidance.MaximumStepS;
             Report->SetObjectField(TEXT("flight_guidance_steps"),Stats(Flight));
+            const auto& Stage=Director->GetUpperStageState();
+            FRecoveryStepStatistics Upper;
+            Upper.Count=Stage.Steps;Upper.TotalS=Stage.ElapsedS;
+            Upper.MinimumS=Stage.MinimumStepS;Upper.MaximumS=Stage.MaximumStepS;
+            Report->SetObjectField(TEXT("upper_stage_steps"),Stats(Upper));
             Report->SetNumberField(TEXT("mission_generation"),Director->GetMissionGeneration());
         }
         Report->SetStringField(TEXT("scope"),TEXT("Session cadence, including ground preparation; proof of scheduling only, not flight convergence."));
         const auto* Settings=UPhysicsSettings::Get();
         Report->SetBoolField(TEXT("substepping"),Settings->bSubstepping);
         Report->SetBoolField(TEXT("async_physics"),Settings->bTickPhysicsAsync);
+        Report->SetBoolField(TEXT("jitter_clock"),bJitterClock);
+        Report->SetNumberField(TEXT("configured_frame_cap_s"),Settings->MaxPhysicsDeltaTime);
+        if(const auto* Block=IConsoleManager::Get().FindConsoleVariable(TEXT("p.AsyncPhysicsBlockMode")))
+            Report->SetNumberField(TEXT("async_block_mode"),Block->GetInt());
         Report->SetNumberField(TEXT("configured_max_substep_s"),Settings->MaxSubstepDeltaTime);
+        if(auto* Scene=GetWorld()->GetPhysicsScene())
+            Report->SetNumberField(TEXT("configured_fixed_step_s"),Scene->GetSolver()->GetAsyncDeltaTime());
         FString Name=TEXT("Physics");FParse::Value(FCommandLine::Get(),TEXT("RecoveryReportName="),Name);
         const FString Directory=FPaths::ProjectSavedDir()/TEXT("Recovery");
         IFileManager::Get().MakeDirectory(*Directory,true);

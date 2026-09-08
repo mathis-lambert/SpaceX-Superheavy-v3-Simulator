@@ -4,6 +4,10 @@ Baseline: `1527ddc`. This program preserves the complete user request of 8 Septe
 
 Unchecked means pending, in progress, or insufficiently verified. A requirement is checked only when its implementation and acceptance evidence are linked here. A successful nominal capture does not prove aerodynamics, robustness, rendering quality, or the remaining requirements. Prototype passes and partial implementations remain unchecked.
 
+Release freeze, 9 September 2026: the user requested an initial Windows alpha,
+final bug fixes and commits. New programme work is deferred to a future release;
+unchecked requirements are not part of the alpha completion claim.
+
 ## Acceptance rules
 
 - Performance: record resolution, hardware, reconstruction, weather, camera, full-mission phase, frame-time percentiles, GPU passes and resident memory. Compare matching moving views before/after. Do not count lowering visible quality as an optimization.
@@ -104,8 +108,9 @@ Unchecked means pending, in progress, or insufficiently verified. A requirement 
 ## Fundamental physics (71–84)
 
 - [ ] 71. Decouple guidance and actuator cadence from rendering.
-- Current work: booster guidance, navigation, ballistic prediction, attitude, propulsion, RCS, fins and mass now run at every Chaos step. Ground/mechanical event timing, fixed solver cadence and upper-stage integration remain open; see [solver guidance evidence](Validation/SOLVER_GUIDANCE.md).
+- Current work: booster and upper-stage loads, guidance and fitting/rail sensing use fixed 120 Hz Chaos steps, including measured 200 ms display stalls. Ground-event delivery and the kinematic tower still involve game frames; see [fixed-clock evidence](Validation/FIXED_PHYSICS_CLOCK.md).
 - [ ] 72. Verify numerical convergence as the integration step decreases.
+- 120/240/480 Hz testing shows ascent convergence and decreasing support drift, but recovery position/velocity differences do not decrease. The analyzer correctly reports failure; the item remains open.
 - [ ] 73. Extend mass, momentum and energy conservation checks.
 - [ ] 74. Add Earth rotation and a consistent atmospheric reference frame.
 - [ ] 75. Extend the documented high-altitude atmosphere model.

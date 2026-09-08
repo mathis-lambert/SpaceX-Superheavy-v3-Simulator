@@ -30,7 +30,12 @@ public:
     void RecordGameStep(double Dt) { if(bEnabled)GameSteps.Add(Dt); }
 private:
     void ConsumePhysicsSteps();
+    void AdvanceDisplayClock();
+    FDelegateHandle DisplayClockHandle;
     FRecoveryCadenceCallback* Callback=nullptr;
     bool bEnabled=false;
+    bool bJitterClock=false;
+    double OriginalFixedDeltaS=0;
+    uint64 FramePatternIndex=0;
     FRecoveryStepStatistics PhysicsSteps,GameSteps;
 };

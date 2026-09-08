@@ -7,6 +7,8 @@ namespace FlightGeometry
 {
     inline constexpr double CentimetersPerMeter = 100.;
     inline constexpr double BoosterBaseOffsetM = 35.44;
+    inline constexpr double UpperStageBaseHeightM = 71.02;
+    inline constexpr double UpperStageCentreFromBaseM = 25.;
     inline constexpr double EarthRadiusM = 6371000.;
 
     inline FVector BoosterBaseCm(const UPrimitiveComponent& Body)
