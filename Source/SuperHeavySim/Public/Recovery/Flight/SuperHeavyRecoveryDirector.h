@@ -110,6 +110,7 @@ public:
     double GetDelugeFlow() const { return DelugeFlow; }
     uint32 GetMissionGeneration() const { return MissionGeneration; }
     bool HasMissionResult() const { return bResultWritten; }
+    double GetPhaseTimeS() const { return PhaseTime; }
     bool IsLaunchMountReleased() const { return bLaunchHoldReleased; }
     const USuperHeavyRecoveryProfile* GetProfile() const { return RuntimeProfile; }
 private:
@@ -166,8 +167,7 @@ private:
     FVector CameraBlendOffset=FVector::ZeroVector, CameraLookBlend=FVector::ZeroVector, LastCameraFocus=FVector::ZeroVector;
     FString Csv;
     FString ReportName;
-    bool bReviewScreenshots=false;
-    ERecoveryPhase LastReviewPhase=ERecoveryPhase::Aborted;
+    bool bChaseReview=false,bEarthReview=false,bIgnoreCameraInput=false;
     TArray<FVector2D> Trace;
     void InitializeVehicle();
     void InitializePhysicalActuators();

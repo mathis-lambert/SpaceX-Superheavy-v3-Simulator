@@ -28,12 +28,21 @@ void URecoveryDiagnosticsComponent::BeginPlay()
     bGroundAudit=FParse::Param(FCommandLine::Get(),TEXT("RecoveryGroundAudit"));
     bPerformanceAudit=FParse::Param(FCommandLine::Get(),TEXT("RecoveryPerformanceAudit"));
     bEndProfileOnResult=FParse::Param(FCommandLine::Get(),TEXT("RecoveryEndProfileOnResult"));
-    SetComponentTickEnabled(bEnabled || bGroundAudit || bPerformanceAudit);
+    bCloudReview=FParse::Param(FCommandLine::Get(),TEXT("RecoveryCloudReview"));
+    bVisualReview=bCloudReview || FParse::Param(FCommandLine::Get(),TEXT("RecoveryReview"));
+    if(bVisualReview)
+    {
+        FString Name;FParse::Value(FCommandLine::Get(),TEXT("RecoveryReviewName="),Name);
+        VisualReviewDirectory=FPaths::ProjectSavedDir()/TEXT("Recovery/Review")/FPaths::MakeValidFileName(Name);
+        IFileManager::Get().MakeDirectory(*VisualReviewDirectory,true);
+    }
+    SetComponentTickEnabled(bEnabled || bGroundAudit || bPerformanceAudit || bVisualReview);
 }
 void URecoveryDiagnosticsComponent::TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn)
 {
     Super::TickComponent(Dt,Type,Fn);
     if(bPerformanceAudit)RecordPerformanceFrame();
+    if(bVisualReview)TickVisualReview();
     if(bGroundAudit){TickGroundAudit(Dt);if(!bEnabled)return;}
     if(!bEnabled)return;
     const auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());
@@ -87,6 +96,7 @@ void URecoveryDiagnosticsComponent::TickComponent(float Dt,ELevelTick Type,FActo
 }
 void URecoveryDiagnosticsComponent::EndPlay(const EEndPlayReason::Type Reason)
 {
+    if(bVisualReview)WriteVisualReview();
     if(bEnabled)
     {
         auto R=MakeShared<FJsonObject>();

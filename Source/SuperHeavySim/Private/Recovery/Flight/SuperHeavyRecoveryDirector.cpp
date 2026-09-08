@@ -33,7 +33,6 @@
 #include "Serialization/JsonSerializer.h"
 #include "UObject/ConstructorHelpers.h"
 #include "PhysicsEngine/PhysicsSettings.h"
-#include "UnrealClient.h"
 
 #include "Recovery/Shared/RecoveryLog.h"
 
@@ -61,7 +60,11 @@ void ASuperHeavyRecoveryDirector::BeginPlay()
     if(!Tower) for(TActorIterator<ASuperHeavyLaunchTower> It(GetWorld()); It; ++It) { Tower=*It; break; }
     if(!Tower) Tower=GetWorld()->SpawnActor<ASuperHeavyLaunchTower>();
     bExitAfterTest=FParse::Param(FCommandLine::Get(),TEXT("RecoveryAutoExit"));
-    bReviewScreenshots=FParse::Param(FCommandLine::Get(),TEXT("RecoveryReview"));
+    bChaseReview=FParse::Param(FCommandLine::Get(),TEXT("RecoveryChaseReview"));
+    bEarthReview=FParse::Param(FCommandLine::Get(),TEXT("RecoveryEarthReview"));
+    bIgnoreCameraInput=FParse::Param(FCommandLine::Get(),TEXT("RecoveryReview")) ||
+        FParse::Param(FCommandLine::Get(),TEXT("RecoveryCloudReview")) ||
+        FParse::Param(FCommandLine::Get(),TEXT("RecoveryVaporReview"));
     FParse::Value(FCommandLine::Get(),TEXT("RecoveryReportName="),ReportName);
     FString TestScenario;
     if(FParse::Value(FCommandLine::Get(),TEXT("RecoveryScenario="),TestScenario))
@@ -281,25 +284,6 @@ void ASuperHeavyRecoveryDirector::Tick(float DeltaSeconds)
     }
     TickUpperStage(Dt);
 
-    if(bReviewScreenshots && MissionTime>=210 && MissionTime-Dt<210 && FParse::Param(FCommandLine::Get(),TEXT("RecoveryEarthReview")))
-        FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/TEXT("Recovery/Review/EarthHorizon.png"),false,false);
-    if(bReviewScreenshots && Phase==ERecoveryPhase::Ascent)
-    {
-        for(const double ShotTime : {16.,28.,45.,70.,100.})
-            if(PhaseTime>=ShotTime && PhaseTime-Dt<ShotTime)
-            {
-                const FString ReviewDir=FPaths::ProjectSavedDir()/TEXT("Recovery/Review");
-                IFileManager::Get().MakeDirectory(*ReviewDir,true);
-                FScreenshotRequest::RequestScreenshot(ReviewDir/FString::Printf(TEXT("VFX_Ascent_%03d.png"),int(ShotTime)),false,false);
-            }
-    }
-    if(bReviewScreenshots && LastReviewPhase!=Phase && PhaseTime>(Phase==ERecoveryPhase::Ascent ? 8 : 1))
-    {
-        LastReviewPhase=Phase;
-        const FString ReviewDir=FPaths::ProjectSavedDir()/TEXT("Recovery/Review");
-        IFileManager::Get().MakeDirectory(*ReviewDir,true);
-        FScreenshotRequest::RequestScreenshot(ReviewDir/GetPhaseLabel()+TEXT(".png"),true,false);
-    }
     SampleClock+=Dt;
     if(SampleClock>=0.1 && !bResultWritten)
     {

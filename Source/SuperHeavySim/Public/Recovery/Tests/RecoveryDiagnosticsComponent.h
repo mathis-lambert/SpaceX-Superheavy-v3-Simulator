@@ -3,6 +3,8 @@
 #include "Components/ActorComponent.h"
 #include "RecoveryDiagnosticsComponent.generated.h"
 
+class FJsonValue;
+
 /** Opt-in measurements taken after the engine has cached the current camera POV. */
 UCLASS()
 class URecoveryDiagnosticsComponent : public UActorComponent
@@ -14,6 +16,13 @@ public:
     virtual void TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn) override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 private:
+    void TickVisualReview();
+    void WriteVisualReview();
+    bool bVisualReview=false,bCloudReview=false;
+    FString VisualReviewDirectory;
+    double PreviousReviewTime=-DBL_MAX;
+    int32 LastReviewPhase=-1;
+    TArray<TSharedPtr<FJsonValue>> ReviewFrames;
     void RecordPerformanceFrame();
     bool bPerformanceAudit=false;
     bool bEndProfileOnResult=false,bProfileStopRequested=false;

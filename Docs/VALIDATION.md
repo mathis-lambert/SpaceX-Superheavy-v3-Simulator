@@ -1,6 +1,14 @@
 # Validation — 8 September 2026
 
-## Current wave: controls, menus, condensation and cleanup
+## Current wave: launch conditioning and full-mission cloud evaluation
+
+See [ground and cloud validation](Validation/REALISM_GROUND_AND_CLOUDS.md) for the
+current optical correction, physical launch-abort evidence and full-flight timing.
+The older scene-presence checks below did not prove visible condensation; fresh
+home/day/night image inspection is the stronger evidence. The 150-requirement
+program tracks the remaining scope in [REALISM_PROGRAM.md](REALISM_PROGRAM.md).
+
+## Previous wave: controls, menus, condensation and cleanup
 
 Unreal 5.8.2 Development Editor build passes. Real input dispatch and Slate focus
 checks pass before launch and during ascent: the legacy F1/F2/F3, number and R/X

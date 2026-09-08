@@ -61,7 +61,7 @@ public:
         Text(D->AltitudeM>=1000?TEXT("KM"):TEXT("M"),332,BY+129,12,Grey);
         Line(405,BY+24,405,BY+152,Dim);
         const float CX=VW*.5f;const bool Counting=D->Phase==ERecoveryPhase::Countdown;
-        const int Sec=Counting?FMath::CeilToInt(D->GetLaunchSequence().RemainingS):FMath::FloorToInt(FMath::Abs(D->MissionTime));
+        const int Sec=Counting?FMath::CeilToInt(D->GetLaunchSequence().RemainingS):D->MissionTime<0?FMath::CeilToInt(-D->MissionTime):FMath::FloorToInt(D->MissionTime);
         Text(FString::Printf(TEXT("T%s%02d:%02d:%02d"),Counting || D->MissionTime<0?TEXT("-"):TEXT("+"),Sec/3600,(Sec/60)%60,Sec%60),CX-130,BY+30,35,White,true);
         Text(TEXT("STARBASE  /  RETURN TO LAUNCH SITE"),CX-139,BY+78,12,Grey,true);
         Text(Counting?D->GetLaunchSequence().Label():D->GetPhaseLabel(),CX-(Counting?145:100),BY+115,Counting?15:22,Status,true);
@@ -76,12 +76,12 @@ public:
         Circle(RX+270,BY+128,8,D->SupportContactCount==2?White:Grey,D->SupportContactCount==2?6.f:1.f);
         Text(FString::Printf(TEXT("%02d ENGINES   /   %.2f MN"),BurningEngines,TotalThrustN/1.e6),RX,BY+157,11,Grey,true);
         const float RailY=BY-22;static const TCHAR* Phases[]={TEXT("ASCENT"),TEXT("SEPARATION"),TEXT("BOOSTBACK"),TEXT("COAST"),TEXT("ENTRY"),TEXT("LANDING BURN"),TEXT("APPROACH"),TEXT("CAPTURE")};
-        const int Current=FMath::Clamp(int(D->LastFlightPhase)-2,0,7);const float Step=(VW-96)/8;
+        const int Current=D->IsLaunchMountReleased()?FMath::Clamp(int(D->LastFlightPhase)-2,0,7):-1;const float Step=(VW-96)/8;
         for(int I=0;I<8;++I){const float X=48+I*Step;Rect(X,RailY,Step-12,2,I<=Current?White:Dim);Text(Phases[I],X,RailY-22,10,I==Current?White:Grey);}
         Rect(28,24,245,43,FLinearColor(0,0,0,.4f));Text(TEXT("STARBASE / LIVE"),43,34,14,White,true);
         Rect(VW-385,24,357,58,FLinearColor(0,0,0,.5f));Text(D->GetCameraLabel(),VW-370,33,14,White);
         if(PC)Text(FString::Printf(TEXT("TAB  CAMERAS    ESC  MENU    %.2f× / %.2f×"),PC->EffectivePlaybackRate,PC->PlaybackRate),VW-370,61,10,Grey);
-        if(D->Phase>=ERecoveryPhase::LandingBurn)
+        if(D->IsLaunchMountReleased() && D->LastFlightPhase>=ERecoveryPhase::LandingBurn)
             Text(FString::Printf(TEXT("VZ %+.2f M/S    AXIS %.2f M    HEADING %.1f°"),D->VerticalSpeedMps,D->HorizontalErrorM,D->HeadingErrorDeg),48,BY-76,13,White);
         if(PC && PC->bForceOverlay)
         {

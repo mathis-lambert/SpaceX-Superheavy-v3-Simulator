@@ -6,8 +6,6 @@
 #include "Camera/CameraComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "GameFramework/PlayerController.h"
-#include "Misc/CommandLine.h"
-#include "Misc/Parse.h"
 #include "EngineUtils.h"
 #include "Engine/ExponentialHeightFog.h"
 #include "Components/ExponentialHeightFogComponent.h"
@@ -38,9 +36,9 @@ FString ASuperHeavyRecoveryDirector::GetCameraLabel() const
 void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
 {
     if(!Camera || !Body || !Tower) return;
-    if(FParse::Param(FCommandLine::Get(),TEXT("RecoveryChaseReview")))CameraMode=6;
+    if(bChaseReview)CameraMode=6;
     // Optional unattended visual review; normal play never changes camera by phase.
-    if(FParse::Param(FCommandLine::Get(),TEXT("RecoveryEarthReview")))
+    if(bEarthReview)
         CameraMode=MissionTime>=195 && MissionTime<230?12:0;
     if(bFrontendView)
     {
@@ -56,7 +54,7 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
     auto* PC=GetWorld()->GetFirstPlayerController();
     const auto* Settings=Cast<ARecoveryPlayerController>(PC);
     const bool AcceptInput=PC && (!Settings || !Settings->IsMenuOpen()) &&
-        !FParse::Param(FCommandLine::Get(),TEXT("RecoveryVaporReview"));
+        !bIgnoreCameraInput;
     const double Sensitivity=Settings?Settings->MouseSensitivity:0.65;
     const bool Changed=LastCameraMode!=CameraMode;
     if(Changed) { OrbitYaw=0;OrbitPitch=0;CinematicAzimuth=-0.85;bOrbitManuallyAdjusted=false; }

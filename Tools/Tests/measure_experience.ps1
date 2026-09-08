@@ -16,6 +16,8 @@ $prefs=Join-Path $root 'Saved/Config/WindowsEditor/GameUserSettings.ini'
 $before=if(Test-Path -LiteralPath $prefs){[IO.File]::ReadAllBytes($prefs)}else{$null}
 $saved=Join-Path $root 'Saved/Recovery'
 $null=New-Item -ItemType Directory -Force -Path $saved
+. (Join-Path $root 'Tools/Shared/validation_evidence.ps1')
+Write-RecoveryBuildEvidence -Root $root -Destination "$saved/$Prefix-source.json" -EngineRoot $EngineRoot
 try {
   foreach($mode in $Modes){
     $label=@('Native','TSRQuality','DLAA','DLSSQuality','DLSSBalanced')[$mode]
@@ -38,6 +40,8 @@ try {
         if(!(Select-String -Quiet -Path "$root/Saved/Recovery/$name.log" -Pattern "RECOVERY_RECONSTRUCTION mode=$mode ")){throw "Requested reconstruction unavailable: $label"}
         $csv=Get-ChildItem "$root/Saved/Profiling/CSV" -Filter '*.csv' | Where-Object LastWriteTime -ge $started | Sort-Object LastWriteTime -Descending | Select-Object -First 1
         if(!$csv){throw "No fresh CSV: $($case.Name)"}
+        $columns=(Get-Content -LiteralPath $csv.FullName -TotalCount 1).Split(',')
+        if('GPU/VolumetricCloud' -notin $columns){throw "Cloud GPU pass missing; this capture cannot measure cloud performance: $name"}
         $destination="$root/Saved/Recovery/$name.csv"
         Copy-Item -LiteralPath $csv.FullName -Destination $destination
         Write-Host $destination

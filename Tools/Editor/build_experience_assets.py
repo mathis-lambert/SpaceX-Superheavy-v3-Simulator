@@ -29,6 +29,8 @@ save(cloud)
 instancepath='/Game/Starbase/Materials/MI_CloudFlight'
 instance=u.load_asset(instancepath) if A.does_asset_exist(instancepath) else A.duplicate_asset(original.get_path_name(),instancepath)
 E.set_material_instance_parent(instance,cloud);A.save_loaded_asset(instance,False)
+from unreal_clouds import configure_storm_feature
+configure_storm_feature(cloud,instance)
 report['cloud_material']=instancepath
 
 # Retain registered aerial detail during suborbital flight; only fade it when

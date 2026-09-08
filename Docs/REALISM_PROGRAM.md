@@ -16,10 +16,10 @@ Unchecked means pending, in progress, or insufficiently verified. A requirement 
 ## Performance (1–12)
 
 - [ ] 1. Optimize volumetric clouds, currently the largest measured GPU pass.
-- [ ] 2. Profile ignition, cloud crossings, entry and capture throughout a full mission.
-- [ ] 3. Track slow-frame percentiles and stalls in addition to average FPS.
+- [x] 2. Profile ignition, cloud crossings, entry and capture throughout a full mission. [Evidence](Validation/REALISM_GROUND_AND_CLOUDS.md#full-mission-timing).
+- [x] 3. Track slow-frame percentiles and stalls in addition to average FPS. [Evidence](Validation/REALISM_GROUND_AND_CLOUDS.md#full-mission-timing); independent analyzer fixtures and raw captures retain startup and tail frames.
 - [ ] 4. Establish separate budgets for clouds, smoke, lighting, shadows, water and reconstruction.
-- [ ] 5. Measure actual resident video memory, including Earth textures.
+- [x] 5. Measure actual resident video memory, including Earth textures. [Evidence](Validation/REALISM_GROUND_AND_CLOUDS.md#full-mission-timing); local RHI memory and texture-streaming counters are separate. Camera-specific residency remains item 13.
 - [ ] 6. Progressively preload resources for upcoming views.
 - [ ] 7. Prepare shaders and PSOs before first visible use.
 - [ ] 8. Remove unnecessary shadow invalidations.
@@ -204,11 +204,11 @@ Unchecked means pending, in progress, or insufficiently verified. A requirement 
 
 ## Additional explicit requirements
 
-- [ ] A1. Visible, continuous propellant condensation on the home-screen rocket.
+- [x] A1. Visible, continuous propellant condensation on the home-screen rocket. [Day/night and home evidence](Validation/REALISM_GROUND_AND_CLOUDS.md#ground-sequence-and-condensation).
 - [ ] A2. A progressive countdown with meaningful real-world preparation activities and verified liftoff interlocks.
 - [ ] A3. Consult authoritative Unreal documentation and rendering literature for planet scale, rocket flames and high-quality smoke, with measured implementations.
 - [ ] A4. Maintain coherent Unreal architecture; remove unstable legacy paths and unnecessary compatibility instead of layering over them.
 
 ## Work log
 
-First implementation in progress: extracted ground launch sequencer, signed countdown, physical thrust verification, independent deluge flow, intermittent replenished vent flow, and vapor continuity when leaving home. Unit, rendered and complete-flight verification are required before accepting this work. Thermal tank preparation and visible moving clamps remain separate open requirements.
+Ground launch sequencing, physical thrust interlocks and condensation are implemented and tested. A full nominal rendered profile covers ignition through passive rail support. Paired moving captures are complete; reconstructed cloud mode 1 remains rejected after sampled edge artifacts. The mode-3 material now removes inactive storm calculations, with a completed timing run and partial visual review. [Current validation and limitations](Validation/REALISM_GROUND_AND_CLOUDS.md). Thermal tank preparation, electrical systems and moving clamps remain open, as do the unchecked requirements above.
