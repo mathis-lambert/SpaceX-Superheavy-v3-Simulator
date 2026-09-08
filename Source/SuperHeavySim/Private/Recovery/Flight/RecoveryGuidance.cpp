@@ -32,7 +32,7 @@
 #include "PhysicsEngine/PhysicsSettings.h"
 #include "UnrealClient.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogRecovery, Log, All);
+#include "Recovery/Shared/RecoveryLog.h"
 
 FVector ASuperHeavyRecoveryDirector::AttitudeTorque(const FVector& TargetUp,double Gain,double Damping) const
 {

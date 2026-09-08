@@ -25,11 +25,13 @@ void URecoveryDiagnosticsComponent::BeginPlay()
 {
     Super::BeginPlay();
     bEnabled=FParse::Param(FCommandLine::Get(),TEXT("RecoveryExperienceAudit"));
-    SetComponentTickEnabled(bEnabled);
+    bGroundAudit=FParse::Param(FCommandLine::Get(),TEXT("RecoveryGroundAudit"));
+    SetComponentTickEnabled(bEnabled || bGroundAudit);
 }
 void URecoveryDiagnosticsComponent::TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn)
 {
     Super::TickComponent(Dt,Type,Fn);
+    if(bGroundAudit){TickGroundAudit(Dt);if(!bEnabled)return;}
     const auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());
     const auto* PC=GetWorld()->GetFirstPlayerController();
     if(!D || !PC || !PC->PlayerCameraManager || !PC->GetViewTarget() || !D->GetBody())return;

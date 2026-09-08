@@ -162,7 +162,10 @@ void ARecoveryPlayerController::LaunchFlight()
 {
     if(auto* D=GetDirector())
     {
-        SetPause(false);D->SelectScenario(SelectedScenario);D->SetCameraMode(StartingCamera);
+        SetPause(false);
+        const FString ExpectedScenario=SelectedScenario==1?TEXT("Crosswind"):SelectedScenario==2?TEXT("Offset"):TEXT("Nominal");
+        if(D->Phase!=ERecoveryPhase::Ready || D->ScenarioName!=ExpectedScenario)D->SelectScenario(SelectedScenario);
+        D->SetCameraMode(StartingCamera);
         D->bShowTelemetry=bTelemetry;bAtHome=false;SetMenuVisible(false);D->StartMission();SavePreferences();
     }
 }

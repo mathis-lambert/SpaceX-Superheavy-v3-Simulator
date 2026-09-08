@@ -71,7 +71,7 @@ void ARecoveryPlayerController::TickControlsAudit()
         if(Index>=Keys.Num())
         {
             Check(AuditStage==10?TEXT("Ready keys never reset experiments"):TEXT("Flight keys never reset experiments"),D->GetExperiment().WindScale==2);
-            if(AuditStage==10){D->StartMission();AuditMissionTime=D->MissionTime;AuditDeadline=Now+17;AuditStage=12;return;}
+            if(AuditStage==10){D->StartMission();AuditMissionTime=D->MissionTime;AuditDeadline=Now+FRecoveryLaunchSequence::DurationS+17;AuditStage=12;return;}
             AuditStage=13;return;
         }
         const FKey Key=Keys[Index];

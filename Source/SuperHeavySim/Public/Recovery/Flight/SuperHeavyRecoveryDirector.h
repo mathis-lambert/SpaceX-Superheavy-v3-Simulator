@@ -5,6 +5,7 @@
 #include "Recovery/Flight/SuperHeavyRecoveryProfile.h"
 #include "Recovery/Flight/RecoveryActuators.h"
 #include "Recovery/Flight/RecoveryFlightInspection.h"
+#include "Recovery/Flight/RecoveryLaunchSequence.h"
 #include "Recovery/Presentation/RecoveryCameraTracking.h"
 #include "SuperHeavyRecoveryDirector.generated.h"
 class UExponentialHeightFogComponent;
@@ -105,6 +106,9 @@ public:
     const TArray<FVector>& GetReactionForcesBodyN() const { return ReactionForcesBodyN; }
     double GetUpperStageThrustN() const { return UpperStageThrustN; }
     FVector2D GetConditioningFlowKgS() const { return ConditioningFlowKgS; }
+    const FRecoveryLaunchSequence& GetLaunchSequence() const { return LaunchSequence; }
+    double GetDelugeFlow() const { return DelugeFlow; }
+    uint32 GetMissionGeneration() const { return MissionGeneration; }
     bool IsLaunchMountReleased() const { return bLaunchHoldReleased; }
     const USuperHeavyRecoveryProfile* GetProfile() const { return RuntimeProfile; }
 private:
@@ -127,6 +131,10 @@ private:
     bool bLaunchHoldReleased=false;
     FVector2D ConditioningFlowKgS=FVector2D::ZeroVector;
     double ConditioningVentedKg=0,GroundSupplyKg=0;
+    FRecoveryLaunchSequence LaunchSequence;
+    uint32 MissionGeneration=0;
+    double GroundClockS=0,DelugeFlow=0;
+    void TickLaunchSequence(double Dt);
     UPROPERTY(Transient) TObjectPtr<ACameraActor> Camera;
     UPROPERTY(Transient) TArray<TObjectPtr<UBoxComponent>> CatchColliders;
     UFUNCTION() void OnVehicleContact(UPrimitiveComponent* HitComponent,AActor* OtherActor,UPrimitiveComponent* OtherComponent,FVector NormalImpulse,const FHitResult& Hit);

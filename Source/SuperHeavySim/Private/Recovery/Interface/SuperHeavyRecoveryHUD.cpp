@@ -60,10 +60,11 @@ public:
         Text(D->AltitudeM>=1000?FString::Printf(TEXT("%06.2f"),D->AltitudeM/1000):FString::Printf(TEXT("%04.0f"),D->AltitudeM),202,BY+114,29,White,true);
         Text(D->AltitudeM>=1000?TEXT("KM"):TEXT("M"),332,BY+129,12,Grey);
         Line(405,BY+24,405,BY+152,Dim);
-        const float CX=VW*.5f;const int Sec=FMath::FloorToInt(D->MissionTime);
-        Text(FString::Printf(TEXT("T+%02d:%02d:%02d"),Sec/3600,(Sec/60)%60,Sec%60),CX-130,BY+30,35,White,true);
+        const float CX=VW*.5f;const bool Counting=D->Phase==ERecoveryPhase::Countdown;
+        const int Sec=Counting?FMath::CeilToInt(D->GetLaunchSequence().RemainingS):FMath::FloorToInt(FMath::Abs(D->MissionTime));
+        Text(FString::Printf(TEXT("T%s%02d:%02d:%02d"),Counting || D->MissionTime<0?TEXT("-"):TEXT("+"),Sec/3600,(Sec/60)%60,Sec%60),CX-130,BY+30,35,White,true);
         Text(TEXT("STARBASE  /  RETURN TO LAUNCH SITE"),CX-139,BY+78,12,Grey,true);
-        Text(D->GetPhaseLabel(),CX-100,BY+115,22,Status,true);
+        Text(Counting?D->GetLaunchSequence().Label():D->GetPhaseLabel(),CX-(Counting?145:100),BY+115,Counting?15:22,Status,true);
         const float RX=VW-470;
         Text(TEXT("MASS"),RX,BY+22,13,Grey,true);Text(FString::Printf(TEXT("%7.1f T"),D->MassKg/1000),RX+150,BY+16,24,White,true);
         Text(TEXT("PROPELLANT"),RX,BY+67,13,Grey,true);

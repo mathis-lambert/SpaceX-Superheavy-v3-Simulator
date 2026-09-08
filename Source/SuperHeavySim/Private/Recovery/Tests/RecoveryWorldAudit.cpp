@@ -37,7 +37,7 @@ void ARecoveryPlayerController::TickWorldAudit()
     case 9: TimeOfDay=17.9f;ReturnHome();AuditDeadline=Now+6;break;
     case 10: bAtHome=false;SetMenuVisible(false);D->SetCameraMode(4);AuditDeadline=Now+4;break;
     case 11: Shot(TEXT("Conditioning.png"));AuditDeadline=Now+2;break;
-    case 12: LaunchFlight();D->SetCameraMode(0);AuditDeadline=Now+13;break;
+    case 12: LaunchFlight();D->SetCameraMode(0);AuditDeadline=Now+FRecoveryLaunchSequence::DurationS+13;break;
     case 13: bForceOverlay=true;Shot(TEXT("ForceVectors.png"));AuditDeadline=Now+2;break;
     case 14:
         AuditPendingCamera=D->GetEngines().IndexOfByPredicate([](const FRecoveryEngineState& E){return E.bCentral;});

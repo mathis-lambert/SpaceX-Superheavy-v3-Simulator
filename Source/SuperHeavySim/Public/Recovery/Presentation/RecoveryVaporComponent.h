@@ -39,7 +39,8 @@ private:
     double FlowTime=0;
     TArray<FBillow> Billows;
     int32 Next=0;
-    double SpawnClock=0, LastMissionTime=0;
+    double SpawnClock=0, DelugeSpawnClock=0;
+    uint32 LastMissionGeneration=0;
     FVector LastTrailPosition=FVector::ZeroVector;
     void Build();
     void UpdateCryogenic(float Dt,const ASuperHeavyRecoveryDirector& Director);

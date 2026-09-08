@@ -41,7 +41,7 @@ void ARecoveryPlayerController::TickInterfaceAudit()
         Shot(TEXT("Home.png"));AuditDeadline=Now+2;break;
     case 2: Menu->ShowPage(1);Shot(TEXT("SimulationSettings.png"));AuditDeadline=Now+2;break;
     case 3: Menu->ShowPage(2);Shot(TEXT("Graphics.png"));AuditDeadline=Now+2;break;
-    case 4: LaunchFlight();D->SetCameraMode(0);AuditDeadline=Now+14;break;
+    case 4: LaunchFlight();D->SetCameraMode(0);AuditDeadline=Now+FRecoveryLaunchSequence::DurationS+14;break;
     case 5:
         Check(TEXT("Launch starts flight and hides menu"),!bMenuOpen && !bAtHome && D->Phase==ERecoveryPhase::Ascent && D->MissionTime>5);
         Check(TEXT("33 engine lights illuminate ascent"),LitCount(true)==33);

@@ -69,9 +69,9 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
     if(!D || !D->GetBody())return;
     if(Volumes.IsEmpty())Build();
     if(Volumes.IsEmpty())return;
-    if(D->MissionTime<LastMissionTime)
+    if(D->GetMissionGeneration()!=LastMissionGeneration)
         for(int I=0;I<Billows.Num();++I){Billows[I].Age=100;Volumes[I]->SetVisibility(false);}
-    LastMissionTime=D->MissionTime;
+    LastMissionGeneration=D->GetMissionGeneration();
     const FVector Base=FlightGeometry::BoosterBaseCm(*D->GetBody());
     const FVector Up=D->GetBody()->GetUpVector();
     const FVector Wind=D->GetWindVelocityMps(30)*100;
@@ -94,15 +94,19 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
         }
         LastTrailPosition=Base;
     }
-    else if(D->ActiveEngines>0 && D->Throttle>.05 && D->AltitudeM<170 && SpawnClock>.25)
+    // Ground water flow and engine exhaust coexist with the cryogenic vents.
+    // Separate clocks prevent active conditioning from suppressing the deluge.
+    DelugeSpawnClock+=Dt;
+    if(D->GetDelugeFlow()>.05 && D->AltitudeM<220 && DelugeSpawnClock>.25)
     {
-        SpawnClock=FMath::Fmod(SpawnClock,.25);
-        const int32 Count=D->ActiveEngines>=13?5:3;
+        DelugeSpawnClock=FMath::Fmod(DelugeSpawnClock,.25);
+        const bool Hot=D->ActiveEngines>0 && D->Throttle>.05;
+        const int32 Count=Hot && D->ActiveEngines>=13?5:3;
         for(int32 J=0;J<Count;++J)
         {
             const double Angle=Next*2.399963;
             const FVector Radial(FMath::Cos(Angle),FMath::Sin(Angle),0);
-            Spawn(FVector(Base.X,Base.Y,250)+Radial*(650+J*130),Radial*(2100+J*240)+Wind+FVector(0,0,110+J*55),22,3+J*.6f,2.2f,3.f,EVaporKind::Deluge);
+            Spawn(FVector(Base.X,Base.Y,250)+Radial*(650+J*130),Radial*((Hot?2100:600)+J*140)+Wind+FVector(0,0,Hot?110+J*55:30),Hot?22:9,Hot?3+J*.6f:1.1,Hot?2.2f:.8f,(Hot?3.f:.6f)*D->GetDelugeFlow(),EVaporKind::Deluge);
         }
     }
     else if(D->Phase==ERecoveryPhase::Ascent && D->AltitudeM>170 && D->AltitudeM<12000 && (Base-LastTrailPosition).Size()>6500)

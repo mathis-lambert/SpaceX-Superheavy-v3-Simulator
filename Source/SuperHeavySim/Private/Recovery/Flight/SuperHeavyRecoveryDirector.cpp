@@ -35,7 +35,7 @@
 #include "PhysicsEngine/PhysicsSettings.h"
 #include "UnrealClient.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogRecovery, Log, All);
+#include "Recovery/Shared/RecoveryLog.h"
 
 ASuperHeavyRecoveryDirector::ASuperHeavyRecoveryDirector()
 {
@@ -183,6 +183,8 @@ void ASuperHeavyRecoveryDirector::SelectScenario(int32 Index)
     StructuralContactCount=0;SettledContactSeconds=0;bApproachAligned=false;
     GridFinAuthority=0; PredictedMissM=0; TimeToImpactS=0; PredictedImpactM=FVector::ZeroVector;
     ResetPhysicalActuators();
+    ++MissionGeneration;
+    LaunchSequence=FRecoveryLaunchSequence();GroundClockS=0;DelugeFlow=0;
     Experiment=FRecoveryFlightExperiment();LandingEngineGroup=13;ChaseTracking=FRecoveryChaseTracking();
     SetPhase(ERecoveryPhase::Ready,TEXT("RTLS / estimated mass & aero / SPACE to launch"));
     UpdateNavigation();
@@ -197,13 +199,15 @@ void ASuperHeavyRecoveryDirector::StartMission()
         Tower->CaptureOffsetM.Z+Tower->ArmContactHeightAboveBaseM>Tower->TowerHeightM-2 ||
         RuntimeProfile->ApogeeM<Tower->TowerHeightM+30)
     { SetPhase(ERecoveryPhase::Aborted,TEXT("Tower requires unit scale, vertical rails and 30 m of flight clearance")); WriteResult(false,StatusMessage); return; }
-    SetPhase(ERecoveryPhase::Countdown,TEXT("Flight computer armed / tower clear"));
+    LaunchSequence.Start();MissionTime=-LaunchSequence.RemainingS;
+    SetPhase(ERecoveryPhase::Countdown,LaunchSequence.Label());
 }
 
 void ASuperHeavyRecoveryDirector::RestartMission() { SelectScenario(ScenarioIndex); StartMission(); }
 void ASuperHeavyRecoveryDirector::AbortMission()
 {
     if(Phase==ERecoveryPhase::Captured || Phase==ERecoveryPhase::Aborted) return;
+    LaunchSequence.Abort();
     SetPhase(ERecoveryPhase::Aborted,TEXT("Operator abort / engines shut down"));
     ActualThrustN=0; ActiveEngines=0; Throttle=0; WriteResult(false,StatusMessage);
 }
@@ -236,19 +240,18 @@ void ASuperHeavyRecoveryDirector::Tick(float DeltaSeconds)
     AppliedForces.Reset(48);
     AppliedForceFrame=Body->GetComponentTransform();
     PhaseTime+=Dt;
-    if(Phase!=ERecoveryPhase::Ready && !bResultWritten) MissionTime+=Dt;
+    if(Phase!=ERecoveryPhase::Ready && Phase!=ERecoveryPhase::Countdown && !bResultWritten) MissionTime+=Dt;
     UpdateNavigation();
+    if(Phase==ERecoveryPhase::Countdown) TickLaunchSequence(Dt);
     TickGroundConditioning(Dt);
     PeakAltitudeM=FMath::Max(PeakAltitudeM,AltitudeM); PeakTiltDeg=FMath::Max(PeakTiltDeg,TiltDeg);
     if(Phase==ERecoveryPhase::Ready || Phase==ERecoveryPhase::Countdown)
     {
         ApplyAerodynamics(FVector::UpVector,Dt);
-        if(Phase==ERecoveryPhase::Countdown && PhaseTime>=3.)
+        if(Phase==ERecoveryPhase::Countdown && LaunchSequence.IsIgnitionCommanded())
         {
             ActiveEngines=33;
             ApplyThrust(Body->GetUpVector()*(33*RuntimeProfile->EngineThrustN/MassKg),Body->GetUpVector(),Dt);
-            if(PhaseTime>=4. && ActualThrustN>MassKg*Gravity*1.1)
-            { ReleaseLaunchHoldDown();SetPhase(ERecoveryPhase::Ascent,TEXT("Mount released / 33 engines / physical liftoff")); }
         }
     }
     else if(Phase>=ERecoveryPhase::Ascent && Phase<=ERecoveryPhase::Capture)

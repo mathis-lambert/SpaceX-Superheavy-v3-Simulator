@@ -14,6 +14,12 @@ public:
     virtual void TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn) override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 private:
+    void TickGroundAudit(float Dt);
+    bool bGroundAudit=false,bGroundPassed=true;
+    int32 GroundStage=0;
+    double GroundAuditClock=0,GroundHoldTime=0;
+    uint32 GroundGeneration=0;
+    TArray<FString> GroundChecks;
     int64 Samples=0,HighAltitudeSamples=0;
     int32 PeakVolumes=0,PlumeLights=0,SiteLights=0,PlayingAudio=0;
     int32 StarshipFrames=0,StarshipPlumes=0,SiteDetailInstances=0;
