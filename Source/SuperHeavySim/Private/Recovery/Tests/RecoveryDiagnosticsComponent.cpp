@@ -26,12 +26,16 @@ void URecoveryDiagnosticsComponent::BeginPlay()
     Super::BeginPlay();
     bEnabled=FParse::Param(FCommandLine::Get(),TEXT("RecoveryExperienceAudit"));
     bGroundAudit=FParse::Param(FCommandLine::Get(),TEXT("RecoveryGroundAudit"));
-    SetComponentTickEnabled(bEnabled || bGroundAudit);
+    bPerformanceAudit=FParse::Param(FCommandLine::Get(),TEXT("RecoveryPerformanceAudit"));
+    bEndProfileOnResult=FParse::Param(FCommandLine::Get(),TEXT("RecoveryEndProfileOnResult"));
+    SetComponentTickEnabled(bEnabled || bGroundAudit || bPerformanceAudit);
 }
 void URecoveryDiagnosticsComponent::TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn)
 {
     Super::TickComponent(Dt,Type,Fn);
+    if(bPerformanceAudit)RecordPerformanceFrame();
     if(bGroundAudit){TickGroundAudit(Dt);if(!bEnabled)return;}
+    if(!bEnabled)return;
     const auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());
     const auto* PC=GetWorld()->GetFirstPlayerController();
     if(!D || !PC || !PC->PlayerCameraManager || !PC->GetViewTarget() || !D->GetBody())return;

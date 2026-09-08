@@ -9,14 +9,30 @@
 #include "Serialization/JsonSerializer.h"
 #include "UnrealClient.h"
 #include "HAL/IConsoleManager.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "ShaderCompiler.h"
 
 void URecoveryDiagnosticsComponent::TickGroundAudit(float Dt)
 {
+    const double Now=FPlatformTime::Seconds();
+    if(GroundWallStartS==0)GroundWallStartS=Now;
+    const bool HomeOnly=FParse::Param(FCommandLine::Get(),TEXT("RecoveryGroundHomeOnly"));
+    const bool HotAbort=FParse::Param(FCommandLine::Get(),TEXT("RecoveryGroundHotAbort"));
+    if(Now-GroundWallStartS>300)
+    {
+        UE_LOG(LogTemp,Error,TEXT("GROUND_AUDIT_TIMEOUT stage=%d"),GroundStage);
+        FPlatformMisc::RequestExitWithStatus(false,1);return;
+    }
+    // A freshly authored material can compile after BeginPlay. A screenshot of
+    // its fallback is not evidence of the final participating-medium renderer.
+    if(GroundStage==0 && GShaderCompilingManager && GShaderCompilingManager->IsCompiling())
+    {GroundAuditClock=0;return;}
     auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());
     auto* PC=Cast<ARecoveryPlayerController>(GetWorld()->GetFirstPlayerController());
     if(!D || !PC || !D->GetBody())return;
     GroundAuditClock+=Dt;
-    const FString Dir=FPaths::ProjectSavedDir()/TEXT("Recovery/GroundAudit");
+    const FString Dir=FPaths::ProjectSavedDir()/(HotAbort?TEXT("Recovery/GroundAbortAudit"):TEXT("Recovery/GroundAudit"));
     IFileManager::Get().MakeDirectory(*Dir,true);
     const auto Check=[&](const TCHAR* Label,bool Pass)
     {bGroundPassed&=Pass;GroundChecks.Add(FString(Label)+(Pass?TEXT(": PASS"):TEXT(": FAIL")));UE_LOG(LogTemp,Display,TEXT("GROUND_CHECK %s %d"),Label,Pass);};
@@ -37,6 +53,8 @@ void URecoveryDiagnosticsComponent::TickGroundAudit(float Dt)
         }
         GroundGeneration=D->GetMissionGeneration();Shot(TEXT("Home.png"));GroundStage=1;
     }
+    else if(GroundStage==1 && HomeOnly && GroundAuditClock>11)
+    {GroundStage=7;GroundAuditClock=0;}
     else if(GroundStage==1 && GroundAuditClock>11)
     {PC->StartingCamera=0;PC->bTelemetry=true;PC->LaunchFlight();GroundStage=2;}
     else if(GroundStage==2 && Remaining<55)
@@ -58,7 +76,16 @@ void URecoveryDiagnosticsComponent::TickGroundAudit(float Dt)
     else if(GroundStage==5 && Remaining<1 && D->Phase==ERecoveryPhase::Countdown)
     {
         Check(TEXT("Engines build physical thrust while the mount is attached"),D->Throttle>.9 && D->ActiveEngines==33 && !D->IsLaunchMountReleased());
-        Shot(TEXT("Ignition.png"));GroundStage=6;
+        Shot(TEXT("Ignition.png"));GroundStage=6;GroundAuditClock=0;
+        if(HotAbort)D->SetFailedEngine(0);
+    }
+    else if(GroundStage==6 && HotAbort && GroundAuditClock>3)
+    {
+        double MeasuredThrust=0;for(const auto& Engine:D->GetEngines())MeasuredThrust+=Engine.ThrustN;
+        Check(TEXT("Post-ignition engine failure aborts before mount release"),D->Phase==ERecoveryPhase::Aborted && !D->IsLaunchMountReleased());
+        Check(TEXT("All physical engine valves close after the ignition abort"),MeasuredThrust<1 && D->Throttle<.001);
+        Check(TEXT("Deluge continues cooling the aborted vehicle"),D->GetDelugeFlow()>.9);
+        Shot(TEXT("SafeShutdown.png"));GroundStage=7;GroundAuditClock=0;
     }
     else if(GroundStage==6 && D->Phase==ERecoveryPhase::Ascent && D->MissionTime>6)
     {
@@ -68,6 +95,8 @@ void URecoveryDiagnosticsComponent::TickGroundAudit(float Dt)
     else if(GroundStage==7 && GroundAuditClock>2)
     {
         auto R=MakeShared<FJsonObject>();R->SetBoolField(TEXT("success"),bGroundPassed);
+        R->SetStringField(TEXT("scope"),HomeOnly?TEXT("home volume plumbing"):HotAbort?TEXT("post-ignition physical abort"):TEXT("terminal ground sequence"));
+        R->SetBoolField(TEXT("visual_review_required"),true);
         TArray<TSharedPtr<FJsonValue>> Checks;for(const auto& C:GroundChecks)Checks.Add(MakeShared<FJsonValueString>(C));R->SetArrayField(TEXT("checks"),Checks);
         FString Json;FJsonSerializer::Serialize(R,TJsonWriterFactory<>::Create(&Json));FFileHelper::SaveStringToFile(Json,*(Dir/TEXT("result.json")));
         FPlatformMisc::RequestExitWithStatus(false,bGroundPassed?0:1);

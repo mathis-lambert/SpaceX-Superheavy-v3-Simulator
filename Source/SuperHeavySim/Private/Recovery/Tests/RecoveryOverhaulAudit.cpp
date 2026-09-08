@@ -39,7 +39,7 @@ void ARecoveryPlayerController::TickOverhaulAudit()
     case 9:Shot(TEXT("Dawn"));break;
     case 10:TimeOfDay=21;AuditDeadline=Now+5;break;
     case 11:Shot(TEXT("Night"));break;
-    case 12:TimeOfDay=17.9f;LaunchFlight();AuditDeadline=Now+12;break;
+    case 12:TimeOfDay=17.9f;LaunchFlight();AuditDeadline=Now+FRecoveryLaunchSequence::DurationS+12;break;
     case 13:
     {
         const auto* Vapor=D->FindComponentByClass<URecoveryVaporComponent>();
@@ -65,7 +65,7 @@ void ARecoveryPlayerController::TickOverhaulAudit()
     case 24:Shot(TEXT("AudioControls"));break;
     case 25:Menu->ShowPage(9);break;
     case 26:Shot(TEXT("MissionBriefing"));break;
-    case 27:TimeOfDay=21;LaunchFlight();AuditDeadline=Now+11;break;
+    case 27:TimeOfDay=21;LaunchFlight();AuditDeadline=Now+FRecoveryLaunchSequence::DurationS+11;break;
     case 28:Shot(TEXT("NightLiftoff"));SetPlaybackRate(.25f);break;
     case 29:
         Check(FMath::Abs(GetWorld()->GetWorldSettings()->GetEffectiveTimeDilation()-.25f)<.001f,TEXT("Interactive playback rate changes world simulation speed"));

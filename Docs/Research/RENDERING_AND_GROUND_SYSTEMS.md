@@ -20,3 +20,15 @@ The clock may hold before ignition when a known actuator fault is present. A fau
 ## Required evidence
 
 For the first ground change: cold-hold/resume and ignition-abort fixtures, a full rendered minute including home vapor and deluge, no duplicate ignition or reset across pause/input events, conservation with vent replenishment, and a complete physical recovery flight. Existing reports from the checkpoint are baseline evidence only.
+
+## Verified engine conventions and next experiments
+
+The installed UE 5.8 renderer provides stronger version-specific evidence than generic advice:
+
+- `HeterogeneousVolumes.cpp` defaults the maximum camera trace to 30,000 cm. The home camera is farther away. The project now permits 12 km, covering the remote observer while retaining bounded local volume intersections.
+- `HeterogeneousVolumesRayMarchingUtils.ush` integrates extinction against the local ray step. The condensation component now uses isotropic 50 cm voxels and converts estimated inverse-metre extinction by 0.5. Unequal axis scaling previously changed the relationship between optical depth and world distance. A temporary uniform-density probe confirmed the renderer and lighting path; it was removed after diagnosis.
+- `StreamingManagerTexture.cpp` emits the selected texture-streaming counters in MiB, despite their engine `MB` names. These represent individual streaming quantities, not total VRAM. The new analyzer also records the RHI local-memory counter and its budget separately.
+
+[Schlüter et al., Rendering Large Volume Datasets in Unreal Engine 5 (2025)](https://arxiv.org/abs/2504.07485) compares volume-texture, Niagara and sparse-volume approaches. Its chunk-boundary lighting problems reinforce the need to test adjoining volumes, not merely individual smoke assets. This is a scientific-visualization survey, not evidence that a particular rocket effect meets real-time quality or cost targets.
+
+Epic's cloud documentation also describes conservative density evaluation: an inexpensive bound can skip the expensive material only where cloud density is certainly zero. Inspect the existing engine-derived graph before adding duplicate logic. A reconstructed cloud mode is being measured against mode 3; opaque silhouettes and orbital horizon images remain required before changing the shipped setting.

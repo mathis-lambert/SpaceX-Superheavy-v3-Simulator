@@ -22,7 +22,7 @@ public:
     int32 GetCryogenicVolumeCount() const;
     UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Vapor",meta=(ClampMin="64",ClampMax="256")) int32 VolumeBudget=128;
 private:
-    enum class EVaporKind:uint8 { Cryogenic,Deluge,Trail };
+    enum class EVaporKind:uint8 { Deluge,Trail };
     struct FBillow
     {
         FVector Position=FVector::ZeroVector, Velocity=FVector::ZeroVector;
@@ -35,11 +35,12 @@ private:
     UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> Materials;
     UPROPERTY(Transient) TArray<TObjectPtr<UHeterogeneousVolumeComponent>> CryogenicVolumes;
     UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> CryogenicMaterials;
+    bool bCryogenicInitialized=false;
     FVector2D CryogenicStrength=FVector2D::ZeroVector;
     double FlowTime=0;
     TArray<FBillow> Billows;
     int32 Next=0;
-    double SpawnClock=0, DelugeSpawnClock=0;
+    double DelugeSpawnClock=0;
     uint32 LastMissionGeneration=0;
     FVector LastTrailPosition=FVector::ZeroVector;
     void Build();

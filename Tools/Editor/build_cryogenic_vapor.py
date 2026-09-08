@@ -19,6 +19,7 @@ side=vector(m,'Outward',(1,0,0,1))
 wind=vector(m,'Wind',(0,0,0,1))
 time=scalar(m,'FlowTime',0)
 strength=scalar(m,'FlowStrength',0)
+voxel=scalar(m,'MetersPerVoxel',.5)
 local=custom(m,{'P':p,'V':origin,'U':up,'O':side,'W':wind},'''
 float3 q=(P-V)*.01;
 float down=-dot(q,U.xyz);
@@ -28,13 +29,13 @@ q-=drift;
 float3 tangent=normalize(cross(U.xyz,O.xyz));
 return float3(dot(q,O.xyz),dot(q,tangent),down);
 ''')
-uv=custom(m,{'Q':local,'T':time},'return Q*float3(.21,.21,.16)+float3(0,0,-T*.46);')
+uv=custom(m,{'Q':local,'T':time},'return Q*float3(.07,.07,.065)+float3(0,0,-T*.1625);')
 n=sample(m,'/Game/Starbase/Textures/Effects/T_FlowNoise128',uv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
 fineuv=custom(m,{'UV':uv,'N':n},'return UV*3.07+(N.rgb-.5)*.44;')
 fine=sample(m,'/Game/Starbase/Textures/Effects/T_FlowNoise128',fineuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
 for node in (n,fine):
     prop(node,'mip_value_mode',u.TextureMipValueMode.TMVM_MIP_LEVEL);prop(node,'const_mip_value',0)
-d=custom(m,{'Q':local,'N':n,'F':fine,'S':strength},'''
+d=custom(m,{'Q':local,'N':n,'F':fine,'S':strength,'VoxelM':voxel},'''
 float depth=max(Q.z,0);
 float width=.65+depth*.16;
 // Detached, curling lobes follow the downward flow; density fades before bounds.
@@ -45,7 +46,10 @@ float tail=1-smoothstep(17,28,Q.z);
 float curls=smoothstep(.29,.67,N.r*.65+F.g*.35);
 // No condensation inside the cylindrical hull (vent is at its surface).
 float hull=smoothstep(-.18,.08,Q.x+Q.y*Q.y/9.3);
-return S*.12*envelope*top*tail*curls*hull/(1+depth*.07);
+// Estimated droplet extinction in inverse metres, converted to UE's local
+// voxel integration units. No emissive term: water scatters the scene lights.
+float extinctionM=1.8*S*envelope*top*tail*curls*hull/(1+depth*.07);
+return extinctionM*VoxelM;
 ''',u.CustomMaterialOutputType.CMOT_FLOAT1)
 connect(m,d,u.MaterialProperty.MP_SUBSURFACE_COLOR)
 connect(m,color(m,(.94,.965,.98)),u.MaterialProperty.MP_BASE_COLOR)

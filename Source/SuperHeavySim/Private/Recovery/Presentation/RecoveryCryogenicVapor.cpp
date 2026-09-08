@@ -2,6 +2,7 @@
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Shared/FlightGeometry.h"
 #include "Recovery/Shared/RecoveryAssets.h"
+#include "Recovery/Shared/RecoveryLog.h"
 #include "Components/HeterogeneousVolumeComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -11,22 +12,24 @@ int32 URecoveryVaporComponent::GetCryogenicVolumeCount() const
 
 void URecoveryVaporComponent::UpdateCryogenic(float Dt,const ASuperHeavyRecoveryDirector& D)
 {
-    if(CryogenicVolumes.IsEmpty())
+    if(!bCryogenicInitialized)
     {
+        bCryogenicInitialized=true;
         auto* Source=LoadObject<UMaterialInterface>(nullptr,RecoveryAssets::M_CryogenicVapor);
-        if(!Source)return;
+        if(!Source){UE_LOG(LogRecovery,Error,TEXT("Required condensation material is missing: %s"),RecoveryAssets::M_CryogenicVapor);return;}
         for(int I=0;I<2;++I)
         {
             auto* V=NewObject<UHeterogeneousVolumeComponent>(GetOwner(),FName(*FString::Printf(TEXT("CryogenicFlow_%d"),I)));
             auto* M=UMaterialInstanceDynamic::Create(Source,this);
             V->SetMobility(EComponentMobility::Movable);V->SetMaterial(0,M);
             V->SetVolumeResolution(FIntVector(48,48,128));V->bPivotAtCentroid=true;
-            V->StepFactor=1;V->ShadowStepFactor=2;V->LightingDownsampleFactor=2;
+            V->StepFactor=.5;V->ShadowStepFactor=1;V->LightingDownsampleFactor=2;
             V->SetCollisionEnabled(ECollisionEnabled::NoCollision);V->SetCastShadow(true);
             V->SetVisibility(false);V->RegisterComponent();GetOwner()->AddInstanceComponent(V);
             CryogenicVolumes.Add(V);CryogenicMaterials.Add(M);
         }
     }
+    if(CryogenicVolumes.IsEmpty())return;
     FlowTime+=Dt;
     const FVector2D Flow=D.GetConditioningFlowKgS();
     const FQuat Q=D.GetBody()->GetComponentQuat();
@@ -50,12 +53,18 @@ void URecoveryVaporComponent::UpdateCryogenic(float Dt,const ASuperHeavyRecovery
         const FVector LocalDrift=Q.UnrotateVector(Drift).GetAbs();
         const FVector Centre=Vent-Up*1350+Out*250+Drift*.5;
         V->SetWorldLocationAndRotation(Centre,Q);
-        // Heterogeneous component bounds are expressed in voxel dimensions.
-        V->SetWorldScale3D(FVector((2400+LocalDrift.X)/48,(2400+LocalDrift.Y)/48,(3200+LocalDrift.Z)/128));
+        // UE integrates extinction over the local voxel ray. Keep isotropic
+        // voxels and explicitly convert inverse metres to inverse local units;
+        // stretching each axis made opacity depend on view and wind direction.
+        constexpr double VoxelCm=50.;
+        const FVector Size=FVector(2400,2400,3200)+LocalDrift;
+        V->SetVolumeResolution(FIntVector(FMath::CeilToInt(Size.X/VoxelCm),FMath::CeilToInt(Size.Y/VoxelCm),FMath::CeilToInt(Size.Z/VoxelCm)));
+        V->SetWorldScale3D(FVector(VoxelCm));
         M->SetVectorParameterValue(TEXT("VentPosition"),Colour(Vent));
         M->SetVectorParameterValue(TEXT("Up"),Colour(Up));M->SetVectorParameterValue(TEXT("Outward"),Colour(Out));
         M->SetVectorParameterValue(TEXT("Wind"),Colour(Wind));
         M->SetScalarParameterValue(TEXT("FlowTime"),FlowTime);
         M->SetScalarParameterValue(TEXT("FlowStrength"),CryogenicStrength[I]);
+        M->SetScalarParameterValue(TEXT("MetersPerVoxel"),VoxelCm*.01);
     }
 }

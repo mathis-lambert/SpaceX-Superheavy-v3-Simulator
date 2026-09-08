@@ -42,7 +42,7 @@ void URecoveryVaporComponent::Spawn(const FVector& Position,const FVector& Veloc
     Billows[I].Kind=Kind;Billows[I].Seed=Next*.6180339f;
     Billows[I].FlowAxis=Velocity.GetSafeNormal(UE_SMALL_NUMBER,FVector::ForwardVector);
     const float Variation=.85f+.3f*FMath::Frac(Next*.381966f);
-    Billows[I].ShapeScale=Kind==EVaporKind::Cryogenic?FVector(2.4,.65,.7):Kind==EVaporKind::Deluge?FVector(1.65*Variation,1.05,.72/Variation):FVector(1.7,.85,1.);
+    Billows[I].ShapeScale=Kind==EVaporKind::Deluge?FVector(1.65*Variation,1.05,.72/Variation):FVector(1.7,.85,1.);
     Volumes[I]->SetVisibility(true);
 }
 
@@ -75,25 +75,8 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
     const FVector Base=FlightGeometry::BoosterBaseCm(*D->GetBody());
     const FVector Up=D->GetBody()->GetUpVector();
     const FVector Wind=D->GetWindVelocityMps(30)*100;
-    const FVector2D Flow=D->GetConditioningFlowKgS();
-    const FQuat Q=D->GetBody()->GetComponentQuat();
     UpdateCryogenic(Dt,*D);
-    SpawnClock+=Dt;
-    if((Flow.X+Flow.Y)>.02 && SpawnClock>.13)
-    {
-        SpawnClock=FMath::Fmod(SpawnClock,.13);
-        const auto& Positions=FlightGeometry::ConditioningVentPositionsM();
-        const auto& Directions=FlightGeometry::ConditioningVentDirections();
-        for(int I=0;I<2;++I)if(Flow[I]>.01)
-        {
-            const FVector Jet=Q.RotateVector(Directions[I]);
-            const double Strength=FMath::Sqrt(Flow[I]);
-            // Detailed condensation is a continuous heterogeneous volume.
-            // Retain this cheap fallback only if that material is unavailable.
-            if(CryogenicVolumes.IsEmpty())Spawn(Base+Q.RotateVector(Positions[I])*100,Wind*.15+Jet*85-Up*260,10,.7f,.48f,2.8f*Strength,EVaporKind::Cryogenic);
-        }
-        LastTrailPosition=Base;
-    }
+    if(D->AltitudeM<=170)LastTrailPosition=Base;
     // Ground water flow and engine exhaust coexist with the cryogenic vents.
     // Separate clocks prevent active conditioning from suppressing the deluge.
     DelugeSpawnClock+=Dt;
@@ -120,22 +103,10 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
         B.Age+=Dt;
         if(B.Age>=B.Life){Volumes[I]->SetVisibility(false);continue;}
         const FVector Eddy(FMath::Sin(B.Age*.71+B.Seed),FMath::Cos(B.Age*.53+B.Seed*2),FMath::Sin(B.Age*.43+B.Seed*3)*.45);
-        const double Buoyancy=B.Kind==EVaporKind::Cryogenic?-240*FMath::Exp(-B.Age/6):180*(1-FMath::Exp(-B.Age/4));
-        const FVector Ambient=Wind+Eddy*(B.Kind==EVaporKind::Cryogenic?75:150)+FVector(0,0,Buoyancy);
+        const double Buoyancy=180*(1-FMath::Exp(-B.Age/4));
+        const FVector Ambient=Wind+Eddy*150+FVector(0,0,Buoyancy);
         B.Velocity=FMath::Lerp(B.Velocity,Ambient,1-FMath::Exp(-Dt/(B.Kind==EVaporKind::Deluge?4.:1.7)));
         B.Position+=B.Velocity*Dt;
-        if(B.Kind==EVaporKind::Cryogenic)
-        {
-            // Rendering-only wall avoidance for dense, descending condensation.
-            // The actual gas exit momentum remains in the conditioning model.
-            FVector NearBody=Q.UnrotateVector(B.Position-Base);
-            if(NearBody.Z>0 && NearBody.Z<6500)
-            {
-                FVector Radial(NearBody.X,NearBody.Y,0);
-                if(Radial.Size()<480 && Radial.Size()>1)
-                {Radial=Radial.GetSafeNormal()*480;NearBody.X=Radial.X;NearBody.Y=Radial.Y;B.Position=Base+Q.RotateVector(NearBody);}
-            }
-        }
         if(B.Kind==EVaporKind::Deluge)B.Position.Z=FMath::Max(200.,B.Position.Z);
         const float Radius=B.RadiusM+FMath::Sqrt(B.Age*2)*B.GrowthMps;
         const float Fade=FMath::SmoothStep(0.f,.6f,B.Age)*(1-FMath::SmoothStep(B.Life*.65f,B.Life,B.Age));
@@ -148,7 +119,7 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
         Materials[I]->SetScalarParameterValue(TEXT("Seed"),B.Seed);
         // A fitted condensation/dilution surrogate. This is not CFD or a claim
         // of conserved aerosol mass; vehicle propellant flow is tracked separately.
-        const float Dilution=FMath::Pow(B.RadiusM/Radius,B.Kind==EVaporKind::Cryogenic?.45f:.3f);
+        const float Dilution=FMath::Pow(B.RadiusM/Radius,.3f);
         Materials[I]->SetScalarParameterValue(TEXT("Density"),B.Density*Fade*Dilution);
     }
 }

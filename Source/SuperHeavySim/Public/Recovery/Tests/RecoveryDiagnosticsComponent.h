@@ -14,10 +14,14 @@ public:
     virtual void TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn) override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 private:
+    void RecordPerformanceFrame();
+    bool bPerformanceAudit=false;
+    bool bEndProfileOnResult=false,bProfileStopRequested=false;
+    int32 LastPerformancePhase=-1;
     void TickGroundAudit(float Dt);
     bool bGroundAudit=false,bGroundPassed=true;
     int32 GroundStage=0;
-    double GroundAuditClock=0,GroundHoldTime=0;
+    double GroundAuditClock=0,GroundHoldTime=0,GroundWallStartS=0;
     uint32 GroundGeneration=0;
     TArray<FString> GroundChecks;
     int64 Samples=0,HighAltitudeSamples=0;

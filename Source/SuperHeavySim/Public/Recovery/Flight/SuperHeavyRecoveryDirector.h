@@ -109,6 +109,7 @@ public:
     const FRecoveryLaunchSequence& GetLaunchSequence() const { return LaunchSequence; }
     double GetDelugeFlow() const { return DelugeFlow; }
     uint32 GetMissionGeneration() const { return MissionGeneration; }
+    bool HasMissionResult() const { return bResultWritten; }
     bool IsLaunchMountReleased() const { return bLaunchHoldReleased; }
     const USuperHeavyRecoveryProfile* GetProfile() const { return RuntimeProfile; }
 private:
