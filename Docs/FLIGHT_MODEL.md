@@ -17,9 +17,11 @@ Startup/throttle response uses bounded first-order response; shutdown closes ove
 `RecoveryPropulsionModel` integrates booster valve impulse analytically over each
 held-command interval. Endpoint thrust drives artwork; step impulse determines
 the mean mechanical force and fuel consumption. The value-only engine-bank
-model has no Unreal object access. Guidance, RCS and upper-stage dynamics still
-run at game-frame cadence; current substepping does not make them independent
-of rendering. See [measured scheduling and convergence limits](Validation/PROPULSION_AND_SCHEDULING.md).
+model has no Unreal object access. `RecoveryDynamicsModel` evaluates the booster
+engine bank, attitude loop, RCS, grid fins, conditioning flow and mass properties
+at every actual Chaos substep through `RecoveryPhysicsComponent`. Outer guidance
+and upper-stage dynamics still run at game-frame cadence. See the
+[solver integration boundary and evidence](Validation/SOLVER_DYNAMICS.md).
 
 Landing guidance uses separate switch-down/switch-up thresholds for the three- and thirteen-engine groups. This prevents consecutive-frame command chatter near one thrust threshold. It does not add thrust or constrain the body. Hardware restart counts, settling requirements and minimum stable operating duration still need a calibrated model.
 
@@ -33,7 +35,8 @@ The controller uses current analytical inertia and includes the gyroscopic term.
 
 The prelaunch stack is a live body retained by an explicit mount constraint with estimated break limits and no projection. Ignition precedes release; release requires a countdown threshold and sufficient thrust. This represents physical hold-down hardware. Detailed visible clamp mechanisms remain unfinished. No hold-down constraint exists during free flight or catch.
 
-`RecoveryGroundSystems` models two conditioning vents with bounded valve response, propellant loss and small reaction forces. Connected ground supply replaces vented mass; disconnect ends replenishment and valves close. The tracked balance is:
+`RecoveryGroundSystems` publishes ground-supply and deluge commands. The solver
+model integrates two conditioning vents with bounded valve response, propellant loss and small reaction forces. Connected ground supply replaces vented mass; disconnect ends replenishment and valves close. The tracked balance is:
 
 `initial propellant + ground supply = remaining propellant + main-engine consumption + vented propellant`.
 

@@ -2,11 +2,6 @@
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Components/PrimitiveComponent.h"
 
-void ASuperHeavyRecoveryDirector::ApplyVehicleForce(ERecoveryForceKind Kind,int32 Index,const FVector& ForceN,const FVector& PointCm)
-{
-    Body->AddForceAtLocation(ForceN*100.,PointCm);
-    AppliedForces.Add({Kind,Index,PointCm,ForceN});
-}
 void ASuperHeavyRecoveryDirector::RecordExperiment(const TCHAR* Action)
 {
     const FString Event=FString::Printf(TEXT("EXPERIMENT %s t=%.3f engine=%d fin=%d rcs_off=%d response=%.3f wind=%.3f"),Action,MissionTime,

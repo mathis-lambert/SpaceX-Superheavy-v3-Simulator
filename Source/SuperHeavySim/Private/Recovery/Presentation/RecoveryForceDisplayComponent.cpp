@@ -16,7 +16,9 @@ void URecoveryForceDisplayComponent::TickComponent(float Dt,ELevelTick Type,FAct
     const auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());
     const auto* PC=Cast<ARecoveryPlayerController>(GetWorld()->GetFirstPlayerController());
     if(!FApp::CanEverRender() || !D || !D->GetBody() || !PC || !PC->bForceOverlay || PC->IsMenuOpen())return;
-    const FTransform Current=D->GetBody()->GetComponentTransform();
+    // Solver sample positions already contain physical centimetres. Blueprint
+    // artwork scale must never be applied a second time when rebasing them.
+    const FTransform Current(D->GetBody()->GetComponentQuat(),D->GetBody()->GetComponentLocation());
     const auto& Previous=D->GetForceFrame();
     static const FColor Colors[]={FColor::Cyan,FColor(195,130,255),FColor(255,170,55),FColor::Yellow,FColor(145,225,255),FColor::White};
     for(const auto& Sample:D->GetAppliedForces())
@@ -36,5 +38,5 @@ void URecoveryForceDisplayComponent::TickComponent(float Dt,ELevelTick Type,FAct
         if(Sample.Kind!=ERecoveryForceKind::Engine)
             DrawDebugString(GetWorld(),End,FString::Printf(TEXT("%.2f kN"),Magnitude/1000.),nullptr,Color,0,false,.85f);
     }
-    DrawDebugSphere(GetWorld(),D->GetBody()->GetCenterOfMass(),90,12,FColor::White,false,0,1,2);
+    DrawDebugSphere(GetWorld(),D->GetMassCentreCm(),90,12,FColor::White,false,0,1,2);
 }

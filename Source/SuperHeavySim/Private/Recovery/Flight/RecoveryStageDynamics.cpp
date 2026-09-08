@@ -22,11 +22,6 @@ FTransform ASuperHeavyRecoveryDirector::GetUpperStageBaseTransform() const
 
 void ASuperHeavyRecoveryDirector::ResetPhysicalActuators()
 {
-    EngineParameters.MinimumThrottle=RuntimeProfile->MinimumThrottle;
-    EngineParameters.OpeningTimeConstantS=RuntimeProfile->ThrottleTimeConstant;
-    EngineParameters.ShutdownTimeS=RuntimeProfile->EngineShutdownTimeS;
-    EngineParameters.MaximumGimbalDeg=RuntimeProfile->MaxGimbalDeg;
-    EngineParameters.GimbalRateDegS=RuntimeProfile->GimbalRateDegS;
     for(auto& Engine:Engines)
     {Engine.ThrustN=0;Engine.StepImpulseNs=0;Engine.StepForceBodyN=FVector::ZeroVector;Engine.DirectionBody=FVector::UpVector;}
     ReactionForcesBodyN.Init(FVector::ZeroVector,6);
@@ -83,16 +78,17 @@ void ASuperHeavyRecoveryDirector::SeparateUpperStage()
     if(bSeparated || !Body || !UpperStageBody)return;
     const FTransform StageBase=GetUpperStageBaseTransform();
     const FVector StageCentre=StageBase.GetLocation()+StageBase.GetRotation().GetUpVector()*StageCentreAboveBaseM*100;
-    const FVector PointVelocity=Body->GetPhysicsLinearVelocityAtPoint(StageCentre);
     const FVector AngularVelocity=Body->GetPhysicsAngularVelocityInRadians();
-    const FVector BeforeCentre=Body->GetCenterOfMass()/100.;
+    const auto BeforeMass=RecoveryMass::Booster(*RuntimeProfile,PropellantKg,RcsPropellantKg,true);
+    const FVector BeforeCentre=BasePositionM+Body->GetUpVector()*BeforeMass.CentreFromBaseM;
+    const FVector PointVelocity=Body->GetPhysicsLinearVelocity()+FVector::CrossProduct(AngularVelocity,StageCentre-BeforeCentre*100.);
     const FVector BeforeMomentum=Body->GetPhysicsLinearVelocity()/100.*MassKg;
     const FQuat Q=Body->GetComponentQuat();
     const FVector OmegaBody=Q.UnrotateVector(AngularVelocity);
-    const FVector BeforeAngularMomentum=Q.RotateVector(Body->GetInertiaTensor()/10000.*OmegaBody);
+    const FVector BeforeAngularMomentum=Q.RotateVector(BeforeMass.InertiaKgM2*OmegaBody);
     const auto BoosterMass=RecoveryMass::Booster(*RuntimeProfile,PropellantKg,RcsPropellantKg,false);
     const FVector BoosterCentre=(BasePositionM+Body->GetUpVector()*BoosterMass.CentreFromBaseM)*100;
-    const FVector BoosterPointVelocity=Body->GetPhysicsLinearVelocityAtPoint(BoosterCentre);
+    const FVector BoosterPointVelocity=Body->GetPhysicsLinearVelocity()+FVector::CrossProduct(AngularVelocity,BoosterCentre-BeforeCentre*100.);
     // This is the initial state of the newly independent body. There is no kick
     // or later pose writer: upper-stage engine forces create relative motion.
     UpperStageBody->SetWorldLocationAndRotation(StageCentre,StageBase.GetRotation(),false,nullptr,ETeleportType::TeleportPhysics);
@@ -110,9 +106,9 @@ void ASuperHeavyRecoveryDirector::SeparateUpperStage()
     Body->SetPhysicsLinearVelocity(BoosterPointVelocity);
     const FVector BoosterMomentum=Body->GetPhysicsLinearVelocity()/100.*MassKg;
     const FVector ShipMomentum=UpperStageBody->GetPhysicsLinearVelocity()/100.*RuntimeProfile->UpperStageMassKg;
-    const FVector AfterAngularMomentum=Q.RotateVector((Body->GetInertiaTensor()+UpperStageBody->GetInertiaTensor())/10000.*OmegaBody)+
-        FVector::CrossProduct(Body->GetCenterOfMass()/100.-BeforeCentre,BoosterMomentum)+
-        FVector::CrossProduct(UpperStageBody->GetCenterOfMass()/100.-BeforeCentre,ShipMomentum);
+    const FVector AfterAngularMomentum=Q.RotateVector((BoosterMass.InertiaKgM2+RecoveryMass::UpperStage(RuntimeProfile->UpperStageMassKg).InertiaKgM2)*OmegaBody)+
+        FVector::CrossProduct(BoosterCentre/100.-BeforeCentre,BoosterMomentum)+
+        FVector::CrossProduct(StageCentre/100.-BeforeCentre,ShipMomentum);
     SeparationMomentumRelativeError=(BoosterMomentum+ShipMomentum-BeforeMomentum).Size()/FMath::Max(1.,BeforeMomentum.Size());
     SeparationAngularMomentumRelativeError=(AfterAngularMomentum-BeforeAngularMomentum).Size()/FMath::Max(1.,BeforeAngularMomentum.Size());
 }

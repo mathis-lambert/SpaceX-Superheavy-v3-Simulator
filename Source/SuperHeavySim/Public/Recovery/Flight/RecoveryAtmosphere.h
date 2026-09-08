@@ -5,6 +5,11 @@ namespace RecoveryAtmosphere
     constexpr double G0=9.80665;
     constexpr double EarthRadiusM=6356766.;
     struct FState { double Density,Pressure,Temperature,SoundSpeed,Gravity; };
+    inline FVector WindAt(const FVector& SurfaceWindMps,double Height,double Scale)
+    {
+        return SurfaceWindMps*Scale*(.4+.6*FMath::Clamp(Height/100.,0.,1.))*
+            FMath::Exp(-FMath::Max(0.,Height-10000.)/18000.);
+    }
     // US Standard Atmosphere 1976 to 86 km geometric; exponential continuation above.
     inline FState Sample(double AltitudeM,double TemperatureOffset=0)
     {

@@ -45,11 +45,12 @@ void ASuperHeavyRecoveryDirector::InitializeContactFixture()
     bContactShutdown=true;ActualThrustN=0;ActiveEngines=0;Throttle=0;
     RuntimeProfile->WindVelocityMps=FVector::ZeroVector;
     SetPhase(ERecoveryPhase::Capture,TEXT("Unpowered contact fixture"));
+    ++MissionGeneration;InitializeDynamics();
 }
 void ASuperHeavyRecoveryDirector::TickContactFixture(double Dt)
 {
     ActualThrustN=0;ActiveEngines=0;Throttle=0;
-    ApplyAerodynamics(FVector::UpVector,Dt);
+    SetFlightCommand(FVector::ZeroVector,FVector::UpVector);
     if(MissionTime<5)return;
     const bool Both=EverSupportContact[0] && EverSupportContact[1];
     bool Passed=false;

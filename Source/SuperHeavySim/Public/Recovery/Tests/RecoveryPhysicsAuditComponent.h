@@ -16,7 +16,7 @@ struct FRecoveryStepStatistics
     }
 };
 
-/** Opt-in measurement of actual solver callbacks versus flight-control steps.
+/** Opt-in measurement of actual solver callbacks versus game-frame exchanges.
  * The callback only exchanges value data and never touches game-thread objects. */
 UCLASS()
 class URecoveryPhysicsAuditComponent : public UActorComponent
@@ -27,10 +27,10 @@ public:
     virtual void BeginPlay() override;
     virtual void TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn) override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
-    void RecordControlStep(double Dt) { if(bEnabled)ControlSteps.Add(Dt); }
+    void RecordGameStep(double Dt) { if(bEnabled)GameSteps.Add(Dt); }
 private:
     void ConsumePhysicsSteps();
     FRecoveryCadenceCallback* Callback=nullptr;
     bool bEnabled=false;
-    FRecoveryStepStatistics PhysicsSteps,ControlSteps;
+    FRecoveryStepStatistics PhysicsSteps,GameSteps;
 };

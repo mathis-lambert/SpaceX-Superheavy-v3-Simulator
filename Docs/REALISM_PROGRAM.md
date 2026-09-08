@@ -104,7 +104,7 @@ Unchecked means pending, in progress, or insufficiently verified. A requirement 
 ## Fundamental physics (71–84)
 
 - [ ] 71. Decouple guidance and actuator cadence from rendering.
-- Current work: value-only engine bank and analytic valve impulse; actual Chaos/control cadence is measured. The callback transfer remains open; see [propulsion and scheduling evidence](Validation/PROPULSION_AND_SCHEDULING.md).
+- Current work: booster attitude, propulsion, RCS, fins and mass now run at every Chaos step. Outer guidance, lifecycle and upper-stage transfer remain open; see [solver dynamics evidence](Validation/SOLVER_DYNAMICS.md).
 - [ ] 72. Verify numerical convergence as the integration step decreases.
 - [ ] 73. Extend mass, momentum and energy conservation checks.
 - [ ] 74. Add Earth rotation and a consistent atmospheric reference frame.

@@ -1,4 +1,5 @@
 #include "Recovery/Tests/RecoveryPhysicsAuditComponent.h"
+#include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Chaos/SimCallbackObject.h"
 #include "PBDRigidsSolver.h"
 #include "Physics/Experimental/PhysScene_Chaos.h"
@@ -69,10 +70,24 @@ void URecoveryPhysicsAuditComponent::EndPlay(const EEndPlayReason::Type Reason)
             Result->SetNumberField(TEXT("mean_s"),Steps.Count?Steps.TotalS/Steps.Count:0.);
             return Result;
         };
-        Report->SetNumberField(TEXT("schema_version"),1);
-        Report->SetBoolField(TEXT("measured"),PhysicsSteps.Count>0 && ControlSteps.Count>0);
+        Report->SetNumberField(TEXT("schema_version"),3);
+        Report->SetBoolField(TEXT("measured"),PhysicsSteps.Count>0 && GameSteps.Count>0);
         Report->SetObjectField(TEXT("solver_steps"),Stats(PhysicsSteps));
-        Report->SetObjectField(TEXT("control_steps"),Stats(ControlSteps));
+        Report->SetObjectField(TEXT("game_steps"),Stats(GameSteps));
+        if(const auto* Director=Cast<ASuperHeavyRecoveryDirector>(GetOwner()))
+        {
+            const auto& State=Director->GetDynamicsState();
+            FRecoveryStepStatistics Dynamics;
+            Dynamics.Count=State.Steps;Dynamics.TotalS=State.ElapsedS;
+            Dynamics.MinimumS=State.MinimumStepS;Dynamics.MaximumS=State.MaximumStepS;
+            Report->SetObjectField(TEXT("inner_dynamics_steps"),Stats(Dynamics));
+            const auto& Guidance=Director->GetGuidanceState();
+            FRecoveryStepStatistics Flight;
+            Flight.Count=Guidance.Steps;Flight.TotalS=Guidance.ElapsedS;
+            Flight.MinimumS=Guidance.MinimumStepS;Flight.MaximumS=Guidance.MaximumStepS;
+            Report->SetObjectField(TEXT("flight_guidance_steps"),Stats(Flight));
+            Report->SetNumberField(TEXT("mission_generation"),Director->GetMissionGeneration());
+        }
         Report->SetStringField(TEXT("scope"),TEXT("Session cadence, including ground preparation; proof of scheduling only, not flight convergence."));
         const auto* Settings=UPhysicsSettings::Get();
         Report->SetBoolField(TEXT("substepping"),Settings->bSubstepping);

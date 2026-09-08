@@ -1,6 +1,12 @@
 # Validation — 8 September 2026
 
-## Current wave: engine impulse and solver scheduling
+## Current wave: booster inner dynamics in Chaos
+
+[Solver dynamics evidence](Validation/SOLVER_DYNAMICS.md) documents the callback
+integration, shared state, independent physics checks and remaining outer-loop
+work. The full 150-item scope remains in [REALISM_PROGRAM.md](REALISM_PROGRAM.md).
+
+## Previous wave: engine impulse and solver scheduling
 
 [Propulsion and scheduling evidence](Validation/PROPULSION_AND_SCHEDULING.md)
 records the value-only engine-bank extraction, eight passing unit tests and nine

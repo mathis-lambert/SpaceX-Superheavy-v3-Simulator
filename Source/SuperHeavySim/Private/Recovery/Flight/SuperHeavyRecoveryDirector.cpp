@@ -2,6 +2,7 @@
 #include "Recovery/Shared/RecoveryAssets.h"
 #include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
 #include "Recovery/Tests/RecoveryPhysicsAuditComponent.h"
+#include "Recovery/Flight/RecoveryPhysicsComponent.h"
 #include "Recovery/Flight/RecoveryAtmosphere.h"
 #include "Recovery/Presentation/RecoveryPresentationComponent.h"
 #include "Recovery/Presentation/RecoverySkyComponent.h"
@@ -49,6 +50,7 @@ ASuperHeavyRecoveryDirector::ASuperHeavyRecoveryDirector()
     CreateDefaultSubobject<URecoverySiteActivityComponent>(TEXT("SiteActivity"));
     CreateDefaultSubobject<URecoveryAudioComponent>(TEXT("FlightAcoustics"));
     CreateDefaultSubobject<URecoveryDiagnosticsComponent>(TEXT("FlightDiagnostics"));
+    PhysicsModel=CreateDefaultSubobject<URecoveryPhysicsComponent>(TEXT("FlightPhysics"));
     PhysicsAudit=CreateDefaultSubobject<URecoveryPhysicsAuditComponent>(TEXT("PhysicsCadenceAudit"));
     CreateDefaultSubobject<URecoveryForceDisplayComponent>(TEXT("ForceInspection"));
     static ConstructorHelpers::FClassFinder<ASuperHeavyVehicleActor> Booster(RecoveryAssets::BP_SuperHeavy);
@@ -58,6 +60,8 @@ ASuperHeavyRecoveryDirector::ASuperHeavyRecoveryDirector()
 void ASuperHeavyRecoveryDirector::BeginPlay()
 {
     Super::BeginPlay();
+    for(auto* Component:GetComponents())
+        if(Component!=PhysicsModel && Component->PrimaryComponentTick.TickGroup==TG_PostPhysics)Component->AddTickPrerequisiteComponent(PhysicsModel);
     RuntimeProfile=MissionProfile ? DuplicateObject<USuperHeavyRecoveryProfile>(MissionProfile,this) : NewObject<USuperHeavyRecoveryProfile>(this);
     if(!Tower) for(TActorIterator<ASuperHeavyLaunchTower> It(GetWorld()); It; ++It) { Tower=*It; break; }
     if(!Tower) Tower=GetWorld()->SpawnActor<ASuperHeavyLaunchTower>();
@@ -174,25 +178,25 @@ void ASuperHeavyRecoveryDirector::SelectScenario(int32 Index)
     Body->SetPhysicsLinearVelocity(FVector::ZeroVector);
     Body->SetPhysicsAngularVelocityInRadians(FVector::ZeroVector);
     MissionTime=0; PhaseTime=0; CaptureDwell=0; ActualThrustN=0; Throttle=0; ActiveEngines=0;
-    IntegralXY=FVector::ZeroVector; AppliedGimbal=FVector::ZeroVector;
+    AppliedGimbal=FVector::ZeroVector;
     PeakAltitudeM=0; PeakTiltDeg=0; SampleClock=0; bResultWritten=false;
     CaptureErrorAtLatch=0; CaptureSpeedAtLatch=0; CaptureTiltAtLatch=0; LatchPositionM=FVector::ZeroVector;
     Csv=TEXT("time_s,phase,x_m,y_m,base_altitude_m,vx_mps,vy_mps,vz_mps,tilt_deg,target_error_m,throttle,engines,arm_closure,mass_kg,propellant_kg,density_kgm3,q_pa,mach,heading_error_deg,fin_xp_deg,fin_xm_deg,fin_ym_deg,thrust_n,predicted_miss_m,lug_error_m\n");
     Trace.Reset(); PhaseEvents.Reset();
-    MainFuelConsumedKg=0; SeparationMassKg=0; CaptureHeadingAtLatch=0; CaptureLugAtLatch=0; PredictorClock=0;
+    MainFuelConsumedKg=0; SeparationMassKg=0; CaptureHeadingAtLatch=0; CaptureLugAtLatch=0;
     LandingIgnitionAltitudeM=0; UnpoweredSeconds=0; BoostbackIgnitionAltitudeM=0; PeakDynamicPressurePa=0;
     LandingBurnSeconds=0; BoostbackSeconds=0; FinControlSeconds=0; PeakDownrangeM=0; PeakSpeedMps=0;
     bUnpoweredViolation=false; GridFinAnglesDeg=FVector::ZeroVector; AeroForceN=FVector::ZeroVector;
     bContactShutdown=false;SupportContactCount=0;SupportImpulseNs=FVector2D::ZeroVector;
     LastSupportContact[0]=LastSupportContact[1]=-100;EverSupportContact[0]=EverSupportContact[1]=false;
-    StructuralContactCount=0;SettledContactSeconds=0;bApproachAligned=false;
+    StructuralContactCount=0;
     GridFinAuthority=0; PredictedMissM=0; TimeToImpactS=0; PredictedImpactM=FVector::ZeroVector;
     ResetPhysicalActuators();
     ++MissionGeneration;
-    LaunchSequence=FRecoveryLaunchSequence();GroundClockS=0;DelugeFlow=0;
-    Experiment=FRecoveryFlightExperiment();LandingEngineGroup=13;ChaseTracking=FRecoveryChaseTracking();
+    LaunchSequence=FRecoveryLaunchSequence();DelugeFlow=0;
+    Experiment=FRecoveryFlightExperiment();ChaseTracking=FRecoveryChaseTracking();
     SetPhase(ERecoveryPhase::Ready,TEXT("RTLS / estimated mass & aero / SPACE to launch"));
-    UpdateNavigation();
+    InitializeDynamics();
 }
 
 void ASuperHeavyRecoveryDirector::StartMission()
@@ -214,7 +218,7 @@ void ASuperHeavyRecoveryDirector::AbortMission()
     if(Phase==ERecoveryPhase::Captured || Phase==ERecoveryPhase::Aborted) return;
     LaunchSequence.Abort();
     SetPhase(ERecoveryPhase::Aborted,TEXT("Operator abort / engines shut down"));
-    ActualThrustN=0; ActiveEngines=0; Throttle=0; WriteResult(false,StatusMessage);
+    ActiveEngines=0; WriteResult(false,StatusMessage);
 }
 
 FString ASuperHeavyRecoveryDirector::GetPhaseLabel() const
@@ -242,49 +246,30 @@ void ASuperHeavyRecoveryDirector::Tick(float DeltaSeconds)
     const double PhysicsBudget=Physics->bSubstepping ? Physics->MaxSubstepDeltaTime*Physics->MaxSubsteps : Physics->MaxPhysicsDeltaTime;
     const double Dt=PhysicsBudget>0 ? FMath::Min(double(DeltaSeconds),PhysicsBudget) : double(DeltaSeconds);
     if(Dt<=0) return;
-    PhysicsAudit->RecordControlStep(Dt);
-    AppliedForces.Reset(48);
-    AppliedForceFrame=Body->GetComponentTransform();
-    PhaseTime+=Dt;
-    if(Phase!=ERecoveryPhase::Ready && Phase!=ERecoveryPhase::Countdown && !bResultWritten) MissionTime+=Dt;
+    PhysicsAudit->RecordGameStep(Dt);
+    ConsumeDynamicsState();
+    DynamicsCommand=FRecoveryDynamicsCommand();
+    if(!GuidanceState.bFlightStarted)PhaseTime+=Dt;
+    if(!GuidanceState.bFlightStarted && Phase!=ERecoveryPhase::Ready && Phase!=ERecoveryPhase::Countdown && !bResultWritten) MissionTime+=Dt;
     UpdateNavigation();
     if(Phase==ERecoveryPhase::Countdown) TickLaunchSequence(Dt);
-    TickGroundConditioning(Dt);
+    PrepareGroundCommand();
     PeakAltitudeM=FMath::Max(PeakAltitudeM,AltitudeM); PeakTiltDeg=FMath::Max(PeakTiltDeg,TiltDeg);
     if(Phase==ERecoveryPhase::Ready || Phase==ERecoveryPhase::Countdown)
     {
-        ApplyAerodynamics(FVector::UpVector,Dt);
         if(Phase==ERecoveryPhase::Countdown && LaunchSequence.IsIgnitionCommanded())
         {
             ActiveEngines=33;
-            ApplyThrust(Body->GetUpVector()*(33*RuntimeProfile->EngineThrustN/MassKg),Body->GetUpVector(),Dt);
+            SetFlightCommand(Body->GetUpVector()*(33*RuntimeProfile->EngineThrustN/MassKg),Body->GetUpVector());
         }
     }
-    else if(Phase>=ERecoveryPhase::Ascent && Phase<=ERecoveryPhase::Capture)
-    {
-        if(MissionTime>RuntimeProfile->TimeoutSeconds || (Phase>=ERecoveryPhase::LandingBurn && TiltDeg>70) || AltitudeM < -3 || BasePositionM.ContainsNaN())
-        { SetPhase(ERecoveryPhase::Aborted,TEXT("Flight envelope exceeded")); ActualThrustN=0; Throttle=0; ActiveEngines=0; WriteResult(false,StatusMessage); }
-        else Guide(Dt);
-    }
-    if(Phase==ERecoveryPhase::Captured)
-    {
-        ActualThrustN=0; Throttle=0; ActiveEngines=0;
-        // Gravity and aerodynamic loads remain active after shutdown. The rails
-        // carry the vehicle; no constraint, pose override or velocity reset.
-        ApplyAerodynamics(FVector::UpVector,Dt);
-        ApplyThrust(FVector::ZeroVector,FVector::UpVector,Dt);
-        const double HoldDrift=(BasePositionM-LatchPositionM).Size();
-        if(HoldDrift>1. || TiltDeg>5.)
-        { SetPhase(ERecoveryPhase::Aborted,TEXT("Physical support lost after engine shutdown")); WriteResult(false,StatusMessage); }
-        else if(PhaseTime>8 && !bResultWritten)
-            WriteResult(VelocityMps.Size()<0.15 && EverSupportContact[0] && EverSupportContact[1],TEXT("Physical rail support evaluated for eight seconds with engines off"));
-    }
+    else if(!ContactFixture.IsEmpty() && Phase==ERecoveryPhase::Capture)TickContactFixture(Dt);
     if(Phase==ERecoveryPhase::Aborted)
     {
         ActiveEngines=0;
-        ApplyAerodynamics(Body->GetUpVector(),Dt);
-        ApplyThrust(FVector::ZeroVector,Body->GetUpVector(),Dt);
+        SetFlightCommand(FVector::ZeroVector,Body->GetUpVector());
     }
+    SubmitDynamicsCommand();
     TickUpperStage(Dt);
 
     SampleClock+=Dt;

@@ -4,7 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Recovery/Flight/SuperHeavyRecoveryProfile.h"
 #include "Recovery/Flight/RecoveryActuators.h"
-#include "Recovery/Flight/RecoveryPropulsionModel.h"
+#include "Recovery/Flight/RecoveryGuidanceModel.h"
 #include "Recovery/Flight/RecoveryFlightPhase.h"
 #include "Recovery/Flight/RecoveryFlightInspection.h"
 #include "Recovery/Flight/RecoveryLaunchSequence.h"
@@ -19,6 +19,7 @@ class ACameraActor;
 class UBoxComponent;
 class UPhysicsConstraintComponent;
 class URecoveryPhysicsAuditComponent;
+class URecoveryPhysicsComponent;
 
 /** Autonomous suborbital recovery. Chaos integrates physical thrust, drag and control forces. */
 UCLASS(Blueprintable)
@@ -90,6 +91,9 @@ public:
     UFUNCTION(BlueprintPure, Category="Recovery") FString GetPhaseLabel() const;
     const TArray<FVector2D>& GetTrace() const { return Trace; }
     UPrimitiveComponent* GetBody() const { return Body; }
+    const FRecoveryDynamicsState& GetDynamicsState() const { return DynamicsState; }
+    const FRecoveryGuidanceState& GetGuidanceState() const { return GuidanceState; }
+    FVector GetMassCentreCm() const;
     UPrimitiveComponent* GetUpperStageBody() const;
     FTransform GetUpperStageBaseTransform() const;
     const TArray<FRecoveryEngineState>& GetEngines() const { return Engines; }
@@ -115,17 +119,26 @@ public:
     const USuperHeavyRecoveryProfile* GetProfile() const { return RuntimeProfile; }
 private:
     friend class URecoveryPresentationComponent;
+    friend class URecoveryPhysicsComponent;
+    void ConsumeDynamicsState();
+    void InitializeDynamics();
+    void SubmitDynamicsCommand();
     UPROPERTY(Transient) TObjectPtr<USuperHeavyRecoveryProfile> RuntimeProfile;
     UPROPERTY(Transient) TObjectPtr<UPrimitiveComponent> Body;
     UPROPERTY(VisibleAnywhere) TObjectPtr<URecoveryPhysicsAuditComponent> PhysicsAudit;
     UPROPERTY(Transient) TObjectPtr<UBoxComponent> UpperStageBody;
     UPROPERTY(Transient) TObjectPtr<UPhysicsConstraintComponent> LaunchHoldDown;
     TArray<FRecoveryEngineState> Engines;
-    FRecoveryEngineParameters EngineParameters;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<URecoveryPhysicsComponent> PhysicsModel;
+    FRecoveryDynamicsState DynamicsState;
+    FRecoveryGuidanceState GuidanceState;
+    FRecoveryGuidanceConfiguration GuidanceConfiguration;
+    int32 ConsumedGuidanceEvents=0;
+    void ConsumeGuidanceState();
+    FRecoveryDynamicsCommand DynamicsCommand;
     TArray<FRecoveryForceSample> AppliedForces;
     FTransform AppliedForceFrame;
     FRecoveryFlightExperiment Experiment;
-    void ApplyVehicleForce(ERecoveryForceKind Kind,int32 Index,const FVector& ForceN,const FVector& PointCm);
     void RecordExperiment(const TCHAR* Action);
     TArray<FVector> ReactionForcesBodyN;
     double UpperStagePropellantKg=0,UpperStageThrustN=0,UpperStageFuelConsumedKg=0;
@@ -137,7 +150,7 @@ private:
     double ConditioningVentedKg=0,GroundSupplyKg=0;
     FRecoveryLaunchSequence LaunchSequence;
     uint32 MissionGeneration=0;
-    double GroundClockS=0,DelugeFlow=0;
+    double DelugeFlow=0;
     void TickLaunchSequence(double Dt);
     UPROPERTY(Transient) TObjectPtr<ACameraActor> Camera;
     UPROPERTY(Transient) TArray<TObjectPtr<UBoxComponent>> CatchColliders;
@@ -145,19 +158,15 @@ private:
     double LastSupportContact[2]={-100,-100};
     bool EverSupportContact[2]={false,false};
     int32 StructuralContactCount=0;
-    double SettledContactSeconds=0;
-    bool bApproachAligned=false;
     FString ContactFixture;
     void InitializeContactFixture();
     void TickContactFixture(double Dt);
     FVector LaunchWorldM, CaptureWorldM, LatchPositionM = FVector::ZeroVector;
-    FVector IntegralXY = FVector::ZeroVector;
     FVector AppliedGimbal = FVector::ZeroVector;
     double PhaseTime=0, ActualThrustN=0, BaseOffsetM=35.44, SampleClock=0, PeakAltitudeM=0, PeakTiltDeg=0;
     double CaptureErrorAtLatch=0, CaptureSpeedAtLatch=0, CaptureTiltAtLatch=0;
     bool bExitAfterTest=false, bResultWritten=false, bInitialized=false;
     int32 CameraMode=0, ScenarioIndex=0;
-    int32 LandingEngineGroup=13;
     int32 PreviousCameraMode=0, LastCameraMode=-1;
     double CameraTransitionRemaining=0;
     TWeakObjectPtr<UExponentialHeightFogComponent> LocalHeightFog;
@@ -177,18 +186,13 @@ private:
     void ReleaseLaunchHoldDown();
     void SeparateUpperStage();
     void TickUpperStage(double Dt);
-    void TickGroundConditioning(double Dt);
-    void ApplyReactionControl(const FVector& TorqueBody,double Dt);
+    void PrepareGroundCommand();
     void SetPhase(ERecoveryPhase NewPhase, const FString& Message);
     void UpdateNavigation();
-    void Guide(double Dt);
-    void ApplyThrust(const FVector& ThrustAcceleration, const FVector& TargetUp, double Dt);
-    void ApplyAerodynamics(const FVector& TargetUp, double Dt);
-    FVector AttitudeTorque(const FVector& TargetUp, double Gain, double Damping) const;
+    void SetFlightCommand(const FVector& ThrustAcceleration,const FVector& TargetUp);
     void UpdateMass();
-    void PredictBallistic();
     FVector WindAt(double Height) const;
-    double Gravity=9.80665, EngineIspS=327, PredictorClock=0, InitialMassKg=0;
+    double Gravity=9.80665, EngineIspS=327, InitialMassKg=0;
     double MainFuelConsumedKg=0, SeparationMassKg=0, CaptureHeadingAtLatch=0;
     double CaptureLugAtLatch=0, BoostbackDownrangeM=0, PeakDownrangeM=0, PeakSpeedMps=0;
     double LandingBurnSeconds=0, BoostbackSeconds=0, FinControlSeconds=0;

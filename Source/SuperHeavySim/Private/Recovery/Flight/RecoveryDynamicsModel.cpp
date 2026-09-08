@@ -16,8 +16,7 @@ void FRecoveryDynamicsModel::Reset(const FRecoveryDynamicsConfiguration& Configu
 
 FVector FRecoveryDynamicsModel::WindAt(double Height,const FRecoveryDynamicsCommand& C) const
 {
-    return Config.WindVelocityMps*C.Experiment.WindScale*(.4+.6*FMath::Clamp(Height/100.,0.,1.))*
-        FMath::Exp(-FMath::Max(0.,Height-10000.)/18000.);
+    return RecoveryAtmosphere::WindAt(Config.WindVelocityMps,Height,C.Experiment.WindScale);
 }
 
 void FRecoveryDynamicsModel::AddForce(ERecoveryForceKind Kind,int32 Index,const FVector& ForceN,const FVector& PointM)
@@ -163,6 +162,7 @@ void FRecoveryDynamicsModel::Step(const FRecoveryBodyKinematics& Body,const FRec
 {
     if(Dt<=0 || !FMath::IsFinite(Dt))return;
     State.Body=Body;State.Forces.Reset();State.ElapsedS+=Dt;++State.Steps;
+    State.MinimumStepS=FMath::Min(State.MinimumStepS,Dt);State.MaximumStepS=FMath::Max(State.MaximumStepS,Dt);
     BaseM=Body.OriginM-Body.Rotation.GetUpVector()*FlightGeometry::BoosterBaseOffsetM;
     const double Height=FlightGeometry::AltitudeM(BaseM*100.);
     const auto Air=RecoveryAtmosphere::Sample(Height,Config.SeaLevelTemperatureOffsetK);

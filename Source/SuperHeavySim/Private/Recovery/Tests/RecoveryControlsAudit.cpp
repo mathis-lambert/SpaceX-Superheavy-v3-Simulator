@@ -85,7 +85,11 @@ void ARecoveryPlayerController::TickControlsAudit()
             InputKey(FInputKeyEventArgs::CreateSimulated(Key,IE_Released,0,1));
             Check(FString::Printf(TEXT("%s %s preserves mission"),AuditStage==10?TEXT("READY"):TEXT("ASCENT"),*Key.ToString()),
                 D->GetExperiment().WindScale==2 && (AuditStage==10?D->Phase==ERecoveryPhase::Ready:D->MissionTime>=AuditMissionTime && D->Phase!=ERecoveryPhase::Ready));
-            if(Index==11)Check(TEXT("I opens force inspector"),bForceOverlay);
+            if(Index==11)
+            {
+                Check(TEXT("I opens force inspector"),bForceOverlay);
+                Shot(AuditStage==10?TEXT("ForcesReady.png"):TEXT("ForcesAscent.png"));
+            }
             if(Index==12)Check(TEXT("I closes force inspector"),!bForceOverlay);
             if(Index==13)Check(TEXT("L opens live lab"),bMenuOpen && !IsPaused());
             if(Index==14)Check(TEXT("L closes focused live lab"),!bMenuOpen);

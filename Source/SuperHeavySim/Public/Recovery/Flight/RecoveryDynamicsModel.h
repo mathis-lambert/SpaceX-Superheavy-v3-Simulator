@@ -38,6 +38,8 @@ struct FRecoveryDynamicsCommand
     ERecoveryPhase Phase=ERecoveryPhase::Ready;
     int32 EngineCount=0;
     bool bSeparated=false,bContactShutdown=false,bGroundSupplyConnected=true;
+    bool bExternalFlightFixture=false;
+    int32 SupportContactCount=0;
     double DelugeDemand=0;
     FRecoveryFlightExperiment Experiment;
 };
@@ -58,6 +60,7 @@ struct FRecoveryDynamicsState
     double EngineIspS=0,DynamicPressurePa=0,GravityMps2=0;
     double DelugeFlow=0,GroundClockS=0,ElapsedS=0;
     double PeakEngineForceRatio=0,PeakGimbalDeg=0;
+    double MinimumStepS=TNumericLimits<double>::Max(),MaximumStepS=0;
     uint64 Steps=0;
 };
 
