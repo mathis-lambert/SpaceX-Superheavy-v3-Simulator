@@ -105,7 +105,25 @@ Each source manifest covers 377 project, configuration, content, tool and DLL
 files. The runtime hashes agree throughout these final checks. The first three
 manifests differ only in the subsequently corrected test-runner argument array;
 later manifests have no differences. See `FixedPhysical-source-verification.json`.
-Rendered verification is recorded below after completion.
+The final editor-game rendered Crosswind flight passes at 1920 x 1080 with
+DLSS at 66.7% internal resolution and 15 game updates/s. It records 7,256 frames,
+including 1,313 above 80 km, front ingress, zero structural hits and passive rail
+support. During 121 secured Chase frames, maximum relative camera-offset step
+is 7.28e-12 cm and angular step is zero. CAPTURE and SECURED images were inspected:
+the booster presents itself to the projecting arms and settles in front of the
+mast, with propulsion extinguished after support transfer.
+
+Rendered controls and interface audits pass, including prelaunch/ascent keys,
+physical pause, display-confirmation timeout, reconstruction changes and return
+home. The post-ignition abort fixture passes all 12 checks; its inspected shutdown
+image shows the stack retained on the mount, no flame and continued cooling.
+Reports and fresh images are preserved in `FixedPhysicalRendered` and
+`FixedPhysicalGroundAbort`. The two stale Review images copied from older runs
+are excluded from this evidence. User preferences are restored byte for byte;
+the before/after SHA256 values match in `FixedPhysicalRendered-settings.json`.
+
+These tests cover the editor-game runtime. Standalone alpha cooking, packaging
+and executable validation are recorded separately in the release evidence.
 
 ## Support observations
 
