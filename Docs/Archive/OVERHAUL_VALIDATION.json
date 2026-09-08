@@ -1,0 +1,255 @@
+{
+  "success": true,
+  "physical_matrix": [
+    {
+      "report": "Saved/Recovery/Physical_Nominal_60.json",
+      "fps": 60,
+      "scenario": "Nominal",
+      "success": true,
+      "peak_altitude_m": 97151.89405863837,
+      "capture_speed_mps": 0.025174220378747003,
+      "support_drift_m": 0.013092330909549072,
+      "mass_kg": 293366.84375
+    },
+    {
+      "report": "Saved/Recovery/Physical_Crosswind_60.json",
+      "fps": 60,
+      "scenario": "Crosswind",
+      "success": true,
+      "peak_altitude_m": 97151.47530442072,
+      "capture_speed_mps": 0,
+      "support_drift_m": 0.001255011142447525,
+      "mass_kg": 284316.78125
+    },
+    {
+      "report": "Saved/Recovery/Physical_Offset_60.json",
+      "fps": 60,
+      "scenario": "Offset",
+      "success": true,
+      "peak_altitude_m": 96930.05094839055,
+      "capture_speed_mps": 0.034115739306388386,
+      "support_drift_m": 0.002865440115759642,
+      "mass_kg": 293322
+    },
+    {
+      "report": "Saved/Recovery/Physical_Nominal_30.json",
+      "fps": 30,
+      "scenario": "Nominal",
+      "success": true,
+      "peak_altitude_m": 97171.82346844913,
+      "capture_speed_mps": 0.01361235308584994,
+      "support_drift_m": 0.013780782877823819,
+      "mass_kg": 289494.5
+    },
+    {
+      "report": "Saved/Recovery/Physical_Crosswind_30.json",
+      "fps": 30,
+      "scenario": "Crosswind",
+      "success": true,
+      "peak_altitude_m": 97171.30551456627,
+      "capture_speed_mps": 0,
+      "support_drift_m": 0.0006481657600912793,
+      "mass_kg": 280698.625
+    },
+    {
+      "report": "Saved/Recovery/Physical_Offset_30.json",
+      "fps": 30,
+      "scenario": "Offset",
+      "success": true,
+      "peak_altitude_m": 96956.44725563913,
+      "capture_speed_mps": 0.023362658788254536,
+      "support_drift_m": 0.006878550021760261,
+      "mass_kg": 294414.5
+    },
+    {
+      "report": "Saved/Recovery/Physical_Nominal_15.json",
+      "fps": 15,
+      "scenario": "Nominal",
+      "success": true,
+      "peak_altitude_m": 97200.74381050549,
+      "capture_speed_mps": 0.023328645367653833,
+      "support_drift_m": 0.018119485182431245,
+      "mass_kg": 290210.84375
+    },
+    {
+      "report": "Saved/Recovery/Physical_Crosswind_15.json",
+      "fps": 15,
+      "scenario": "Crosswind",
+      "success": true,
+      "peak_altitude_m": 97200.30629474108,
+      "capture_speed_mps": 0,
+      "support_drift_m": 0.0023898800763963004,
+      "mass_kg": 281092.4375
+    },
+    {
+      "report": "Saved/Recovery/Physical_Offset_15.json",
+      "fps": 15,
+      "scenario": "Offset",
+      "success": true,
+      "peak_altitude_m": 96968.62513367848,
+      "capture_speed_mps": 0,
+      "support_drift_m": 0.02029088335935356,
+      "mass_kg": 295041.46875
+    }
+  ],
+  "contact_fixtures": {
+    "Centered": {
+      "success": true,
+      "duration_s": 5.000000260770321,
+      "report": "Saved/Recovery/ContactCentered.json"
+    },
+    "WrongHeading": {
+      "success": true,
+      "duration_s": 5.000000260770321,
+      "report": "Saved/Recovery/ContactWrongHeading.json"
+    },
+    "SideImpact": {
+      "success": true,
+      "duration_s": 5.000000260770321,
+      "report": "Saved/Recovery/ContactSideImpact.json"
+    }
+  },
+  "audits": {
+    "presentation": {
+      "success": true,
+      "report": "Saved/Recovery/Overhaul/result.json"
+    },
+    "assets": {
+      "success": true,
+      "report": "Saved/Recovery/asset-audit.json"
+    },
+    "earth": {
+      "success": true,
+      "report": "Saved/Recovery/earth-asset-audit.json"
+    },
+    "vfx": {
+      "success": true,
+      "report": "Saved/Recovery/vfx-asset-audit.json"
+    },
+    "camera": {
+      "success": true,
+      "report": "Saved/Recovery/EarthAudit/result.json"
+    }
+  },
+  "rendered_flight": {
+    "success": true,
+    "scenario": "Crosswind",
+    "reason": "Physical rail support evaluated for eight seconds with engines off",
+    "duration_s": 424.36668879911304,
+    "peak_altitude_m": 97171.30551456627,
+    "peak_tilt_deg": 130.39072988199507,
+    "capture_error_m": 0.03220450844142823,
+    "capture_speed_mps": 0,
+    "capture_tilt_deg": 0.001541308320254426,
+    "final_error_m": 0.0315971624519224,
+    "final_altitude_m": 20.000011789097385,
+    "final_speed_mps": 0,
+    "restraint_drift_m": 0.0006481657600912793,
+    "mass_kg": 280698.625,
+    "launch_mass_kg": 5617000,
+    "separation_mass_kg": 691589.6775614714,
+    "propellant_remaining_kg": 67037.52840254329,
+    "main_propellant_consumed_kg": 3582962.471597469,
+    "rcs_propellant_remaining_kg": 3632.084456326973,
+    "boostback_ignition_altitude_m": 81082.04227847148,
+    "boostback_downrange_m": 62651.81784851675,
+    "boostback_seconds": 37.800001971423626,
+    "unpowered_seconds": 134.1666736640036,
+    "fin_control_seconds": 35.900001872330904,
+    "landing_ignition_altitude_m": 4494.265629386314,
+    "landing_burn_seconds": 90.06667136400938,
+    "peak_q_pa": 158329.26082310014,
+    "peak_speed_mps": 1590.6834306119254,
+    "peak_downrange_m": 76694.33478922232,
+    "capture_heading_error_deg": 0.06327354882189695,
+    "capture_lug_error_m": 0.03578115238111496,
+    "unpowered_thrust_violation": false,
+    "physical_capture": true,
+    "left_rail_contact": true,
+    "right_rail_contact": true,
+    "contact_engine_shutdown": true,
+    "left_support_impulse_ns": 26966039.873136666,
+    "right_support_impulse_ns": 24255024.016227692,
+    "structural_contacts": 81,
+    "launch_catch_axis_distance_m": 0,
+    "phase_events": [
+      "READY 0.00s 0m 5617000kg",
+      "COUNTDOWN 0.00s 12m 5617000kg",
+      "ASCENT 4.00s 12m 5617000kg",
+      "SEPARATION 137.53s 66220m 691590kg",
+      "BOOSTBACK 153.40s 81082m 689446kg",
+      "COAST 191.17s 96855m 395070kg",
+      "ENTRY 270.57s 58350m 393473kg",
+      "LANDING BURN 326.33s 4494m 393161kg",
+      "CAPTURE 369.50s 155m 311917kg",
+      "SECURED 416.37s 20m 280670kg"
+    ]
+  },
+  "sources": {
+    "SuperHeavySim\\Source\\SuperHeavySim\\Private\\Recovery\\SuperHeavyRecoveryDirector.cpp": "67f14a150679c4156e94a6aace8e05602eca9169c6190b31fe5958a08be33719",
+    "SuperHeavySim\\Source\\SuperHeavySim\\Private\\Recovery\\RecoveryContacts.cpp": "2fb05a200cd408546a8acad9c279c70d48e9dbae44617cbe589758638fd837d0",
+    "SuperHeavySim\\Source\\SuperHeavySim\\Private\\Recovery\\RecoverySkyComponent.cpp": "c46182c016564a9c361f3affd225026c3149b15b1a68042b1d6e921a3ee950e1",
+    "assets\\overhaul\\sources.json": "79a5dfbcc023451d4bcc302eea580157efdfef8014a15d726570def3baa9eac2"
+  },
+  "rendered_final15": {
+    "success": true,
+    "scenario": "Crosswind",
+    "reason": "Physical rail support evaluated for eight seconds with engines off",
+    "duration_s": 424.40002213418484,
+    "peak_altitude_m": 97200.30629474108,
+    "peak_tilt_deg": 130.2558707128756,
+    "capture_error_m": 0.040179431068440984,
+    "capture_speed_mps": 0,
+    "capture_tilt_deg": 0.0033067705919905084,
+    "final_error_m": 0.03824659328666776,
+    "final_altitude_m": 20.000013365334333,
+    "final_speed_mps": 0,
+    "restraint_drift_m": 0.0023898800763963004,
+    "mass_kg": 281092.4375,
+    "launch_mass_kg": 5617000,
+    "separation_mass_kg": 691287.2662385216,
+    "propellant_remaining_kg": 67434.99332980375,
+    "main_propellant_consumed_kg": 3582565.0066701984,
+    "rcs_propellant_remaining_kg": 3628.4533556014767,
+    "boostback_ignition_altitude_m": 81139.40605146342,
+    "boostback_downrange_m": 62646.02587870495,
+    "boostback_seconds": 37.800001971423626,
+    "unpowered_seconds": 134.0666736587882,
+    "fin_control_seconds": 35.000001825392246,
+    "landing_ignition_altitude_m": 4499.024460093404,
+    "landing_burn_seconds": 90.2666713744402,
+    "peak_q_pa": 158468.73753950454,
+    "peak_speed_mps": 1591.075722796998,
+    "peak_downrange_m": 76660.33168925525,
+    "capture_heading_error_deg": 0.040100778109064095,
+    "capture_lug_error_m": 0.04003396354961005,
+    "unpowered_thrust_violation": false,
+    "physical_capture": true,
+    "left_rail_contact": true,
+    "right_rail_contact": true,
+    "contact_engine_shutdown": true,
+    "left_support_impulse_ns": 22507709.46105924,
+    "right_support_impulse_ns": 20242997.062042806,
+    "structural_contacts": 135,
+    "launch_catch_axis_distance_m": 0,
+    "phase_events": [
+      "READY 0.00s 0m 5617000kg",
+      "COUNTDOWN 0.00s 12m 5617000kg",
+      "ASCENT 4.00s 12m 5617000kg",
+      "SEPARATION 137.53s 66266m 691287kg",
+      "BOOSTBACK 153.40s 81139m 689144kg",
+      "COAST 191.13s 96876m 394880kg",
+      "ENTRY 270.47s 58330m 393329kg",
+      "LANDING BURN 326.20s 4499m 393014kg",
+      "CAPTURE 368.60s 155m 312621kg",
+      "SECURED 416.40s 20m 281063kg"
+    ]
+  },
+  "limitations": [
+    "Estimated flight and aerodynamic model, not SpaceX telemetry.",
+    "Rigid contact volumes, without arm deformation or detailed bearing contact.",
+    "Authored gas nozzles and Starship; visual upper-stage trajectory after separation.",
+    "Art-directed plume and atlas smoke, not real-time CFD.",
+    "Historical NASA/NAIP imagery; no real-time site survey or guaranteed optical resolution."
+  ]
+}

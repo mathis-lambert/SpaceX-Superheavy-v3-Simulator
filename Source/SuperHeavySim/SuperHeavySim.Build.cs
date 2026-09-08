@@ -8,16 +8,11 @@ public class SuperHeavySim : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "Json", "Niagara" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
-
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
-		
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
-
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "PhysicsCore", "RHI", "RenderCore" });
+		bool HasDLSS = Target.Platform == UnrealTargetPlatform.Win64 && System.IO.Directory.Exists(System.IO.Path.Combine(ModuleDirectory, "..", "..", "Plugins", "NVIDIA", "DLSS"));
+		PublicDefinitions.Add("RECOVERY_WITH_DLSS=" + (HasDLSS ? "1" : "0"));
+		if (HasDLSS) PrivateDependencyModuleNames.Add("DLSSBlueprint");
 	}
 }

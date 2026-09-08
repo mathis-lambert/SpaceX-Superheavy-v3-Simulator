@@ -9,9 +9,17 @@ Saved
 *.opendb
 *.sdf
 *.sln
+*.slnx
 *.suo
 *.xcodeproj
 *.xcworkspace
 .vsconfig
 *.log
 .DS_Store
+__pycache__/
+*.py[cod]
+
+# Vendor runtime libraries are dependencies, not generated Unreal binaries.
+!/Plugins/NVIDIA/DLSS/Binaries/
+/Plugins/NVIDIA/DLSS/Binaries/*
+!/Plugins/NVIDIA/DLSS/Binaries/ThirdParty/

@@ -1,0 +1,673 @@
+{
+  "toolset": "NiagaraToolsets.NiagaraToolset_System",
+  "description": "Sequential authoring recipe for a new NS_RecoveryVaporTrail. Run build_recovery_vfx.py before assigning the renderer material. Already-created assets are saved in Content/Starbase/FX.",
+  "operations": [
+    {
+      "tool": "CreateNiagaraSystem",
+      "args": {
+        "assetName": "NS_RecoveryVaporTrail",
+        "assetPath": "/Game/Starbase/FX",
+        "templateSystem": {
+          "refPath": "/Niagara/DefaultAssets/Templates/Systems/DirectionalBurst.DirectionalBurst"
+        }
+      }
+    },
+    {
+      "tool": "RemoveEmitter",
+      "args": {
+        "emitterToRemove": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "LocationBasedRibbon",
+          "scriptName": "",
+          "moduleName": "",
+          "rendererIndex": 0,
+          "inputNameStack": []
+        }
+      }
+    },
+    {
+      "tool": "RemoveEmitter",
+      "args": {
+        "emitterToRemove": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "DirectionalBurst",
+          "scriptName": "",
+          "moduleName": "",
+          "rendererIndex": 0,
+          "inputNameStack": []
+        }
+      }
+    },
+    {
+      "tool": "AddEmitter",
+      "args": {
+        "system": {
+          "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+        },
+        "templateEmitter": {
+          "refPath": "/Niagara/DefaultAssets/Templates/Emitters/Fountain.Fountain"
+        },
+        "emitterName": "Condensation"
+      }
+    },
+    {
+      "tool": "SetEmitterData",
+      "args": {
+        "emitter": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "",
+          "moduleName": "",
+          "rendererIndex": 0,
+          "inputNameStack": []
+        },
+        "emitterData": {
+          "propertyValues": "{\"SimTarget\":\"GPUComputeSim\",\"bLocalSpace\":false,\"CalculateBoundsMode\":\"Fixed\",\"FixedBounds\":{\"min\":{\"x\":-5000000,\"y\":-5000000,\"z\":-15000000},\"max\":{\"x\":5000000,\"y\":5000000,\"z\":15000000},\"isValid\":true},\"AllocationMode\":\"ManualEstimate\",\"PreAllocationCount\":6000}"
+        }
+      }
+    },
+    {
+      "tool": "AddUserVariables",
+      "args": {
+        "system": {
+          "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+        },
+        "variablesToAdd": [
+          {
+            "name": "User.SpawnRate",
+            "description": "Condensation sprites per second; zero stops new smoke.",
+            "type": {
+              "classStructOrEnum": {
+                "refPath": "/Script/Niagara.NiagaraFloat"
+              }
+            },
+            "defaultValue": {
+              "struct": {
+                "refPath": "/Script/Niagara.NiagaraFloat"
+              },
+              "value": {
+                "value": 0
+              }
+            }
+          },
+          {
+            "name": "User.ExhaustVelocity",
+            "description": "Initial world velocity of mixed exhaust, cm/s.",
+            "type": {
+              "classStructOrEnum": {
+                "refPath": "/Script/CoreUObject.Vector3f"
+              }
+            },
+            "defaultValue": {
+              "struct": {
+                "refPath": "/Script/CoreUObject.Vector"
+              },
+              "value": {
+                "x": 0,
+                "y": 400,
+                "z": -800
+              }
+            }
+          },
+          {
+            "name": "User.Wind",
+            "description": "Atmospheric world wind cm/s.",
+            "type": {
+              "classStructOrEnum": {
+                "refPath": "/Script/CoreUObject.Vector3f"
+              }
+            },
+            "defaultValue": {
+              "struct": {
+                "refPath": "/Script/CoreUObject.Vector"
+              },
+              "value": {
+                "x": 0,
+                "y": 400,
+                "z": 100
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "EmitterUpdateScript",
+          "moduleName": "SpawnRate",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "SpawnRate"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/NiagaraEditor.NiagaraExt_StackInputData_Linked"
+          },
+          "value": {
+            "linkedVariable": {
+              "name": "User.SpawnRate",
+              "type": {
+                "classStructOrEnum": {
+                  "refPath": "/Script/Niagara.NiagaraFloat"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleSpawnScript",
+          "moduleName": "InitializeParticle",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Lifetime Min"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/Niagara.NiagaraFloat"
+          },
+          "value": {
+            "value": 28
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleSpawnScript",
+          "moduleName": "InitializeParticle",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Lifetime Max"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/Niagara.NiagaraFloat"
+          },
+          "value": {
+            "value": 42
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleSpawnScript",
+          "moduleName": "InitializeParticle",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Uniform Sprite Size Min"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/Niagara.NiagaraFloat"
+          },
+          "value": {
+            "value": 1300
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleSpawnScript",
+          "moduleName": "InitializeParticle",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Uniform Sprite Size Max"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/Niagara.NiagaraFloat"
+          },
+          "value": {
+            "value": 2100
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleSpawnScript",
+          "moduleName": "ShapeLocation",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Sphere Radius"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/Niagara.NiagaraFloat"
+          },
+          "value": {
+            "value": 360
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleSpawnScript",
+          "moduleName": "AddVelocity",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Velocity Mode"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/NiagaraEditor.NiagaraExt_StackInputData_Enum"
+          },
+          "value": {
+            "enum": {
+              "refPath": "/Niagara/Enums/Utility/ENiagara_VelocityMode.ENiagara_VelocityMode"
+            },
+            "enumName": "ENiagara_VelocityMode::NewEnumerator0",
+            "displayName": "Linear"
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleSpawnScript",
+          "moduleName": "AddVelocity",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Velocity"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/NiagaraEditor.NiagaraExt_StackInputData_Linked"
+          },
+          "value": {
+            "linkedVariable": {
+              "name": "User.ExhaustVelocity",
+              "type": {
+                "classStructOrEnum": {
+                  "refPath": "/Script/CoreUObject.Vector3f"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleSpawnScript",
+          "moduleName": "AddVelocity",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Rotation Coordinate Space"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/NiagaraEditor.NiagaraExt_StackInputData_Enum"
+          },
+          "value": {
+            "enum": {
+              "refPath": "/Script/Niagara.ENiagaraCoordinateSpace"
+            },
+            "enumName": "ENiagaraCoordinateSpace::World",
+            "displayName": "World"
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleUpdateScript",
+          "moduleName": "GravityForce",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Gravity"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/CoreUObject.Vector3f"
+          },
+          "value": {
+            "x": 0,
+            "y": 0,
+            "z": 50
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleUpdateScript",
+          "moduleName": "Drag",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Drag"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/Niagara.NiagaraFloat"
+          },
+          "value": {
+            "value": 0.22
+          }
+        }
+      }
+    },
+    {
+      "tool": "AddModule",
+      "args": {
+        "moduleLocationRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleUpdateScript",
+          "moduleName": "GravityForce",
+          "rendererIndex": 0,
+          "inputNameStack": []
+        },
+        "moduleAsset": {
+          "refPath": "/Niagara/Modules/Update/Forces/V2/CurlNoiseForce.CurlNoiseForce"
+        }
+      }
+    },
+    {
+      "tool": "AddModule",
+      "args": {
+        "moduleLocationRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleUpdateScript",
+          "moduleName": "CurlNoiseForce",
+          "rendererIndex": 0,
+          "inputNameStack": []
+        },
+        "moduleAsset": {
+          "refPath": "/Niagara/Modules/Update/Forces/WindForce.WindForce"
+        }
+      }
+    },
+    {
+      "tool": "AddModule",
+      "args": {
+        "moduleLocationRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleUpdateScript",
+          "moduleName": "SolveForcesAndVelocity",
+          "rendererIndex": 0,
+          "inputNameStack": []
+        },
+        "moduleAsset": {
+          "refPath": "/Niagara/Modules/Update/Size/ScaleSpriteSize.ScaleSpriteSize"
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleUpdateScript",
+          "moduleName": "CurlNoiseForce",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Noise Strength"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/Niagara.NiagaraFloat"
+          },
+          "value": {
+            "value": 160
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleUpdateScript",
+          "moduleName": "CurlNoiseForce",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Noise Frequency"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/Niagara.NiagaraFloat"
+          },
+          "value": {
+            "value": 0.0005
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleUpdateScript",
+          "moduleName": "ScaleColor",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Scale Alpha"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/Niagara.NiagaraFloat"
+          },
+          "value": {
+            "value": 1
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleUpdateScript",
+          "moduleName": "WindForce",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Wind Speed"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/NiagaraEditor.NiagaraExt_StackInputData_Linked"
+          },
+          "value": {
+            "linkedVariable": {
+              "name": "User.Wind",
+              "type": {
+                "classStructOrEnum": {
+                  "refPath": "/Script/CoreUObject.Vector3f"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "",
+          "scriptName": "SystemUpdateScript",
+          "moduleName": "SystemState",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Loop Behavior"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/NiagaraEditor.NiagaraExt_StackInputData_Enum"
+          },
+          "value": {
+            "enum": {
+              "refPath": "/Niagara/Enums/ENiagara_EmitterStateOptions.ENiagara_EmitterStateOptions"
+            },
+            "enumName": "ENiagara_EmitterStateOptions::NewEnumerator0",
+            "displayName": "Infinite"
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetStackInputData",
+      "args": {
+        "stackInputRef": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "ParticleUpdateScript",
+          "moduleName": "ScaleSpriteSize",
+          "rendererIndex": 0,
+          "inputNameStack": [
+            "Uniform Curve Sprite Scale"
+          ]
+        },
+        "inputData": {
+          "struct": {
+            "refPath": "/Script/NiagaraEditor.NiagaraExt_StackInputData_DataInterface"
+          },
+          "value": {
+            "propertyValues": "{\"Curve\":{\"keys\":[{\"interpMode\":\"RCIM_Linear\",\"tangentMode\":\"RCTM_User\",\"tangentWeightMode\":\"RCTWM_WeightedNone\",\"time\":0,\"value\":0.7,\"arriveTangent\":0,\"arriveTangentWeight\":0,\"leaveTangent\":0,\"leaveTangentWeight\":0},{\"interpMode\":\"RCIM_Linear\",\"tangentMode\":\"RCTM_User\",\"tangentWeightMode\":\"RCTWM_WeightedNone\",\"time\":0.12,\"value\":1.8,\"arriveTangent\":0,\"arriveTangentWeight\":0,\"leaveTangent\":0,\"leaveTangentWeight\":0},{\"interpMode\":\"RCIM_Linear\",\"tangentMode\":\"RCTM_User\",\"tangentWeightMode\":\"RCTWM_WeightedNone\",\"time\":0.45,\"value\":3.6,\"arriveTangent\":0,\"arriveTangentWeight\":0,\"leaveTangent\":0,\"leaveTangentWeight\":0},{\"interpMode\":\"RCIM_Linear\",\"tangentMode\":\"RCTM_User\",\"tangentWeightMode\":\"RCTWM_WeightedNone\",\"time\":1,\"value\":6,\"arriveTangent\":0,\"arriveTangentWeight\":0,\"leaveTangent\":0,\"leaveTangentWeight\":0}],\"defaultValue\":0,\"preInfinityExtrap\":\"RCCE_Constant\",\"postInfinityExtrap\":\"RCCE_Constant\"},\"bUseLUT\":true}"
+          }
+        }
+      }
+    },
+    {
+      "tool": "SetRendererData",
+      "args": {
+        "renderer": {
+          "system": {
+            "refPath": "/Game/Starbase/FX/NS_RecoveryVaporTrail.NS_RecoveryVaporTrail"
+          },
+          "emitterName": "Condensation",
+          "scriptName": "",
+          "moduleName": "",
+          "rendererIndex": 0,
+          "inputNameStack": []
+        },
+        "rendererData": {
+          "propertyValues": "{\"Material\":{\"refPath\":\"/Game/Starbase/Materials/M_VaporTrail.M_VaporTrail\"},\"SortMode\":\"ViewDepth\",\"bCastShadows\":false}"
+        }
+      }
+    }
+  ]
+}

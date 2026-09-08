@@ -1,0 +1,789 @@
+{
+  "source": "https://developer.nvidia.com/rtx/dlss",
+  "archive": "UE5.8_DLSS4.5Plugin_v8.7.2.zip",
+  "archive_sha256": "caec541ce620ca60e455151e905e0e17cf01bd7337708ff5d3cae24fc9038bef",
+  "version": "8.7.2-NGX310.6.0",
+  "engine": "5.8",
+  "files": [
+    {
+      "path": "DLSS\\Binaries\\ThirdParty\\Win64\\Development\\nvngx_dlss.dll",
+      "sha256": "5b74688087dc9bacc4a654b9ab6f326d35ee26c8852713a1c5cbbfea124d5e26"
+    },
+    {
+      "path": "DLSS\\Binaries\\ThirdParty\\Win64\\Development\\nvngx_dlssd.dll",
+      "sha256": "3dd71cfbf43df4ab2bd9711aa881e1867a848ca8b91737ed9183aa1556cd03be"
+    },
+    {
+      "path": "DLSS\\Binaries\\ThirdParty\\Win64\\nvngx_dlss.dll",
+      "sha256": "099b3e1e3ad3f226de621fe570b26cc554cc775e2606be23eb222d6245674070"
+    },
+    {
+      "path": "DLSS\\Binaries\\ThirdParty\\Win64\\nvngx_dlssd.dll",
+      "sha256": "aca3d81f55ad3b709ec1f500578bbb114cf9d5a3cebc8c1a119162c4c4d4a361"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-DLSS.dll",
+      "sha256": "f9f8af2f17e3fb4d81a57753f2263b34b25d4ad93ef6478359576cb8fb7f51e3"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-DLSS.pdb",
+      "sha256": "a793d037c8a16f9e0a1b00051a3316c35c6ff730b9c1a2b5a419ad36d76f322a"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-DLSSBlueprint.dll",
+      "sha256": "6f7ebaecfd14856311d49d159a2827ab1421ea4479de7989a8cb23bddff02b4f"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-DLSSBlueprint.pdb",
+      "sha256": "c77617c6982a37a626337f275da8960af96472d07350c18197831224537fad62"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-DLSSEditor.dll",
+      "sha256": "9a60f78ded51c9a7aea7ed6929e6644f7fb11d9fb791997026dffff6c906c51f"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-DLSSEditor.pdb",
+      "sha256": "019746118ecc3ea2e0565757db8d56233d9b42a7074d3190634b4673055d6cdc"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-DLSSUtility.dll",
+      "sha256": "e24965612e3f225191321520b724587758f4f80e73f5795cf3c870fe1660b146"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-DLSSUtility.pdb",
+      "sha256": "d450d3e68b594abe5cc8528d5a3d49999b7f7fd7c174c706179fc87d2a06f9c4"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-NGXD3D11RHI.dll",
+      "sha256": "42144e3fdf7b53aa5b86839d950d1e14cad9c4593e63b970d2353be68c42f69a"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-NGXD3D11RHI.pdb",
+      "sha256": "5e5422191cf0fce47a6e34f42019cf2e58456f22056fa4eea293519c43051598"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-NGXD3D12RHI.dll",
+      "sha256": "aefae9c612008d92a2d7f8b910d5db99a8177b409ea1e4dc989cbaba8b15e14c"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-NGXD3D12RHI.pdb",
+      "sha256": "19fc2390342d829b41234569b4821e19ead69e5f7bd79639d308b8265e126d58"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-NGXRHI.dll",
+      "sha256": "b5e41bb05c954bf167c8ce1cf732612972846a7d32fcf7bd9b03a24a5c4d13b7"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-NGXRHI.pdb",
+      "sha256": "ce1ae174966b5c919ac5710bde928119e64f00c05b9f21c7f0ceb79509ca803b"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-NGXVulkanRHI.dll",
+      "sha256": "698821e729ef8f97481080fbc53ac514eca436144469f2a13b465781af01fa9d"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-NGXVulkanRHI.pdb",
+      "sha256": "7c8570f9ca1d81f52b31dd66d5b72fe092591ecf2cc89a56a2f8f0333e0d7b5b"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-NGXVulkanRHIPreInit.dll",
+      "sha256": "5ae0f2c3921fd389a3db2a6c949535afc468846a817e8d479dd0523a863a6472"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor-NGXVulkanRHIPreInit.pdb",
+      "sha256": "9046645d1eaaf8852909b8f6281d4559f65d8c7b772f6a4cce54eb8e4449ab27"
+    },
+    {
+      "path": "DLSS\\Binaries\\Win64\\UnrealEditor.modules",
+      "sha256": "13be92d07c2b262ad5d2d070bd568aa25733a27b26474e331f132cb8aee025ff"
+    },
+    {
+      "path": "DLSS\\Config\\FilterPlugin.ini",
+      "sha256": "ce4dff7ea6e71f990cb305878c65fdea5e9780ef23ab38b103418779b130ffe2"
+    },
+    {
+      "path": "DLSS\\Content\\DLSSMacros.uasset",
+      "sha256": "005b01f0881562127cbadd14b6fb1044c754e7a3bc4f5faeb5ed6ef9c12a58d8"
+    },
+    {
+      "path": "DLSS\\DLSS.uplugin",
+      "sha256": "c470e34fbe6d09152ee531de7500ed066e5351872114c08e5f283062c9102eba"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\DLSS\\UHT\\DLSS.init.gen.cpp",
+      "sha256": "387ade7be45a247e523b8c82299916dc9cb20a6c8cf4eece2bcb47a6222ae708"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\DLSS\\UHT\\DLSSClasses.h",
+      "sha256": "1270d67f056d111136d87fed9076cb3f77df8b680fe4464c38514e021940c54e"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\DLSS\\UHT\\DLSSSettings.gen.cpp",
+      "sha256": "ddd705de4c0aa313deafa22ed217feaa571bdf2b9508d30c72aaf088f140d87b"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\DLSS\\UHT\\DLSSSettings.generated.h",
+      "sha256": "2d853aefdb11c251814dbbb5ccda832cefae09098b6ffcefaf385e7488608006"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\DLSS\\UHT\\DLSSUpscalerModularFeature.gen.cpp",
+      "sha256": "a27c378296fff108dde9002fab49bbea707a24d32e6214b0598d606d5a1bc6d8"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\DLSS\\UHT\\DLSSUpscalerModularFeature.generated.h",
+      "sha256": "f05ed8d59375661d30556c316dc905c668bb6f4606d2e743f0c517ac4abe0144"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\DLSSBlueprint\\UHT\\DLSSBlueprint.init.gen.cpp",
+      "sha256": "20037a03431d36e7c8e017c28611cdeb7720ae8e1aa9151c949cf362d65b90b0"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\DLSSBlueprint\\UHT\\DLSSBlueprintClasses.h",
+      "sha256": "1270d67f056d111136d87fed9076cb3f77df8b680fe4464c38514e021940c54e"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\DLSSBlueprint\\UHT\\DLSSLibrary.gen.cpp",
+      "sha256": "75252f96880aa8613497ef8984f5f82a275c996e25fcd4d727d2830f4bd287a0"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\DLSSBlueprint\\UHT\\DLSSLibrary.generated.h",
+      "sha256": "338b179e4b4ea46c3428d51f6ee609e9e91127d5d025633f37c7d62970c546f7"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealGame\\Inc\\DLSS\\UHT\\DLSS.init.gen.cpp",
+      "sha256": "387ade7be45a247e523b8c82299916dc9cb20a6c8cf4eece2bcb47a6222ae708"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealGame\\Inc\\DLSS\\UHT\\DLSSClasses.h",
+      "sha256": "1270d67f056d111136d87fed9076cb3f77df8b680fe4464c38514e021940c54e"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealGame\\Inc\\DLSS\\UHT\\DLSSSettings.gen.cpp",
+      "sha256": "ddd705de4c0aa313deafa22ed217feaa571bdf2b9508d30c72aaf088f140d87b"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealGame\\Inc\\DLSS\\UHT\\DLSSSettings.generated.h",
+      "sha256": "2d853aefdb11c251814dbbb5ccda832cefae09098b6ffcefaf385e7488608006"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealGame\\Inc\\DLSS\\UHT\\DLSSUpscalerModularFeature.gen.cpp",
+      "sha256": "a27c378296fff108dde9002fab49bbea707a24d32e6214b0598d606d5a1bc6d8"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealGame\\Inc\\DLSS\\UHT\\DLSSUpscalerModularFeature.generated.h",
+      "sha256": "f05ed8d59375661d30556c316dc905c668bb6f4606d2e743f0c517ac4abe0144"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealGame\\Inc\\DLSSBlueprint\\UHT\\DLSSBlueprint.init.gen.cpp",
+      "sha256": "20037a03431d36e7c8e017c28611cdeb7720ae8e1aa9151c949cf362d65b90b0"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealGame\\Inc\\DLSSBlueprint\\UHT\\DLSSBlueprintClasses.h",
+      "sha256": "1270d67f056d111136d87fed9076cb3f77df8b680fe4464c38514e021940c54e"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealGame\\Inc\\DLSSBlueprint\\UHT\\DLSSLibrary.gen.cpp",
+      "sha256": "75252f96880aa8613497ef8984f5f82a275c996e25fcd4d727d2830f4bd287a0"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\UnrealGame\\Inc\\DLSSBlueprint\\UHT\\DLSSLibrary.generated.h",
+      "sha256": "338b179e4b4ea46c3428d51f6ee609e9e91127d5d025633f37c7d62970c546f7"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\DLSS\\UnrealEditor-DLSS.lib",
+      "sha256": "828155160a01f787b1845b16d8cc254b42ab1a3d1e5b53eb4959fb160462f58d"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\DLSSBlueprint\\UnrealEditor-DLSSBlueprint.lib",
+      "sha256": "d3dfa852c39e51e67acd96c6afb7234b2536018ae52a151072f4d29b40cae631"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\DLSSEditor\\UnrealEditor-DLSSEditor.lib",
+      "sha256": "381f049b30346917609e7de2214581285e533b966570aed417ef238232331229"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\DLSSUtility\\UnrealEditor-DLSSUtility.lib",
+      "sha256": "78334b3bce077656459fd4ff638d55b3bdaf77dfbefffda5813563b7aafa6b4f"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\NGXD3D11RHI\\UnrealEditor-NGXD3D11RHI.lib",
+      "sha256": "0cc600b45e1807cafd2bd0441410ac5a3460acfdc9097fa7d5f4ff3fcfe1b9b3"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\NGXD3D12RHI\\UnrealEditor-NGXD3D12RHI.lib",
+      "sha256": "1cbf42ee016a95c38b0a3155cc7173ecfd9f4fb57cdfc2c659635fc1afb83ad2"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\NGXRHI\\UnrealEditor-NGXRHI.lib",
+      "sha256": "533d7dbf316bffb8a0cd2f86d6a5df0b21f8b4f1520f7b876e817f01853cb82c"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\NGXVulkanRHI\\UnrealEditor-NGXVulkanRHI.lib",
+      "sha256": "526950f3a3c9251e461e5e7042034d8cff93b76d374de68fea2cda6c63d766d4"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\NGXVulkanRHIPreInit\\UnrealEditor-NGXVulkanRHIPreInit.lib",
+      "sha256": "7aab28097166dc3831276d1816c785522e77cfe0b50ab4a3765542a901ee15af"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSS\\DLSS.cpp.obj",
+      "sha256": "1cf2d7c8d2e86a0d4de0b0af745da377ce87b12953f2f317d5f347ede4f416f9"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSS\\DLSS.precompiled",
+      "sha256": "1a7e8ef8ed98344e2a64caaf2a29ed8b94d9a2e0f54ad60b09d7b5e631fcf513"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSS\\DLSSDenoiser.cpp.obj",
+      "sha256": "cd0eda825905fb1809325649e6d80f87b1292ff2c04785113f914412df4a955f"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSS\\DLSSUpscaler.cpp.obj",
+      "sha256": "a942a2afe0e3452a4cc1088b4cfd7719aabcb30003588de9bbe264be9f764bae"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSS\\DLSSUpscalerHistory.cpp.obj",
+      "sha256": "56ac232e4730f77b118c31eb38ba505255cd9cb5c138990d69fae005a9de99f5"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSS\\DLSSUpscalerModularFeature.cpp.obj",
+      "sha256": "58fd0f5bb5921468a02465df9a37970c8a9e05dd4f7e37d593ae9cedf2134a5b"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSS\\Module.DLSS.cpp.obj",
+      "sha256": "0fd0809bb71255486d543b6fda1822bbba5bca4698dd0b02157e2959ec123fc7"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSSBlueprint\\DLSSBlueprint.precompiled",
+      "sha256": "fca95d6a39b6bbadc46e19664180c9125f0d02ea721e80c4d941776169691b80"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSSBlueprint\\DLSSLibrary.cpp.obj",
+      "sha256": "590f2cb947ab5502f614d271430a4babec371b7577c65ce3c1c8f7011fed2207"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSSBlueprint\\DLSSUpscalerModularFeatureTest.cpp.obj",
+      "sha256": "593749a8703f12f4e64533e093429c1498914db641f22e9803b0e5aa5356fbec"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSSBlueprint\\Module.DLSSBlueprint.cpp.obj",
+      "sha256": "320b48abd85b0607568bbc9c1a9fbbea729a82af292e19cc409e57fa01a3424a"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSSUtility\\BiasCurrentColorPass.cpp.obj",
+      "sha256": "e8e02926c39be2254812f1aebc43948ecdec8652e634f2f1ad728ebbcdb90f83"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSSUtility\\DLSSUtility.cpp.obj",
+      "sha256": "b02a400a4e210e6401c3197b0d5be2b430076cfceab71a597750c58b4beaba0b"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSSUtility\\DLSSUtility.precompiled",
+      "sha256": "ed5f3d64d5160c57f9152b9eb9655c3b8cb940228a67f6b063d123332ddd3a9a"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSSUtility\\GBufferResolvePass.cpp.obj",
+      "sha256": "c143c32e04480925b05e79ee976437d2e6f6e0f14bf506f4cfa3f2233ad6e68d"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\DLSSUtility\\VelocityCombinePass.cpp.obj",
+      "sha256": "9c2271539704236169650feb92404bfd0c65d3755dbcfcb6d58090e5ddbcc905"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\NGXD3D11RHI\\NGXD3D11RHI.cpp.obj",
+      "sha256": "7821490a8592d4d7430382e5f87df53630dcce62ba2f9263fd8978abe817d317"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\NGXD3D11RHI\\NGXD3D11RHI.precompiled",
+      "sha256": "7592743b5faae6f09ddce32076f3ed3488364a9374b8bddc7661dd9db5582d10"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\NGXD3D12RHI\\NGXD3D12RHI.cpp.obj",
+      "sha256": "3a392ceac5f261fa24a840908a3ff23d48d114a2404a6b607287ba63eb7e8479"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\NGXD3D12RHI\\NGXD3D12RHI.precompiled",
+      "sha256": "b6f73b4fcb4d063a704a22bda596b3f6cfe92984aad57f97d4681c3fbcfea19e"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\NGXRHI\\NGXRHI.cpp.obj",
+      "sha256": "c69448ddea6f13b07e8fcd80aa49e4b75f13a0cdc70020f770a8e733fc5cb09a"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\NGXRHI\\NGXRHI.precompiled",
+      "sha256": "a2fc552fbf7746aaf3050de7ed54fff3e4e1c71dce34728a45494247548940a1"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\NGXVulkanRHI\\NGXVulkanRHI.cpp.obj",
+      "sha256": "c653cd6037cd0cbb040c589c5b44a81392be28e78f303b12952a8ab61fc9eed4"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\NGXVulkanRHI\\NGXVulkanRHI.precompiled",
+      "sha256": "28d519d3a53af343f5145d71375cd7717a9d81641d12184f8310dd5b62e7653c"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\NGXVulkanRHIPreInit\\NGXVulkanRHIPreInit.cpp.obj",
+      "sha256": "b1e56851186fc59d220a00163dcb51feac531c9d137347e2c73bea48e2ae00c5"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\NGXVulkanRHIPreInit\\NGXVulkanRHIPreInit.precompiled",
+      "sha256": "ca5ecfd52060afac061a410ce939809fecb0ba4c39ea5118be2cd48fdba9d7c8"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSS\\DLSS.cpp.obj",
+      "sha256": "4e9796f962413c5de5868cb7adf6603e9f4aec8e215a7a5ac4b9756752f4bc31"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSS\\DLSS.precompiled",
+      "sha256": "1a7e8ef8ed98344e2a64caaf2a29ed8b94d9a2e0f54ad60b09d7b5e631fcf513"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSS\\DLSSDenoiser.cpp.obj",
+      "sha256": "24aa147a108a770f5e21545ad5135e487d249091e6c2a12d969875f68a608122"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSS\\DLSSUpscaler.cpp.obj",
+      "sha256": "53ffd1cdc698c16143c1a55ed9d993591e3557132614fc0950345c8b9fb54978"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSS\\DLSSUpscalerHistory.cpp.obj",
+      "sha256": "c6613d0bbf547863a8331c0ea3ebc651a597f2eec427f7b689568a4235feefaa"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSS\\DLSSUpscalerModularFeature.cpp.obj",
+      "sha256": "a6857c5f3c65678fd651baf91bd36e5def874cb31badab7ff6a77856e5c65ab3"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSS\\Module.DLSS.cpp.obj",
+      "sha256": "1a26cc783c508dbdfd4efd45a75a0853aa8813fa08a8c4515f47173ef61161a9"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSSBlueprint\\DLSSBlueprint.precompiled",
+      "sha256": "fca95d6a39b6bbadc46e19664180c9125f0d02ea721e80c4d941776169691b80"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSSBlueprint\\DLSSLibrary.cpp.obj",
+      "sha256": "031e845e625dd021f282dcc593350b1bcefcd532a32858587fc08ebf3afeb0be"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSSBlueprint\\DLSSUpscalerModularFeatureTest.cpp.obj",
+      "sha256": "62da25e14ca836f5c3fe9ebc7f6ac72960bbe251c6db5f3fb4e6d2b33c75e7a6"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSSBlueprint\\Module.DLSSBlueprint.cpp.obj",
+      "sha256": "fe30e91c63633396b51cb7d4a8c2d46af9a64e37d905924a1497183cd91dc440"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSSUtility\\BiasCurrentColorPass.cpp.obj",
+      "sha256": "7cc89c506f74b78ba99d940c7ba247e7cca9c6b836f592bae0d2f583cdc79439"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSSUtility\\DLSSUtility.cpp.obj",
+      "sha256": "9c04e7dedd65305b648591cd7d67eb9c4f2949be01228121e19d6a622b9d8507"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSSUtility\\DLSSUtility.precompiled",
+      "sha256": "ed5f3d64d5160c57f9152b9eb9655c3b8cb940228a67f6b063d123332ddd3a9a"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSSUtility\\GBufferResolvePass.cpp.obj",
+      "sha256": "5829da36998e882c82cd73bc0dfea8ae834bd0b28b6da0e49f37da6f0090bfaf"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\DLSSUtility\\VelocityCombinePass.cpp.obj",
+      "sha256": "8bc5771fa9d355351ef09d569a07b56e64f0900cf2bcd2729d276bf863436ea0"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\NGXD3D11RHI\\NGXD3D11RHI.cpp.obj",
+      "sha256": "1cf36bb285f25ed7bbc814b886ce48d09b3f1cd0e1b6373d993489b17b01eab4"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\NGXD3D11RHI\\NGXD3D11RHI.precompiled",
+      "sha256": "7592743b5faae6f09ddce32076f3ed3488364a9374b8bddc7661dd9db5582d10"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\NGXD3D12RHI\\NGXD3D12RHI.cpp.obj",
+      "sha256": "8f36791aa8e17e11d200797a7c460ebead7925ad4af1580d5aac61bed55f8f83"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\NGXD3D12RHI\\NGXD3D12RHI.precompiled",
+      "sha256": "b6f73b4fcb4d063a704a22bda596b3f6cfe92984aad57f97d4681c3fbcfea19e"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\NGXRHI\\NGXRHI.cpp.obj",
+      "sha256": "b2581eb0374c0e0d9a1837cab0fbab40eab15aa4a8c4bf45c734e69df92dc09a"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\NGXRHI\\NGXRHI.precompiled",
+      "sha256": "a2fc552fbf7746aaf3050de7ed54fff3e4e1c71dce34728a45494247548940a1"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\NGXVulkanRHI\\NGXVulkanRHI.cpp.obj",
+      "sha256": "1cbb47b5b5a77e84fae7a7105680cac8710df27df5186139fa20bef6f891bfe3"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\NGXVulkanRHI\\NGXVulkanRHI.precompiled",
+      "sha256": "28d519d3a53af343f5145d71375cd7717a9d81641d12184f8310dd5b62e7653c"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\NGXVulkanRHIPreInit\\NGXVulkanRHIPreInit.cpp.obj",
+      "sha256": "3f1cbec4dafefc1df26750d3cdc445d5a3240733c4b7e2bf959c92110dcff603"
+    },
+    {
+      "path": "DLSS\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\NGXVulkanRHIPreInit\\NGXVulkanRHIPreInit.precompiled",
+      "sha256": "ca5ecfd52060afac061a410ce939809fecb0ba4c39ea5118be2cd48fdba9d7c8"
+    },
+    {
+      "path": "DLSS\\Resources\\Icon128.png",
+      "sha256": "6f10722cbd636809eb277dfa7b4457e782675f557e3d4f77e86a3937b3e8dc3a"
+    },
+    {
+      "path": "DLSS\\Shaders\\Private\\CreateBiasCurrentColor.usf",
+      "sha256": "3bc3d32ab3bd70d96b3e5917c46777be3c549abc8d9607a1a32fedf2e64cde75"
+    },
+    {
+      "path": "DLSS\\Shaders\\Private\\GBufferResolve.usf",
+      "sha256": "9b04da17c9b20b4c6e3fc2c0931807519a9e2bda25d048240e7965eb39cd3217"
+    },
+    {
+      "path": "DLSS\\Shaders\\Private\\VelocityCombine.usf",
+      "sha256": "f06c7c9e220ceaa4894b37ac0ef4eba179bdb9b4d7bcb689da82035ac8f1ec85"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\DLSS.Build.cs",
+      "sha256": "417c1c27af8c4d5818dd3f030b5765bca2153747407bae545bac70883b28874c"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Private\\DLSS.cpp",
+      "sha256": "4a13df02399461da15cc54ceb3373c7e8bd09bbad318ddc378dd299b26989b20"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Private\\DLSSDenoiser.cpp",
+      "sha256": "cebaf3cb6a1068ef46142602d9cd5d9f929a9977bf4a9a7bc565b5489d95c7b2"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Private\\DLSSDenoiser.h",
+      "sha256": "96db63a0a95104c12f934d2908e0eda273737ae33469f2fd2116ec0bbebf9c03"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Private\\DLSSUpscaler.cpp",
+      "sha256": "b75d95e139f0b32825ff4861afae5eb094f871f4e7703e03944ca34d12d25bd4"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Private\\DLSSUpscalerHistory.cpp",
+      "sha256": "3bd4392afa52e25616ba3e05ca3b3aca64db3ebc18659d64d7e2319496b3e416"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Private\\DLSSUpscalerHistory.h",
+      "sha256": "3a46d6f9da7cbfa33a4140a8899ab2cbdd55280bde56ae935309baf440eeff26"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Private\\DLSSUpscalerModularFeature.cpp",
+      "sha256": "d072dcb335e500d6725fdcbe789a97a316f061863153ee56c3ef0d9356b7d49d"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Private\\DLSSUpscalerModularFeature.h",
+      "sha256": "8c51c5d0d79babb7d5daa952f8a74a0367ade8fbcb4ec64d9338d76f5e22c4c5"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Private\\DLSSUpscalerPrivate.h",
+      "sha256": "21390408179579060e637558f45a6348c488f280bb6ec2d82fdf9df6826cea26"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Public\\DLSS.h",
+      "sha256": "c4e402e8102a09e7fae89ab97c842800b5b0156b0d2759f7a20b340db45077c6"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Public\\DLSSSettings.h",
+      "sha256": "3b335f872c88f85b395552e319d317f087ac7f59330136ef60f43f5b0ffd13c3"
+    },
+    {
+      "path": "DLSS\\Source\\DLSS\\Public\\DLSSUpscaler.h",
+      "sha256": "368522712e68af0fab5fa92642886ec445043de95afc637337bf14ac2882876c"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSBlueprint\\DLSSBlueprint.Build.cs",
+      "sha256": "50b2c6951307c07504d263696c339004ff3028aaf2e8a1386c9cf46f2bffb5cb"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSBlueprint\\Private\\DLSSLibrary.cpp",
+      "sha256": "a9d676a4e0fd869e45b339ad3c8ad6ed0e3ed2efdcdf7cbfba608e44c2c7f441"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSBlueprint\\Private\\Tests\\DLSSUpscalerModularFeatureTest.cpp",
+      "sha256": "4930ded6a6b60e57f4e93f12ce5095a613154f96e55ce0b5819eaeae9d360c5d"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSBlueprint\\Public\\DLSSLibrary.h",
+      "sha256": "670ec571510caf02b823697ba12e276a7bc3ffb11a2b232fde668a156c1965cd"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSEditor\\DLSSEditor.Build.cs",
+      "sha256": "7b013561e21e7562eaeecf22786e3b6c662e644a290311b0117c39cd185f8c04"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSEditor\\Private\\DLSSEditor.cpp",
+      "sha256": "fe381850490618f647828b89f3546c740173c32dda3653be3e29cb7e4e93b8c2"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSEditor\\Public\\DLSSEditor.h",
+      "sha256": "a66edcf40926a60bd45f1618bd0ece946a19cd1c0fcdc9d5a5b67bfb2fc2e63e"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSUtility\\DLSSUtility.Build.cs",
+      "sha256": "fbf621840b39bdb5605462f181e2c24012e32ede713a4f9a0d8c1a3f4ddc7a27"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSUtility\\Private\\BiasCurrentColorPass.cpp",
+      "sha256": "8e8225069312fecbfe894508e8dd0c9c1972efda85725f7eabf775184e14fb98"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSUtility\\Private\\DLSSUtility.cpp",
+      "sha256": "1bcfadfc296f3728f2515419bd3379b8beab06881b6c610792d14bb2c0ac531a"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSUtility\\Private\\GBufferResolvePass.cpp",
+      "sha256": "8736746d588f931bb448637df8b6a9bad48c5e8275e72c88e4644da3347e3394"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSUtility\\Private\\VelocityCombinePass.cpp",
+      "sha256": "c242ce603d66fd1d502fae5dbec0abbca837814851c0bd4f5e0a917e80eb0274"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSUtility\\Public\\BiasCurrentColorPass.h",
+      "sha256": "6a548e0914f01fa758f0828eeb3a14e916d851b412b5e8614d8c71d618578fee"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSUtility\\Public\\DLSSUtility.h",
+      "sha256": "756238a260a7ffdc90f90efd2f370ccc317e206d8a3d19b28c40a0360efed74c"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSUtility\\Public\\GBufferResolvePass.h",
+      "sha256": "8bb98d8323661b1add6849b19a4114b5978b80b2f2d499bfc6e4c1d97dd8c390"
+    },
+    {
+      "path": "DLSS\\Source\\DLSSUtility\\Public\\VelocityCombinePass.h",
+      "sha256": "a1ec9f094a0f90a6fe7778ea861d53ca82b5451f061b5fd66eb5d7d067d7a86b"
+    },
+    {
+      "path": "DLSS\\Source\\NGXD3D11RHI\\NGXD3D11RHI.Build.cs",
+      "sha256": "b485d640b7c6bb56499afbccaafb892338381c84b5317ee15ce796247bf1ac27"
+    },
+    {
+      "path": "DLSS\\Source\\NGXD3D11RHI\\Private\\NGXD3D11RHI.cpp",
+      "sha256": "c063aa30d7fb8f04e00c9c57ebda9750c6aab5304b13c8238981ca9b36489f60"
+    },
+    {
+      "path": "DLSS\\Source\\NGXD3D11RHI\\Public\\NGXD3D11RHI.h",
+      "sha256": "5b84a3c4cf157ef84fe222aa13e00a0d87b9d8e9c525df5270a303f9ee7c9754"
+    },
+    {
+      "path": "DLSS\\Source\\NGXD3D12RHI\\NGXD3D12RHI.Build.cs",
+      "sha256": "f9c6cf9ea2d1a420ffd48c0a9bfb7402432a6485bdcf26ca2294697428ac3b5b"
+    },
+    {
+      "path": "DLSS\\Source\\NGXD3D12RHI\\Private\\NGXD3D12RHI.cpp",
+      "sha256": "28a42c3b8e44b9c20c11d307779f8d47ad14746ad05cbeba594b1d1c358ce113"
+    },
+    {
+      "path": "DLSS\\Source\\NGXD3D12RHI\\Public\\NGXD3D12RHI.h",
+      "sha256": "0fc9ec83704ded182fd9b3e5196d6575b1d594c2eebc30cc6a76654acf76d45a"
+    },
+    {
+      "path": "DLSS\\Source\\NGXRHI\\NGXRHI.Build.cs",
+      "sha256": "5bbf37fe6402a2a52cef3371ec3ca04153309268300a3486856385ef88c1f403"
+    },
+    {
+      "path": "DLSS\\Source\\NGXRHI\\Private\\NGXRHI.cpp",
+      "sha256": "c506e7d526012fdf67a1cd760b07c72602066b9571cae0b773906059c1cb5509"
+    },
+    {
+      "path": "DLSS\\Source\\NGXRHI\\Public\\NGXRHI.h",
+      "sha256": "09be739d930f041337a397d29701d9d39480e9b181b96f9ea153843fcd4ceb36"
+    },
+    {
+      "path": "DLSS\\Source\\NGXVulkanRHI\\NGXVulkanRHI.Build.cs",
+      "sha256": "bc7d7aeacb984c400c2f1c8969ac636139cba23661bf151bb2dc9542de081ed0"
+    },
+    {
+      "path": "DLSS\\Source\\NGXVulkanRHI\\Private\\NGXVulkanRHI.cpp",
+      "sha256": "847a2f1b150f6a718347986457cebc8f988dbe34dbd6b4c9290ff9d6cb8a3681"
+    },
+    {
+      "path": "DLSS\\Source\\NGXVulkanRHI\\Public\\NGXVulkanRHI.h",
+      "sha256": "313adcbd3e6ccae3910968c7a6464e31e441e791210390b2b603635f2ac0709f"
+    },
+    {
+      "path": "DLSS\\Source\\NGXVulkanRHIPreInit\\NGXVulkanRHIPreInit.Build.cs",
+      "sha256": "3f71af359e3f48efea559dc3b2289dd5fcc71a927f0f778624e519c086000791"
+    },
+    {
+      "path": "DLSS\\Source\\NGXVulkanRHIPreInit\\Private\\NGXVulkanRHIPreInit.cpp",
+      "sha256": "d6e890b50da85e1014c3475180f0eea8eb61c0dc0c09b1a4a00acee4e9b06f8d"
+    },
+    {
+      "path": "DLSS\\Source\\NGXVulkanRHIPreInit\\Public\\NGXVulkanRHIPreInit.h",
+      "sha256": "4f8511c9f7ccd2444925b3987ae836266aa3ef432ebfc168af94f711ea6b0234"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Include\\nvsdk_ngx.h",
+      "sha256": "e04614ece503030b2613dc04518a31ffc13789d98b131e36679ade820073656f"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Include\\nvsdk_ngx_defs.h",
+      "sha256": "d8fb08d514ee25a4f6ef4eb11e4368634157281597d8930e1b669df0d38c50b0"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Include\\nvsdk_ngx_defs_dlssd.h",
+      "sha256": "e2f9066708b8e212ba4f4c0afa0f31ae6e2fdfd8ed117cba1a452057d2dca744"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Include\\nvsdk_ngx_helpers.h",
+      "sha256": "c908feeecc4369e0763bc3bb059dbb98654a25e06794467b5be86a83700671e8"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Include\\nvsdk_ngx_helpers_dlssd.h",
+      "sha256": "7c5264ac9f9756e79c8074c6fbae2ab5800d99849870cb093de64bc7b8a09380"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Include\\nvsdk_ngx_helpers_dlssd_vk.h",
+      "sha256": "5c126f6e8bea6ca09b9b32e5f477d2b44e06b18e9d82e1d9a413e364e9b01f81"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Include\\nvsdk_ngx_helpers_vk.h",
+      "sha256": "40353a9537abb768378e85158d1b468f49de4b6da1a6cbd907b9c21991028682"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Include\\nvsdk_ngx_params.h",
+      "sha256": "dd9ef57ac264256ddd63b3c75b2894f519c72a1a9c9c23814fb433aa71478ada"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Include\\nvsdk_ngx_params_dlssd.h",
+      "sha256": "7e4fc6d5c84b436d31e289f863762a178ab2ef5d8c1ff40b614b01b342385f05"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Include\\nvsdk_ngx_vk.h",
+      "sha256": "b417e45c5ff01a6153ed64d26629c824a878b7e92f3c795ce0ecb73577092dbb"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Lib\\x64\\nvsdk_ngx_d.lib",
+      "sha256": "a2209ba6c071fb0f6c54c592f60239d856e9e6471e6abf1fb2fcc7c0c09cde5e"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Lib\\x64\\nvsdk_ngx_d_dbg.lib",
+      "sha256": "cfcc50e3ba522dbd7764b57ba0f4f5f79e1ac9a8887c76497dfa9cffb834339f"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Lib\\x64\\nvsdk_ngx_s.lib",
+      "sha256": "d4ef7a7f941183b99ffb8a85927ad8655dca08c0b3a3618feb224e979cff8a88"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Lib\\x64\\nvsdk_ngx_s_dbg.lib",
+      "sha256": "d3a489dfcc50c10c0d089eae5bcd8bcad8f8a8acee86bbb17711743f1b091e77"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\LICENSE.txt",
+      "sha256": "dc2778a3283427285984cdb5b3f7f03eae7d8a06057f672f2999c5ee7fd4f67d"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\NGX.Build.cs",
+      "sha256": "18e52368f770cb4215e1936338b9368ae77e3846113c6e1ce9f31498b2b3915e"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\NGX.tps",
+      "sha256": "b225b8db85040d659d5785ee98a334971d8d56202a1685f678f74c0a3f90001f"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Utils\\DLSS_Debug_Jitter_Configs.txt",
+      "sha256": "8b237a1b2f699b7fa5fb03e8413e2d3919c7b654b3a0ab91ef6bb8478ef154d2"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Utils\\ngx_driver_onscreenindicator.reg",
+      "sha256": "a3d5ab7e4edb284d4da09ba91fecf327d79923591bc6749a2358467f3ce43e3a"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Utils\\ngx_driver_onscreenindicator_off.reg",
+      "sha256": "031a6e32a7741690c381e93e104ada8f21682828002a03c0eaedebb22e7bcd28"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Utils\\ngx_log_off.reg",
+      "sha256": "50596464cc918cbaac40175d9449f7cceddb05922a9cfcaa6b7b4d15a2e0a1a9"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Utils\\ngx_log_on.reg",
+      "sha256": "c0ef05bf7f3cda6c21b6cdddca8b8d5361a5b239df0169228fe1f8ac24c1e24c"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Utils\\ngx_log_verbose.reg",
+      "sha256": "2167cd920d52b027298c461417a5187443fe14343cb79a12e7268d0c40acb1bf"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Utils\\ngx_log_window_off.reg",
+      "sha256": "db1e89ac6d508660b48c04e19871e148e3773d8ab5c500477530c5578557514a"
+    },
+    {
+      "path": "DLSS\\Source\\ThirdParty\\NGX\\Utils\\ngx_log_window_on.reg",
+      "sha256": "fddae9b886612082d18bc074c62b1b23a3356019697ddfe7334e75e8e44dceba"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Binaries\\Win64\\UnrealEditor-StreamlineNGXCommon.dll",
+      "sha256": "0d80744c0f0a5660cb12c059e528e12f07b7bf3e014403f3199aefa0f21eab45"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Binaries\\Win64\\UnrealEditor-StreamlineNGXCommon.pdb",
+      "sha256": "003746944110f870e41fda8433d96f75925e295559a1706b9fe316369efecfd2"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Binaries\\Win64\\UnrealEditor.modules",
+      "sha256": "c232f24ca5fa032609bbab578e72c15adaaf9966ff476697e8e1691c9011d896"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\StreamlineNGXCommon\\UnrealEditor-StreamlineNGXCommon.lib",
+      "sha256": "377ed35d1c7ea2943727e92fcedb2d630c19e7c2dc7f6adf33a21a690f4c5fd8"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\StreamlineNGXCommon\\StreamlineNGXCommon.cpp.obj",
+      "sha256": "7f0cfadc26f8003e3e07b8f285f89f2f2363fcb4020da5504348aebb30907580"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Development\\StreamlineNGXCommon\\StreamlineNGXCommon.precompiled",
+      "sha256": "bbdb1a51fdd9a7261678a61ded4d17bcf5b637225a4a80ba83365eeac8a74666"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\StreamlineNGXCommon\\StreamlineNGXCommon.cpp.obj",
+      "sha256": "a79cd91362751c175625bb510d8192fd2b8046387ab1fc7d4a0464ee8f3829ad"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Intermediate\\Build\\Win64\\x64\\UnrealGame\\Shipping\\StreamlineNGXCommon\\StreamlineNGXCommon.precompiled",
+      "sha256": "bbdb1a51fdd9a7261678a61ded4d17bcf5b637225a4a80ba83365eeac8a74666"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Resources\\Icon128.png",
+      "sha256": "dab7b0eca5d83b58b01e428f9f4a6dbf422d2fcbb904b2baab5c87232621ad9f"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Source\\StreamlineNGXCommon\\Private\\StreamlineNGXCommon.cpp",
+      "sha256": "e164b66b7933b27f92e9e060e32b3ecdba0b21aabea1e308833c37e367ffd9a5"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Source\\StreamlineNGXCommon\\Public\\StreamlineNGXCommon.h",
+      "sha256": "af86561d0d031277a08c70d7ab37c29c303ca15485ba40dd0d4d02e2a600dff5"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Source\\StreamlineNGXCommon\\Public\\StreamlineNGXRenderer.h",
+      "sha256": "416170b30692b4930cd11062d134152918ecf7e8b5d24458a87a0a92af725004"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Source\\StreamlineNGXCommon\\Public\\StreamlineNGXRHI.h",
+      "sha256": "79e60ce057a33b67722612052be524f7318b8d68e64cd49fa0ff4e3f97deb8a8"
+    },
+    {
+      "path": "StreamlineNGXCommon\\Source\\StreamlineNGXCommon\\StreamlineNGXCommon.Build.cs",
+      "sha256": "1e02752c7b4ce4fd5424bf8b776c28630b8a883b2ba666ed571241d4d8552f73"
+    },
+    {
+      "path": "StreamlineNGXCommon\\StreamlineNGXCommon.uplugin",
+      "sha256": "6d7c639023216222e20bae800f62b1b21cc3dc78ce9baf1c246562d8913fd883"
+    }
+  ]
+}
