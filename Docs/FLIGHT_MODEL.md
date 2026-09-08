@@ -14,6 +14,13 @@ Updated 2026-09-08. Chaos integrates the rigid bodies. Guidance commands bounded
 
 Startup/throttle response uses bounded first-order response; shutdown closes over a finite interval. Specific impulse varies between configured sea-level and vacuum values. These estimates are not measured Raptor performance curves. Delivered impulse is limited by remaining fuel, including the final fraction of a timestep. Consumption follows `mass flow = thrust / (specific impulse × standard gravity)`, consistent with the [specific impulse definition](https://www.grc.nasa.gov/www/BGH/specimp.html).
 
+`RecoveryPropulsionModel` integrates booster valve impulse analytically over each
+held-command interval. Endpoint thrust drives artwork; step impulse determines
+the mean mechanical force and fuel consumption. The value-only engine-bank
+model has no Unreal object access. Guidance, RCS and upper-stage dynamics still
+run at game-frame cadence; current substepping does not make them independent
+of rendering. See [measured scheduling and convergence limits](Validation/PROPULSION_AND_SCHEDULING.md).
+
 Landing guidance uses separate switch-down/switch-up thresholds for the three- and thirteen-engine groups. This prevents consecutive-frame command chatter near one thrust threshold. It does not add thrust or constrain the body. Hardware restart counts, settling requirements and minimum stable operating duration still need a calibrated model.
 
 Reaction control uses six estimated pod locations, each representing two opposing one-way ports. The allocator closes the existing valve before reversing and applies forces at their locations. Valve response, maximum force and a separate gas supply bound authority. The six displayed pods are simplified artwork; detailed paired-nozzle geometry remains unfinished.

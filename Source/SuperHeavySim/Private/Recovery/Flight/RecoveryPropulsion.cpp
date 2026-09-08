@@ -38,69 +38,35 @@ void ASuperHeavyRecoveryDirector::InitializePhysicalActuators()
 
 void ASuperHeavyRecoveryDirector::ApplyThrust(const FVector& ThrustAcceleration,const FVector& TargetUp,double Dt)
 {
-    const double PerEngine=RuntimeProfile->EngineThrustN*EngineIspS/RuntimeProfile->SpecificImpulseSeaLevelS;
-    const auto IsRequested=[this](const FRecoveryEngineState& E)
-    { return ActiveEngines==33 || (ActiveEngines>=13 && E.bGimballed) || (ActiveEngines>0 && E.bCentral); };
-    int32 AvailableCount=0;
-    for(int32 I=0;I<Engines.Num();++I)if(IsRequested(Engines[I]) && I!=Experiment.FailedEngine)++AvailableCount;
-    const double Available=AvailableCount*PerEngine;
-    const double Required=FMath::Max(0.,FVector::DotProduct(ThrustAcceleration,Body->GetUpVector())*MassKg);
-    const double Command=Available>0 && PropellantKg>0 ? FMath::Clamp(Required/Available,RuntimeProfile->MinimumThrottle,1.) : 0.;
-    const double Response=1-FMath::Exp(-Dt/FMath::Max(.01,RuntimeProfile->ThrottleTimeConstant));
-    double Total=0;
-    for(auto& Engine:Engines)
-    {
-        const bool Enabled=IsRequested(Engine) && (&Engine-Engines.GetData())!=Experiment.FailedEngine;
-        // A closing propellant valve reaches its seat in finite time. Its rate
-        // belongs to the engine model and does not depend on mission phase time.
-        Engine.ThrustN=Enabled && Command>0 ? FMath::Lerp(Engine.ThrustN,Command*PerEngine,Response) :
-            FMath::Max(0.,Engine.ThrustN-PerEngine*Dt/FMath::Max(.01,RuntimeProfile->EngineShutdownTimeS));
-        if(Engine.ThrustN<1.) Engine.ThrustN=0;
-        Total+=Engine.ThrustN;
-    }
-    const double Delivered=RecoveryActuators::FuelLimitedThrust(Total,PropellantKg,EngineIspS,Dt);
-    const double FuelScale=Total>0?Delivered/Total:0;
-    ActualThrustN=Delivered;
-    const double Used=Delivered/(EngineIspS*RecoveryAtmosphere::G0)*Dt;
-    PropellantKg=FMath::Max(0.,PropellantKg-Used);MainFuelConsumedKg+=Used;
+    FRecoveryEngineCommand Command;
+    Command.RequestedCount=ActiveEngines;
+    Command.FailedEngine=Experiment.FailedEngine;
+    Command.RatedThrustN=RuntimeProfile->EngineThrustN*EngineIspS/RuntimeProfile->SpecificImpulseSeaLevelS;
+    Command.SpecificImpulseS=EngineIspS;
+    Command.RequestedThrustN=FMath::Max(0.,FVector::DotProduct(ThrustAcceleration,Body->GetUpVector())*MassKg);
+    auto Step=RecoveryPropulsion::AdvanceEngines(Engines,EngineParameters,Command,PropellantKg,Dt);
+    ActualThrustN=Dt>0?Step.DeliveredImpulseNs/Dt:0.;
+    PropellantKg=FMath::Max(0.,PropellantKg-Step.FuelUsedKg);
+    MainFuelConsumedKg+=Step.FuelUsedKg;
     UpdateMass();
-    Throttle=Available>0?FMath::Clamp(Delivered/Available,0.,1.):0;
+    Throttle=Step.AvailableThrustN>0?FMath::Clamp(ActualThrustN/Step.AvailableThrustN,0.,1.):0.;
     const FQuat Q=Body->GetComponentQuat();
     const FVector COM=Q.UnrotateVector(Body->GetCenterOfMass()/100.-BasePositionM);
     const FVector DesiredTorque=Phase<=ERecoveryPhase::Countdown || Phase>=ERecoveryPhase::Captured || bContactShutdown ? FVector::ZeroVector :
         AttitudeTorque(TargetUp,Phase>=ERecoveryPhase::LandingBurn?2.5:.65,Phase>=ERecoveryPhase::LandingBurn?3.2:1.6);
-    FVector C0=FVector::ZeroVector,C1=FVector::ZeroVector,C2=FVector::ZeroVector,AxialTorque=FVector::ZeroVector;
-    for(auto& Engine:Engines)
+    RecoveryPropulsion::AllocateGimbals(Engines,EngineParameters,COM,DesiredTorque,Dt,Step);
+    for(int32 I=0;I<Engines.Num();++I)
     {
-        Engine.ThrustN*=FuelScale;
-        const FVector R=Engine.PositionFromBaseM-COM;
-        AxialTorque+=FVector::CrossProduct(R,FVector(0,0,Engine.ThrustN));
-        if(!Engine.bGimballed || Engine.ThrustN<1.)continue;
-        for(const FVector A:{FVector(0,R.Z,-R.Y),FVector(-R.Z,0,R.X)})
-        { C0+=A*A.X;C1+=A*A.Y;C2+=A*A.Z; }
-    }
-    const FVector Lambda=RecoveryActuators::SolveSymmetric(C0,C1,C2,DesiredTorque-AxialTorque);
-    LastEngineForceBodyN=LastEngineMomentBodyNm=FVector::ZeroVector;
-    for(auto& Engine:Engines)
-    {
-        const FVector R=Engine.PositionFromBaseM-COM;
-        FVector Target=FVector::UpVector;
-        if(Engine.bGimballed && Engine.ThrustN>1.)
-        {
-            FVector Side(FVector::DotProduct(FVector(0,R.Z,-R.Y),Lambda),FVector::DotProduct(FVector(-R.Z,0,R.X),Lambda),0);
-            Side=Side.GetClampedToMaxSize(Engine.ThrustN*FMath::Tan(FMath::DegreesToRadians(RuntimeProfile->MaxGimbalDeg)));
-            Target=FVector(Side.X,Side.Y,Engine.ThrustN).GetSafeNormal();
-        }
-        const double Angle=FMath::Acos(FMath::Clamp(FVector::DotProduct(Engine.DirectionBody,Target),-1.,1.));
-        const double Fraction=Angle>1.e-8?FMath::Min(1-FMath::Exp(-Dt/.08),FMath::DegreesToRadians(RuntimeProfile->GimbalRateDegS)*Dt/Angle):1.;
-        Engine.DirectionBody=FMath::Lerp(Engine.DirectionBody,Target,Fraction).GetSafeNormal();
-        const FVector Force=Engine.DirectionBody*Engine.ThrustN;
-        ApplyVehicleForce(ERecoveryForceKind::Engine,int32(&Engine-Engines.GetData()),Q.RotateVector(Force),(BasePositionM+Q.RotateVector(Engine.PositionFromBaseM))*100);
-        LastEngineForceBodyN+=Force;LastEngineMomentBodyNm+=FVector::CrossProduct(R,Force);
-        PeakEngineForceRatio=FMath::Max(PeakEngineForceRatio,Engine.ThrustN>1.?Force.Size()/Engine.ThrustN:0.);
+        const auto& Engine=Engines[I];
+        ApplyVehicleForce(ERecoveryForceKind::Engine,I,Q.RotateVector(Engine.StepForceBodyN),
+            (BasePositionM+Q.RotateVector(Engine.PositionFromBaseM))*100);
+        const double MeanThrust=Dt>0?Engine.StepImpulseNs/Dt:0.;
+        PeakEngineForceRatio=FMath::Max(PeakEngineForceRatio,MeanThrust>1.?Engine.StepForceBodyN.Size()/MeanThrust:0.);
         PeakAppliedGimbalDeg=FMath::Max(PeakAppliedGimbalDeg,FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(Engine.DirectionBody.Z,-1.,1.))));
     }
-    AppliedGimbal=FVector(LastEngineForceBodyN.X,LastEngineForceBodyN.Y,0);
+    LastEngineForceBodyN=Step.ForceBodyN;
+    LastEngineMomentBodyNm=Step.MomentBodyNm;
+    AppliedGimbal=FVector(Step.ForceBodyN.X,Step.ForceBodyN.Y,0);
 }
 
 void ASuperHeavyRecoveryDirector::ApplyReactionControl(const FVector& TorqueBody,double Dt)

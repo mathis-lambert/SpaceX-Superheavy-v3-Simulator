@@ -1,6 +1,7 @@
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Shared/RecoveryAssets.h"
 #include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
+#include "Recovery/Tests/RecoveryPhysicsAuditComponent.h"
 #include "Recovery/Flight/RecoveryAtmosphere.h"
 #include "Recovery/Presentation/RecoveryPresentationComponent.h"
 #include "Recovery/Presentation/RecoverySkyComponent.h"
@@ -48,6 +49,7 @@ ASuperHeavyRecoveryDirector::ASuperHeavyRecoveryDirector()
     CreateDefaultSubobject<URecoverySiteActivityComponent>(TEXT("SiteActivity"));
     CreateDefaultSubobject<URecoveryAudioComponent>(TEXT("FlightAcoustics"));
     CreateDefaultSubobject<URecoveryDiagnosticsComponent>(TEXT("FlightDiagnostics"));
+    PhysicsAudit=CreateDefaultSubobject<URecoveryPhysicsAuditComponent>(TEXT("PhysicsCadenceAudit"));
     CreateDefaultSubobject<URecoveryForceDisplayComponent>(TEXT("ForceInspection"));
     static ConstructorHelpers::FClassFinder<ASuperHeavyVehicleActor> Booster(RecoveryAssets::BP_SuperHeavy);
     VehicleClass=Booster.Class;
@@ -240,6 +242,7 @@ void ASuperHeavyRecoveryDirector::Tick(float DeltaSeconds)
     const double PhysicsBudget=Physics->bSubstepping ? Physics->MaxSubstepDeltaTime*Physics->MaxSubsteps : Physics->MaxPhysicsDeltaTime;
     const double Dt=PhysicsBudget>0 ? FMath::Min(double(DeltaSeconds),PhysicsBudget) : double(DeltaSeconds);
     if(Dt<=0) return;
+    PhysicsAudit->RecordControlStep(Dt);
     AppliedForces.Reset(48);
     AppliedForceFrame=Body->GetComponentTransform();
     PhaseTime+=Dt;

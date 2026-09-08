@@ -1,6 +1,13 @@
 # Validation — 8 September 2026
 
-## Current wave: launch conditioning and full-mission cloud evaluation
+## Current wave: engine impulse and solver scheduling
+
+[Propulsion and scheduling evidence](Validation/PROPULSION_AND_SCHEDULING.md)
+records the value-only engine-bank extraction, eight passing unit tests and nine
+passing physical flights. The actual Chaos/control cadence measurement exposes
+the remaining frame dependence; this wave does not complete the fixed-step work.
+
+## Previous wave: launch conditioning and full-mission cloud evaluation
 
 See [ground and cloud validation](Validation/REALISM_GROUND_AND_CLOUDS.md) for the
 current optical correction, physical launch-abort evidence and full-flight timing.

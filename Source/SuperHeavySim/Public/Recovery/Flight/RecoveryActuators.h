@@ -10,6 +10,9 @@ struct FRecoveryEngineState
     FVector NozzleOffsetBodyM=FVector::ZeroVector;
     FVector DirectionBody=FVector::UpVector;
     double ThrustN=0;
+    // The endpoint drives telemetry/VFX; the integral drives fuel and mechanics.
+    double StepImpulseNs=0;
+    FVector StepForceBodyN=FVector::ZeroVector;
     bool bGimballed=false;
     bool bCentral=false;
 };

@@ -22,7 +22,13 @@ FTransform ASuperHeavyRecoveryDirector::GetUpperStageBaseTransform() const
 
 void ASuperHeavyRecoveryDirector::ResetPhysicalActuators()
 {
-    for(auto& Engine:Engines) { Engine.ThrustN=0;Engine.DirectionBody=FVector::UpVector; }
+    EngineParameters.MinimumThrottle=RuntimeProfile->MinimumThrottle;
+    EngineParameters.OpeningTimeConstantS=RuntimeProfile->ThrottleTimeConstant;
+    EngineParameters.ShutdownTimeS=RuntimeProfile->EngineShutdownTimeS;
+    EngineParameters.MaximumGimbalDeg=RuntimeProfile->MaxGimbalDeg;
+    EngineParameters.GimbalRateDegS=RuntimeProfile->GimbalRateDegS;
+    for(auto& Engine:Engines)
+    {Engine.ThrustN=0;Engine.StepImpulseNs=0;Engine.StepForceBodyN=FVector::ZeroVector;Engine.DirectionBody=FVector::UpVector;}
     ReactionForcesBodyN.Init(FVector::ZeroVector,6);
     PeakEngineForceRatio=PeakAppliedGimbalDeg=SeparationVelocityErrorMps=0;
     SeparationMomentumRelativeError=SeparationAngularMomentumRelativeError=0;

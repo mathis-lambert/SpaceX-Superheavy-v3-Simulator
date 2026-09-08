@@ -4,6 +4,8 @@
 #include "GameFramework/Actor.h"
 #include "Recovery/Flight/SuperHeavyRecoveryProfile.h"
 #include "Recovery/Flight/RecoveryActuators.h"
+#include "Recovery/Flight/RecoveryPropulsionModel.h"
+#include "Recovery/Flight/RecoveryFlightPhase.h"
 #include "Recovery/Flight/RecoveryFlightInspection.h"
 #include "Recovery/Flight/RecoveryLaunchSequence.h"
 #include "Recovery/Presentation/RecoveryCameraTracking.h"
@@ -16,9 +18,7 @@ class UPrimitiveComponent;
 class ACameraActor;
 class UBoxComponent;
 class UPhysicsConstraintComponent;
-
-UENUM(BlueprintType)
-enum class ERecoveryPhase : uint8 { Ready, Countdown, Ascent, Separation, Boostback, Coast, Entry, LandingBurn, Capture, Captured, Aborted };
+class URecoveryPhysicsAuditComponent;
 
 /** Autonomous suborbital recovery. Chaos integrates physical thrust, drag and control forces. */
 UCLASS(Blueprintable)
@@ -117,9 +117,11 @@ private:
     friend class URecoveryPresentationComponent;
     UPROPERTY(Transient) TObjectPtr<USuperHeavyRecoveryProfile> RuntimeProfile;
     UPROPERTY(Transient) TObjectPtr<UPrimitiveComponent> Body;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<URecoveryPhysicsAuditComponent> PhysicsAudit;
     UPROPERTY(Transient) TObjectPtr<UBoxComponent> UpperStageBody;
     UPROPERTY(Transient) TObjectPtr<UPhysicsConstraintComponent> LaunchHoldDown;
     TArray<FRecoveryEngineState> Engines;
+    FRecoveryEngineParameters EngineParameters;
     TArray<FRecoveryForceSample> AppliedForces;
     FTransform AppliedForceFrame;
     FRecoveryFlightExperiment Experiment;

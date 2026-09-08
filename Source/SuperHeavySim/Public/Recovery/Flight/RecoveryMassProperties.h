@@ -29,7 +29,8 @@ namespace RecoveryMass
         return Out;
     }
 
-    inline FProperties Booster(const USuperHeavyRecoveryProfile& P,double FuelKg,double GasKg,bool WithUpperStage)
+    template<typename TConfiguration>
+    inline FProperties Booster(const TConfiguration& P,double FuelKg,double GasKg,bool WithUpperStage)
     {
         // Estimated coaxial tank geometry and bulk densities. No mesh bounding
         // box is used as a substitute for a full stack's mass distribution.

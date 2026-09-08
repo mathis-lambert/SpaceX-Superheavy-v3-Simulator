@@ -15,7 +15,7 @@ Unchecked means pending, in progress, or insufficiently verified. A requirement 
 
 ## Performance (1–12)
 
-- [ ] 1. Optimize volumetric clouds, currently the largest measured GPU pass.
+- [x] 1. Optimize volumetric clouds, currently the largest measured GPU pass. Inactive storm shader work removed with full-resolution mode 3 preserved; [measured 1440p gains and paired visual scope](Validation/REALISM_GROUND_AND_CLOUDS.md#inactive-storm-shader-checkpoint).
 - [x] 2. Profile ignition, cloud crossings, entry and capture throughout a full mission. [Evidence](Validation/REALISM_GROUND_AND_CLOUDS.md#full-mission-timing).
 - [x] 3. Track slow-frame percentiles and stalls in addition to average FPS. [Evidence](Validation/REALISM_GROUND_AND_CLOUDS.md#full-mission-timing); independent analyzer fixtures and raw captures retain startup and tail frames.
 - [ ] 4. Establish separate budgets for clouds, smoke, lighting, shadows, water and reconstruction.
@@ -104,6 +104,7 @@ Unchecked means pending, in progress, or insufficiently verified. A requirement 
 ## Fundamental physics (71–84)
 
 - [ ] 71. Decouple guidance and actuator cadence from rendering.
+- Current work: value-only engine bank and analytic valve impulse; actual Chaos/control cadence is measured. The callback transfer remains open; see [propulsion and scheduling evidence](Validation/PROPULSION_AND_SCHEDULING.md).
 - [ ] 72. Verify numerical convergence as the integration step decreases.
 - [ ] 73. Extend mass, momentum and energy conservation checks.
 - [ ] 74. Add Earth rotation and a consistent atmospheric reference frame.

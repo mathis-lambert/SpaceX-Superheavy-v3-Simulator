@@ -98,10 +98,12 @@ counts, scattering and lighting settings remain unchanged. The shared authoring
 helper reproduces the material change during both targeted and full rebuilds.
 
 `StormPrunedVisual1440Mode3` completed the nominal physical mission and produced
-84 views matching the baseline geometry. Sampled crossing views retain their
-cloud silhouettes; the largest image difference is the startup countdown
-(mean absolute RGB difference 1.92/255). Full visual acceptance, including that
-startup difference and the remaining horizon/entry views, is still pending.
+84 views matching the baseline geometry. Sampled crossing, horizon and entry
+views retain their cloud silhouettes. The startup countdown has the largest
+image difference (mean absolute RGB difference 1.92/255); paired inspection
+shows a lighting difference on the ground. Its cause has not been isolated.
+The sampled cloud views support retaining the optimization in mode 3. This is
+not a claim of identical startup rendering or validation of every weather preset.
 
 The warmed full-flight capture
 `StormPrunedFlightFlightDLSSQuality1440Cloud3Hz30` completed with the cloud GPU
@@ -119,8 +121,10 @@ These are single-run observations, not a statistical guarantee. An earlier
 `StormPrunedHome` capture lacked the cloud GPU counter and is excluded; the
 measurement wrapper now rejects that case. Six Python validation fixtures pass,
 the three PowerShell scripts parse, and the Unreal editor build succeeded.
-The ground-abort HUD correction has compiled but still needs its own fresh
-hot-abort screenshot. Raw screenshots, CSVs and build evidence remain local
+The fresh `propulsion-ground-abort.log` run passes 12 checks. Its reviewed
+`GroundAbortAudit/SafeShutdown.png` shows `T-00:00:01`, zero engines/thrust,
+no flames, no highlighted flight phase and no landing-axis strip. Raw
+screenshots, CSVs and build evidence remain local
 under ignored `Saved/Recovery`; this document records their checkpoint status.
 
 The planet's low-detail coastline, repetitive cloud layout, large-scale water,
