@@ -1,0 +1,359 @@
+{
+  "source": "USGS/USDA NAIP orthoimagery service",
+  "credits": "USGS / USDA NAIP public domain imagery",
+  "note": "Requested output resolution does not prove the native ground sampling distance; verify source metadata before making a resolution claim.",
+  "tiles": [
+    {
+      "file": "BocaChica_0_0.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.2169338380889%2C25.943340703644875%2C-97.18691691904445%2C25.970320351822437&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.2169338380889,
+        25.943340703644875,
+        -97.18691691904445,
+        25.970320351822437
+      ],
+      "reported_extent": [
+        -97.2169338380889,
+        25.943340703644875,
+        -97.18691691904445,
+        25.970320351822437
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "dea81d8851fa29a66c6b6ad055903489720c909af7af710080a783967f3f24e8"
+    },
+    {
+      "file": "BocaChica_1_0.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.18691691904445%2C25.943340703644875%2C-97.1569%2C25.970320351822437&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.18691691904445,
+        25.943340703644875,
+        -97.1569,
+        25.970320351822437
+      ],
+      "reported_extent": [
+        -97.18691691904445,
+        25.943340703644875,
+        -97.1569,
+        25.970320351822437
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "f1914cdd396a78e7fe5e592358f786025bc0567fbb1d41f54bef292dc58e39b2"
+    },
+    {
+      "file": "BocaChica_2_0.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.1569%2C25.943340703644875%2C-97.12688308095554%2C25.970320351822437&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.1569,
+        25.943340703644875,
+        -97.12688308095554,
+        25.970320351822437
+      ],
+      "reported_extent": [
+        -97.1569,
+        25.943340703644875,
+        -97.12688308095554,
+        25.970320351822437
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "f5c476cdd8776e5f15aa456fcb1ce491405ecd2cccf62ae33853304a6d3b5df1"
+    },
+    {
+      "file": "BocaChica_3_0.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.12688308095554%2C25.943340703644875%2C-97.09686616191108%2C25.970320351822437&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.12688308095554,
+        25.943340703644875,
+        -97.09686616191108,
+        25.970320351822437
+      ],
+      "reported_extent": [
+        -97.12688308095554,
+        25.943340703644875,
+        -97.09686616191108,
+        25.970320351822437
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "46061bb0d02bbb67b174729ed78805be89392e1bb300bcd39534d02eef9311a2"
+    },
+    {
+      "file": "BocaChica_0_1.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.2169338380889%2C25.970320351822437%2C-97.18691691904445%2C25.9973&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.2169338380889,
+        25.970320351822437,
+        -97.18691691904445,
+        25.9973
+      ],
+      "reported_extent": [
+        -97.2169338380889,
+        25.970320351822437,
+        -97.18691691904445,
+        25.9973
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "618a71d6ca4dd8fa429335a81bad7279994f2c22eead43134df4be4b2407b463"
+    },
+    {
+      "file": "BocaChica_1_1.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.18691691904445%2C25.970320351822437%2C-97.1569%2C25.9973&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.18691691904445,
+        25.970320351822437,
+        -97.1569,
+        25.9973
+      ],
+      "reported_extent": [
+        -97.18691691904445,
+        25.970320351822437,
+        -97.1569,
+        25.9973
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "dc22843a67ce0af02596dc82c9b2a7c8ce083e86a96086779626673d36fc2414"
+    },
+    {
+      "file": "BocaChica_2_1.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.1569%2C25.970320351822437%2C-97.12688308095554%2C25.9973&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.1569,
+        25.970320351822437,
+        -97.12688308095554,
+        25.9973
+      ],
+      "reported_extent": [
+        -97.1569,
+        25.970320351822437,
+        -97.12688308095554,
+        25.9973
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "eeec8f769ddb58251dbf04f2a505667068874307ae7191ed958c374c8e2c169e"
+    },
+    {
+      "file": "BocaChica_3_1.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.12688308095554%2C25.970320351822437%2C-97.09686616191108%2C25.9973&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.12688308095554,
+        25.970320351822437,
+        -97.09686616191108,
+        25.9973
+      ],
+      "reported_extent": [
+        -97.12688308095554,
+        25.970320351822437,
+        -97.09686616191108,
+        25.9973
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "4081aed378046353699fb830c2354cf698d052c5932705c7f4d90d0145c2a553"
+    },
+    {
+      "file": "BocaChica_0_2.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.2169338380889%2C25.9973%2C-97.18691691904445%2C26.02427964817756&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.2169338380889,
+        25.9973,
+        -97.18691691904445,
+        26.02427964817756
+      ],
+      "reported_extent": [
+        -97.2169338380889,
+        25.9973,
+        -97.18691691904445,
+        26.02427964817756
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "d577fb682c73c3d3331cc518806ec2b2c0f9e1df83a9d54b8cc883f85e610ace"
+    },
+    {
+      "file": "BocaChica_1_2.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.18691691904445%2C25.9973%2C-97.1569%2C26.02427964817756&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.18691691904445,
+        25.9973,
+        -97.1569,
+        26.02427964817756
+      ],
+      "reported_extent": [
+        -97.18691691904445,
+        25.9973,
+        -97.1569,
+        26.02427964817756
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "9318e54507f02a274e95a1ed9fd2e7ae289b69ba9bd47029bcc0debc23e6b71d"
+    },
+    {
+      "file": "BocaChica_2_2.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.1569%2C25.9973%2C-97.12688308095554%2C26.02427964817756&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.1569,
+        25.9973,
+        -97.12688308095554,
+        26.02427964817756
+      ],
+      "reported_extent": [
+        -97.1569,
+        25.9973,
+        -97.12688308095554,
+        26.02427964817756
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "dd446e07eda091e5e02b2070367467963815c23e11ac6d2bb61600f3d3b9d4ee"
+    },
+    {
+      "file": "BocaChica_3_2.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.12688308095554%2C25.9973%2C-97.09686616191108%2C26.02427964817756&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.12688308095554,
+        25.9973,
+        -97.09686616191108,
+        26.02427964817756
+      ],
+      "reported_extent": [
+        -97.12688308095554,
+        25.9973,
+        -97.09686616191108,
+        26.02427964817756
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "92a8e788b441c5fc07a9cd3e5534870177a88336d938a61662c071c38634d017"
+    },
+    {
+      "file": "BocaChica_0_3.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.2169338380889%2C26.02427964817756%2C-97.18691691904445%2C26.051259296355123&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.2169338380889,
+        26.02427964817756,
+        -97.18691691904445,
+        26.051259296355123
+      ],
+      "reported_extent": [
+        -97.2169338380889,
+        26.02427964817756,
+        -97.18691691904445,
+        26.051259296355123
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "d844a93c698bbc0106ef3b7b5e8c8a3b57d716b55046e0acdcaa982056b79637"
+    },
+    {
+      "file": "BocaChica_1_3.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.18691691904445%2C26.02427964817756%2C-97.1569%2C26.051259296355123&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.18691691904445,
+        26.02427964817756,
+        -97.1569,
+        26.051259296355123
+      ],
+      "reported_extent": [
+        -97.18691691904445,
+        26.02427964817756,
+        -97.1569,
+        26.051259296355123
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "ca79c524e37504a8f8b12a5fe2b6fa21abb5b6f5df4c1bfcd9d8f90dcab7906f"
+    },
+    {
+      "file": "BocaChica_2_3.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.1569%2C26.02427964817756%2C-97.12688308095554%2C26.051259296355123&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.1569,
+        26.02427964817756,
+        -97.12688308095554,
+        26.051259296355123
+      ],
+      "reported_extent": [
+        -97.1569,
+        26.02427964817756,
+        -97.12688308095554,
+        26.051259296355123
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "be68f3a49371c20be2b003df9909e30ebd966f33fe0edb06911623096cf8ab5b"
+    },
+    {
+      "file": "BocaChica_3_3.png",
+      "url": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage?bbox=-97.12688308095554%2C26.02427964817756%2C-97.09686616191108%2C26.051259296355123&bboxSR=4326&imageSR=4326&size=4000%2C4000&format=png32&bandIds=0%2C1%2C2&adjustAspectRatio=false&f=pjson",
+      "bbox": [
+        -97.12688308095554,
+        26.02427964817756,
+        -97.09686616191108,
+        26.051259296355123
+      ],
+      "reported_extent": [
+        -97.12688308095554,
+        26.02427964817756,
+        -97.09686616191108,
+        26.051259296355123
+      ],
+      "dimensions": [
+        4000,
+        4000
+      ],
+      "nominal_output_metres_per_pixel": 0.75,
+      "sha256": "e49e0d490011465a71448253d868b240dc8de14b693cd2ed7c86c315e055a4fc"
+    }
+  ]
+}

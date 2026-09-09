@@ -2,8 +2,8 @@
 
 An interactive Unreal Engine 5.8 simulator: launch, stage separation, boostback, ballistic coast, atmospheric control, landing burn and physical tower capture.
 
-The first validated Windows alpha is `0.1.0-alpha.2`. See [launch instructions and known
-limitations](Docs/Releases/ALPHA_0.1.0.md) and [release validation](Docs/Releases/ALPHA_0.1.0_VALIDATION.md). Reproduce the standalone package with
+The current source version is `0.1.0-alpha.3`. See [launch instructions and known
+limitations](Docs/Releases/ALPHA_0.1.0.md), [site and photography changes](Docs/SITE_PHOTOGRAPHY.md), and the [first alpha validation](Docs/Releases/ALPHA_0.1.0_VALIDATION.md). Reproduce the standalone package with
 `./Tools/Runtime/package_alpha.ps1` from committed sources. Local release builds
 live in `Releases/`; generated binaries remain outside Git.
 
@@ -30,6 +30,7 @@ Both scripts accept `-EngineRoot` if Unreal is installed elsewhere. The default 
 
 - [Controls and cleanup](Docs/CONTROLS_AND_CLEANUP.md)
 - [Project structure](Docs/PROJECT_STRUCTURE.md)
+- [Site geography, photographic looks and the Starbase civil-time sun](Docs/SITE_PHOTOGRAPHY.md)
 - [Measured performance and validation](Docs/VALIDATION.md)
 - [Viewer, rendering, audio and browser-delivery notes](Docs/EXPERIENCE_NOTES.md)
 - [Flight model and physical capture](Docs/FLIGHT_MODEL.md)

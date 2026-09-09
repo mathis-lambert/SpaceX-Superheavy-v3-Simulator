@@ -53,10 +53,11 @@ def build_surface(name,tile=None):
         lo=-97.1569-half_lon+i*half_lon/2;hi=25.9973-half_lat+(j+1)*half_lat/2
         tileuv=custom(m,{'G':geo},f'return float2((G.x-({lo:.12f}))/{half_lon/2:.12f},({hi:.12f}-G.y)/{half_lat/2:.12f});',u.CustomMaterialOutputType.CMOT_FLOAT2)
         aerial=sample(m,ROOT+f'/Textures/Earth/T_BocaChica_{i}_{j}',tileuv)
+        water=custom(m,{'W':water,'P':p},'float h=(P.z+dot(P.xy,P.xy)/1274200000.)*.01;float local=1-smoothstep(-4.45,-3.85,h);return lerp(W,local,smoothstep(0,60000,600000-max(abs(P.x),abs(P.y))));',u.CustomMaterialOutputType.CMOT_FLOAT1)
         base=custom(m,{'B':base,'C':(aerial,'RGB'),'A':(aerial,'A'),'UV':tileuv,'P':p,'Camera':camera},'''
-float edge=min(min(UV.x,1-UV.x),min(UV.y,1-UV.y));
+float edge=600000-max(abs(P.x),abs(P.y));
 float near=1-smoothstep(180000,1000000,length(Camera-P));
-return lerp(B,C,A*smoothstep(0,.035,edge)*near);''')
+return lerp(B,C,A*smoothstep(0,60000,edge)*near);''')
     # Water comes from a BRDF, not a lit photograph of an old ocean surface.
     base=custom(m,{'C':base,'W':water},'float3 sea=lerp(float3(.003,.013,.024),float3(.009,.035,.041),saturate(C.g*4));return lerp(C,sea,W);')
     grounduv=custom(m,{'P':p},'return P.xy/430;',u.CustomMaterialOutputType.CMOT_FLOAT2)

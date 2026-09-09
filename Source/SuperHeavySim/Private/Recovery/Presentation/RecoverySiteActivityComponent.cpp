@@ -2,6 +2,7 @@
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Flight/SuperHeavyLaunchTower.h"
 #include "Recovery/Shared/RecoveryAssets.h"
+#include "Recovery/Presentation/RecoveryEnvironmentProfile.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -24,7 +25,8 @@ void URecoverySiteActivityComponent::Build(const FTransform& Site)
         C->SetGenerateOverlapEvents(false);C->SetCullDistance(180000);C->RegisterComponent();GetOwner()->AddInstanceComponent(C);
         C->SetWorldLocation(Site.TransformPosition(Location*100));C->SetWorldScale3D(Scale);return C;
     };
-    if(TruckMesh)for(int I=0;I<2;++I)
+    if(const auto* Profile=LoadObject<URecoveryEnvironmentProfile>(nullptr,RecoveryAssets::DA_RecoveryEnvironment))Road=Profile->ServiceRoad;
+    if(TruckMesh)for(int I=0;I<4;++I)
     {
         auto* Truck=Part(TruckMesh,nullptr,FVector(-255+I*55,-93.5,0),FVector(1,-1,1));Trucks.Add(Truck);
         if(Lamp)
@@ -66,21 +68,33 @@ void URecoverySiteActivityComponent::TickComponent(float Dt,ELevelTick Type,FAct
     auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());if(!D || !D->Tower)return;
     const auto Site=D->Tower->GetActorTransform();if(!bBuilt)Build(Site);
     ActivityTime+=Dt;
-    // Keep the access road static throughout an active launch/catch operation.
-    // These generic service vehicles patrol only the western service section.
-    if(D->Phase==ERecoveryPhase::Ready)TrafficDistance+=Dt*1.8;
-    constexpr double Length=65,Radius=4.7,Loop=2*Length+2*PI*Radius;
+    // Shared road data prevents vehicle paths drifting away from the authored
+    // mesh. Clear traffic at countdown; the viewing effects never drive physics.
+    const bool TrafficAllowed=D->Phase==ERecoveryPhase::Ready && !D->GetLaunchSequence().bRunning;
+    const double Duty=FMath::Fmod(ActivityTime,85.);
+    TrafficSpeed=FMath::FInterpConstantTo(TrafficSpeed,TrafficAllowed && Duty<72?3.2:0.,Dt,1.6);
+    TrafficDistance+=Dt*TrafficSpeed;
+    double Loop=0;for(int I=1;I<Road.Num();++I)Loop+=FVector::Dist(Road[I-1],Road[I]);
     for(int I=0;I<Trucks.Num();++I)
     {
-        const double T=FMath::Fmod(TrafficDistance+I*Loop*.5,Loop);FVector P;double Yaw;
-        if(T<Length){P=FVector(-270+T,-90-Radius,.1);Yaw=0;}
-        else if(T<Length+PI*Radius){double A=(T-Length)/Radius-PI*.5;P=FVector(-205+Radius*FMath::Cos(A),-90+Radius*FMath::Sin(A),.1);Yaw=FMath::RadiansToDegrees(A+PI*.5);}
-        else if(T<2*Length+PI*Radius){P=FVector(-205-(T-Length-PI*Radius),-90+Radius,.1);Yaw=180;}
-        else{double A=(T-2*Length-PI*Radius)/Radius+PI*.5;P=FVector(-270+Radius*FMath::Cos(A),-90+Radius*FMath::Sin(A),.1);Yaw=FMath::RadiansToDegrees(A+PI*.5);}
-        Trucks[I]->SetWorldLocationAndRotation(Site.TransformPosition(P*100),Site.TransformRotation(FRotator(0,Yaw,0).Quaternion()));
+        FVector P(136+(I-2)*24,26,.07);double Yaw=90;
+        if(I<2 && Loop>0)
+        {
+            double Distance=FMath::Fmod(TrafficDistance+I*Loop*.48,Loop);
+            for(int Segment=1;Segment<Road.Num();++Segment)
+            {
+                const FVector Delta=Road[Segment]-Road[Segment-1];const double Length=Delta.Size();
+                if(Length<=KINDA_SMALL_NUMBER)continue;
+                if(Distance<=Length){P=Road[Segment-1]+Delta*(Distance/Length);Yaw=Delta.Rotation().Yaw;break;}
+                Distance-=Length;
+            }
+        }
+        const FRotator Target=Site.TransformRotation(FRotator(0,Yaw,0).Quaternion()).Rotator();
+        Trucks[I]->SetWorldLocationAndRotation(Site.TransformPosition(P*100),FMath::RInterpTo(Trucks[I]->GetComponentRotation(),Target,Dt,5.));
         if(Beacons.IsValidIndex(I))Beacons[I]->SetScalarParameterValue(TEXT("Intensity"),FMath::Fmod(ActivityTime+I*.3,1)<.12?180.f:1.f);
     }
     const FVector Wind=D->GetWindVelocityMps(10);const double Yaw=Wind.IsNearlyZero()?0:Wind.Rotation().Yaw;
+    UpdateFacilityVents(Site,Wind);
     for(int I=0;I<Flags.Num();++I)
     {
         Flags[I]->SetWorldRotation(FRotator(0,Yaw,0));const FVector Normal=Flags[I]->GetRightVector();

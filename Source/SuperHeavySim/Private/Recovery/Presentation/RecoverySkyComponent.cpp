@@ -1,10 +1,13 @@
 #include "Recovery/Presentation/RecoverySkyComponent.h"
+#include "Recovery/Presentation/RecoverySolarPosition.h"
+#include "Recovery/Presentation/RecoveryEnvironmentProfile.h"
 #include "Recovery/Interface/RecoveryPlayerController.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Engine/DirectionalLight.h"
 #include "Engine/SkyLight.h"
 #include "Engine/ExponentialHeightFog.h"
 #include "Engine/PostProcessVolume.h"
+#include "Camera/CameraActor.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/SkyLightComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
@@ -23,9 +26,15 @@ URecoverySkyComponent::URecoverySkyComponent()
     PrimaryComponentTick.bCanEverTick=true;PrimaryComponentTick.bTickEvenWhenPaused=true;
     PrimaryComponentTick.TickGroup=TG_PostUpdateWork;
 }
+FVector URecoverySkyComponent::CalculateSunDirection(double LatitudeDeg,double LongitudeDeg,double LocalHour,double UtcOffsetHours,int32 DayOfYear)
+{return RecoverySolarPosition::Direction(LatitudeDeg,LongitudeDeg,LocalHour,UtcOffsetHours,DayOfYear);}
 void URecoverySkyComponent::FindScene()
 {
-    for(TActorIterator<ADirectionalLight> It(GetWorld());It;++It) if(!Sun.IsValid()) Sun=*It;
+    if(const auto* Environment=LoadObject<URecoveryEnvironmentProfile>(nullptr,RecoveryAssets::DA_RecoveryEnvironment))OriginLatLon=Environment->OriginLatLon;
+    // Choose the atmosphere's solar light explicitly; arbitrary iterator order
+    // can select a decorative or lunar directional light in a changed level.
+    for(TActorIterator<ADirectionalLight> It(GetWorld());It;++It)
+        if(auto* L=Cast<UDirectionalLightComponent>(It->GetLightComponent());L && L->bAtmosphereSunLight && L->AtmosphereSunLightIndex==0){Sun=*It;break;}
     for(TActorIterator<APostProcessVolume> It(GetWorld());It;++It) if(It->bUnbound) { Exposure=*It;break; }
     for(TActorIterator<AExponentialHeightFog> It(GetWorld());It;++It) { Fog=It->GetComponent();break; }
     for(TActorIterator<ASkyLight> It(GetWorld());It;++It) { Sky=It->GetLightComponent();break; }
@@ -70,17 +79,17 @@ void URecoverySkyComponent::TickComponent(float Dt,ELevelTick Type,FActorCompone
     if(!bFound)FindScene();
     const auto* PC=Cast<ARecoveryPlayerController>(GetWorld()->GetFirstPlayerController());
     const double Hour=PC?PC->TimeOfDay:17.;
-    // Local solar time at Boca Chica, representative September declination.
-    const double Latitude=FMath::DegreesToRadians(25.9973),Decl=FMath::DegreesToRadians(6.);
-    const double H=FMath::DegreesToRadians((Hour-12)*15);
-    const FVector ToSun(-FMath::Cos(Decl)*FMath::Sin(H),FMath::Cos(Latitude)*FMath::Sin(Decl)-FMath::Sin(Latitude)*FMath::Cos(Decl)*FMath::Cos(H),FMath::Sin(Latitude)*FMath::Sin(Decl)+FMath::Cos(Latitude)*FMath::Cos(Decl)*FMath::Cos(H));
+    const int32 SolarDay=PC?FMath::RoundToInt(PC->Photography.SolarDayOfYear):252;
+    const float UtcOffset=PC?PC->Photography.UtcOffsetHours:-5.f;
+    const FVector ToSun=RecoverySolarPosition::Direction(OriginLatLon.X,OriginLatLon.Y,Hour,UtcOffset,SolarDay);
     const double Elevation=FMath::RadiansToDegrees(FMath::Asin(ToSun.Z));
     const float Day=FMath::SmoothStep(-5.,5.,Elevation),HighSun=FMath::SmoothStep(0.,35.,Elevation);
-    if(FMath::Abs(Hour-LastHour)>0.001)
+    if(FMath::Abs(Hour-LastHour)>0.001 || SolarDay!=LastSolarDay || UtcOffset!=LastUtcOffset)
     {
         if(Sun.IsValid()) { Sun->SetActorRotation((-ToSun).Rotation());Sun->GetLightComponent()->SetIntensity(110000*Day);Sun->GetLightComponent()->SetLightColor(FLinearColor::White);Cast<UDirectionalLightComponent>(Sun->GetLightComponent())->SetForwardShadingPriority(Day>.01f?2:1); }
         if(Moon.IsValid()) { Moon->SetActorRotation(FRotator(-35,35,0));Moon->GetLightComponent()->SetIntensity(0.3f*(1-Day));Cast<UDirectionalLightComponent>(Moon->GetLightComponent())->SetForwardShadingPriority(Day>.01f?1:2); }
         LastHour=Hour;
+        LastSolarDay=SolarDay;LastUtcOffset=UtcOffset;
     }
     UpdateSiteLighting(1-FMath::SmoothStep(-5.f,5.f,float(Elevation)));
     FVector CameraLocation=FVector::ZeroVector;
@@ -109,24 +118,29 @@ void URecoverySkyComponent::TickComponent(float Dt,ELevelTick Type,FActorCompone
         auto& S=Exposure->Settings;
         const auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());
         const float EnginePower=D && D->ActiveEngines>0?FMath::Clamp(float(D->Throttle),0.f,1.f):0.f;
-        const float BaseEV=FMath::Lerp(6.5f,12.5f,Day)+HighSun*1.7f;
+        const float BaseEV=FMath::Lerp(6.5f,12.5f,Day)+HighSun*2.35f;
         // A night tracking camera stops down as the engines ignite. This retains
         // surface detail instead of whitening the whole pad with a daylight source.
         const float TargetEV=FMath::Max(BaseEV,FMath::Lerp(BaseEV,8.f,EnginePower*(1-Day)));
-        ExposureEV=ExposureEV<0?TargetEV:FMath::FInterpTo(ExposureEV,TargetEV,Dt,2.5f);
-        const float EV=ExposureEV;
+        ExposureEV=ExposureEV<0?TargetEV:FMath::FInterpTo(ExposureEV,TargetEV,FApp::GetDeltaTime(),2.5f);
+        const float EV=ExposureEV-(PC?PC->Photography.ExposureBiasEV:0.f);
         S.bOverride_AutoExposureMinBrightness=S.bOverride_AutoExposureMaxBrightness=true;
         S.AutoExposureMinBrightness=S.AutoExposureMaxBrightness=EV;
         S.bOverride_BloomIntensity=true;S.BloomIntensity=0.32f;
-        S.bOverride_MotionBlurAmount=true;S.MotionBlurAmount=PC?PC->MotionBlur:0.25f;
+        S.bOverride_MotionBlurAmount=true;S.MotionBlurAmount=PC?(PC->IsPaused()?0.f:PC->MotionBlur):0.25f;
         S.bOverride_MotionBlurMax=true;S.MotionBlurMax=2.f;
         S.bOverride_FilmGrainIntensity=true;S.FilmGrainIntensity=PC?PC->CameraGrain:0.12f;
         S.bOverride_VignetteIntensity=true;S.VignetteIntensity=0.15f;
+        S.bOverride_WhiteTemp=true;S.WhiteTemp=PC?PC->Photography.WhiteBalanceK:6500.f;
+        S.bOverride_WhiteTint=true;S.WhiteTint=PC?PC->Photography.Tint:0.f;
+        S.bOverride_ColorSaturation=true;S.ColorSaturation=FVector4(1,1,1,PC?PC->Photography.Saturation:1.f);
+        S.bOverride_ColorContrast=true;S.ColorContrast=FVector4(1,1,1,PC?PC->Photography.Contrast:1.f);
         S.bOverride_DepthOfFieldEnabled=true;S.DepthOfFieldEnabled=PC && PC->bCameraDepthOfField;
-        S.bOverride_DepthOfFieldFstop=true;S.DepthOfFieldFstop=8.f;
+        S.bOverride_DepthOfFieldFstop=true;S.DepthOfFieldFstop=PC?PC->Photography.Aperture:8.f;
         S.bOverride_DepthOfFieldFocalDistance=true;
-        const double Focus=D?(D->BasePositionM*100+FVector(0,0,5500)-CameraLocation).Size():50000;
-        S.DepthOfFieldFocalDistance=FMath::Max(2000.,Focus);
+        const double Focus=PC && !PC->Photography.bAutomaticFocus?PC->Photography.FocusDistanceM*100:
+            D?(D->GetViewerFocus()-CameraLocation).Size():50000;
+        S.DepthOfFieldFocalDistance=FMath::Max(200.,Focus);
         S.bOverride_DepthOfFieldSensorWidth=true;S.DepthOfFieldSensorWidth=36.f;
     }
 }

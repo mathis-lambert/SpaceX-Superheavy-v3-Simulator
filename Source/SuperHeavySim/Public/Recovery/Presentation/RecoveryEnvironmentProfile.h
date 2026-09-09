@@ -13,4 +13,6 @@ public:
     UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Geography") FVector2D OriginLatLon=FVector2D(25.9973,-97.1569);
     UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Scenery") TArray<FTransform> Grass;
     UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Scenery") TArray<FTransform> Rocks;
+    /** Authored closed service circuit in local metres, shared with the road mesh. */
+    UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Scenery") TArray<FVector> ServiceRoad;
 };

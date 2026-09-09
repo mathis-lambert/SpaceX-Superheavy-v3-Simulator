@@ -9,9 +9,9 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'Shared'))
 from project_paths import PROJECT_ROOT,ART_ROOT,SAVED_ROOT
 import unreal as u
 
-source=ART_ROOT/'Earth/Detail4000'
+source=ART_ROOT/'Earth/Registered4000'
 records=json.loads((source/'sources.json').read_text(encoding='utf-8'))['tiles']
-backup=SAVED_ROOT/'BeforeStrictPhysics/Content/Starbase/Textures/Earth'
+backup=SAVED_ROOT/'BeforeSitePhotography/Content/Starbase/Textures/Earth'
 backup.mkdir(parents=True,exist_ok=True)
 results=[]
 for record in records:

@@ -32,6 +32,10 @@ ASuperHeavyRecoveryDirector* ARecoveryPlayerController::GetDirector() const
 void ARecoveryPlayerController::BeginPlay()
 {
     Super::BeginPlay();
+    // The renderer must keep updating view history when optics are edited in
+    // pause; otherwise the final zoom velocity remains frozen in motion blur.
+    GetWorld()->bIsCameraMoveableWhenPaused=true;
+    Photography.Load(TEXT("Recovery.Photography"),GGameUserSettingsIni);
     GConfig->GetInt(TEXT("Recovery.Rendering"),TEXT("Reconstruction"),ReconstructionMode,GGameUserSettingsIni);
     GConfig->GetBool(TEXT("Recovery.Rendering"),TEXT("HardwareRayTracing"),bHardwareRayTracing,GGameUserSettingsIni);
     int32 RayTracingOverride=-1;FParse::Value(FCommandLine::Get(),TEXT("RecoveryRayTracing="),RayTracingOverride);
@@ -99,6 +103,7 @@ void ARecoveryPlayerController::HandleViewerAction(RecoveryInput::EAction Action
 void ARecoveryPlayerController::PlayerTick(float Dt)
 {
     Super::PlayerTick(Dt);
+    if(IsPaused())if(auto* D=GetDirector())D->RefreshViewerCamera(FApp::GetDeltaTime());
     if(!bReconstructionInitialized && RecoveryRenderSettings::IsReconstructionReady())
     {
         ReconstructionMode=RecoveryRenderSettings::ApplyReconstruction(ReconstructionMode);
@@ -127,6 +132,7 @@ void ARecoveryPlayerController::PlayerTick(float Dt)
     if(bFrontendInitialized && FParse::Param(FCommandLine::Get(),TEXT("RecoveryEarthAudit"))) TickEnvironmentAudit();
     if(bFrontendInitialized && FParse::Param(FCommandLine::Get(),TEXT("RecoveryOverhaulAudit"))) TickOverhaulAudit();
     if(bFrontendInitialized && FParse::Param(FCommandLine::Get(),TEXT("RecoveryWorldAudit"))) TickWorldAudit();
+    if(bFrontendInitialized && FParse::Param(FCommandLine::Get(),TEXT("RecoveryPhotoAudit"))) TickPhotographyAudit();
     if(bFrontendInitialized && (FParse::Param(FCommandLine::Get(),TEXT("RecoveryControlsAudit")) ||
         FParse::Param(FCommandLine::Get(),TEXT("RecoveryVaporReview")))) TickControlsAudit();
 }
@@ -220,6 +226,7 @@ void ARecoveryPlayerController::SavePreferences()
     // Render/input audits may vary scene settings, but never persist test values.
     if(FString(FCommandLine::Get()).Contains(TEXT("Audit")) || FParse::Param(FCommandLine::Get(),TEXT("RecoveryVaporReview")))return;
     GConfig->SetInt(TEXT("Recovery.Rendering"),TEXT("Reconstruction"),ReconstructionMode,GGameUserSettingsIni);
+    Photography.Sanitize();Photography.Save(TEXT("Recovery.Photography"),GGameUserSettingsIni);
     GConfig->SetBool(TEXT("Recovery.Rendering"),TEXT("HardwareRayTracing"),bHardwareRayTracing,GGameUserSettingsIni);
     GConfig->SetInt(TEXT("Recovery.Interface"),TEXT("Scenario"),SelectedScenario,GGameUserSettingsIni);
     GConfig->SetInt(TEXT("Recovery.Interface"),TEXT("Camera"),StartingCamera,GGameUserSettingsIni);

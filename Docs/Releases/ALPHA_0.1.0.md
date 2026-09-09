@@ -1,6 +1,6 @@
 # Starbase Flight Simulator — Alpha 0.1.0
 
-Version: `0.1.0-alpha.2`. Windows x64, Unreal Engine 5.8.
+Version: `0.1.0-alpha.3`. Windows x64, Unreal Engine 5.8.
 
 ## Start
 
@@ -33,6 +33,13 @@ fixed 120 Hz physical clock. Fitting support is read from resolved Chaos contact
 including during display stalls. Menus, camera selection, experiment controls,
 optional DLSS and hardware Lumen are included.
 
+This version adds registered coastal imagery, refined central terrain, service
+roads, maintenance facilities, four service vehicles and active tank vents.
+**Settings → Photography** provides five factory looks, three saved looks,
+camera optics, exposure/color controls and a geographic solar calendar. The
+clock is local Starbase time (CDT or CST); September solar noon is around 13:25 CDT.
+See `PHOTOGRAPHY.md` for controls, sources and scope.
+
 ## Known alpha limitations
 
 - The guidance and aerodynamic coefficients are estimates. Whole-return
@@ -41,7 +48,7 @@ optional DLSS and hardware Lumen are included.
 - Landing burns are still too long. Tower arms use a kinematic mechanism;
   articulation, compliance, overloads and failure behavior remain unfinished.
 - Earth imagery, cloud/smoke detail, site assets and graphics performance still
-  have improvements pending. This release freezes new feature work.
+  have improvements pending. The new site layout is authored, not a current survey.
 - Hardware validation is currently limited to the development machine.
 - The original realism programme remains a backlog, not a completed feature list.
 

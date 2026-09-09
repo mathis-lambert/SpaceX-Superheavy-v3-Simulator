@@ -44,7 +44,7 @@ void SRecoveryMenu::Construct(const FArguments& Args)
     Controller=Args._Controller;
     ChildSlot
     [SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-      .BorderBackgroundColor_Lambda([this](){ return FLinearColor(.002f,.004f,.008f,Page==6 || Page==13?0.12f:Page==0 && Controller.IsValid() && Controller->IsAtHome()?0.18f:0.55f); })
+      .BorderBackgroundColor_Lambda([this](){ return FLinearColor(.002f,.004f,.008f,Page==7 || (Page>=18 && Page<=21)?.04f:Page==6 || Page==13?0.12f:Page==0 && Controller.IsValid() && Controller->IsAtHome()?0.18f:0.55f); })
       .Padding(0)
       [SNew(SScaleBox).Stretch(EStretch::ScaleToFit)
         [SNew(SBox).WidthOverride(1920).HeightOverride(1080)
@@ -146,10 +146,11 @@ void SRecoveryMenu::ShowPage(int32 NewPage)
     const float Width=Page==6?1060:Page==0?520:Page==13?600:720;
     FString Title=Home?TEXT("RETURN TO\nSTARBASE"):TEXT("PAUSED");
     const TMap<int32,FString> Titles={{1,TEXT("LAUNCH")},{2,TEXT("DISPLAY")},{3,TEXT("CONTROLS")},
-        {4,TEXT("KEEP CHANGES?")},{5,TEXT("SAVED")},{6,TEXT("CAMERAS")},{7,TEXT("LIGHT & LENS")},
+        {4,TEXT("KEEP CHANGES?")},{5,TEXT("SAVED")},{6,TEXT("CAMERAS")},{7,TEXT("PHOTOGRAPHY")},
         {8,TEXT("SETTINGS")},{9,TEXT("ABOUT")},{10,TEXT("MISSION")},{11,TEXT("AUDIO")},
         {12,TEXT("IMAGE QUALITY")},{13,TEXT("FLIGHT LAB")},{14,TEXT("RAY TRACING")},
-        {15,TEXT("CREDITS")},{16,TEXT("RESTART FLIGHT?")},{17,TEXT("RETURN HOME?")}};
+        {15,TEXT("CREDITS")},{16,TEXT("RESTART FLIGHT?")},{17,TEXT("RETURN HOME?")},
+        {18,TEXT("CAMERA OPTICS")},{19,TEXT("COLOR & EXPOSURE")},{20,TEXT("ENVIRONMENT")},{21,TEXT("SAVED LOOKS")}};
     if(const auto* Found=Titles.Find(Page))Title=*Found;
     Rows->AddSlot().AutoHeight().Padding(0,0,0,26)[Text(Title,Page==0 && Home?52:30)];
     if(Page==0)
@@ -232,13 +233,17 @@ void SRecoveryMenu::ShowPage(int32 NewPage)
         Rows->AddSlot().AutoHeight().Padding(0,0,0,10)[Button(TEXT("KEEP THESE SETTINGS"),[PC](){ PC->ConfirmVideo(); },true)];
         Rows->AddSlot().AutoHeight()[Button(TEXT("REVERT DISPLAY SETTINGS"),[PC](){ PC->RevertVideo(); })];
     }
-    else if(Page==7)
+    else if(Page==7 || Page==18 || Page==19 || Page==21)PhotoPage(Rows);
+    else if(Page==20)
     {
+        Rows->AddSlot().AutoHeight().Padding(0,0,0,12)[Text(TEXT("STARBASE / LOCAL TIME"),13,RecoveryUI::Muted)];
+        Choice(Rows,TEXT("Clock"),{TEXT("CDT / UTC−5"),TEXT("CST / UTC−6")},PC->Photography.UtcOffsetHours<-5.5f?1:0,[PC](int32 I){PC->Photography.UtcOffsetHours=I?-6.f:-5.f;PC->SavePreferences();});
+        PhotoSlider(Rows,TEXT("Date / 2026"),&PC->Photography.SolarDayOfYear,1,365,TEXT("calendar"));
         Rows->AddSlot().AutoHeight().Padding(0,0,0,12)
           [SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Bold",42)).ColorAndOpacity(RecoveryUI::Accent)
             .Text_Lambda([PC](){const int32 M=FMath::RoundToInt(PC->TimeOfDay*60)%1440;return FText::FromString(FString::Printf(TEXT("%02d:%02d"),M/60,M%60));})];
         auto Marks=SNew(SHorizontalBox);
-        for(const TCHAR* Label:{TEXT("00 / NIGHT"),TEXT("06 / DAWN"),TEXT("12 / NOON"),TEXT("18 / DUSK")})
+        for(const TCHAR* Label:{TEXT("00:00"),TEXT("06:00"),TEXT("12:00"),TEXT("18:00")})
             Marks->AddSlot().FillWidth(1)[Text(Label,12,RecoveryUI::Muted)];
         Rows->AddSlot().AutoHeight().Padding(0,0,0,8)[Marks];
         auto Spectrum=SNew(SHorizontalBox);
@@ -261,9 +266,6 @@ void SRecoveryMenu::ShowPage(int32 NewPage)
               .OnMouseCaptureEnd_Lambda([PC](){PC->SavePreferences();}).OnControllerCaptureEnd_Lambda([PC](){PC->SavePreferences();})];
         };
         Slider(TEXT("Coastal haze / volumetric fog"),&PC->FogAmount,2.f);
-        Slider(TEXT("Motion blur / shutter"),&PC->MotionBlur,.5f);
-        Slider(TEXT("Film grain"),&PC->CameraGrain,.35f);
-        Toggle(Rows,TEXT("Depth of field / vehicle focus"),PC->bCameraDepthOfField,[PC](bool B){PC->bCameraDepthOfField=B;PC->SavePreferences();});
     }
     else if(Page==5) Rows->AddSlot().AutoHeight().Padding(0,0,0,10)[Button(TEXT("Back to graphics"),[this](){ ShowPage(2); })];
     else if(Page==6)
@@ -289,7 +291,7 @@ void SRecoveryMenu::ShowPage(int32 NewPage)
     }
     else if(Page==8)
     {
-        for(const auto& Item:TArray<TPair<FString,int32>>{{TEXT("Display"),2},{TEXT("Light & lens"),7},{TEXT("Controls"),3},{TEXT("Audio"),11},{TEXT("Credits"),15}})
+        for(const auto& Item:TArray<TPair<FString,int32>>{{TEXT("Display"),2},{TEXT("Photography"),7},{TEXT("Controls"),3},{TEXT("Audio"),11},{TEXT("Credits"),15}})
             Rows->AddSlot().AutoHeight().Padding(0,0,0,10)[Button(Item.Key,[this,Id=Item.Value](){ShowPage(Id);})];
     }
     else if(Page==9)

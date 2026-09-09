@@ -141,6 +141,7 @@ void URecoverySiteDetailsComponent::Build(const FTransform& Site)
         Pipe(1,FVector(X,Y,3.15),FVector(X+8,Y,.15),.025);
         for(int Wire=1;Wire<8;++Wire)Pipe(1,FVector(X+Wire,Y,.15),FVector(X+Wire,Y,3.15),.012);
     }
+    BuildServiceFacilities();
     for(auto& Batch:Batches){Batch->bAutoRebuildTreeOnInstanceChanges=true;Batch->BuildTreeIfOutdated(true,true);}
     bBuilt=true;
     UE_LOG(LogTemp,Display,TEXT("STARBASE_INDUSTRIAL_DETAIL instances=%d batches=%d"),GetInstanceCount(),Batches.Num());

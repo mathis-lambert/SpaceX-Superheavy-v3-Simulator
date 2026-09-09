@@ -88,6 +88,8 @@ public:
     static constexpr int32 CameraCount=14;
     static TArray<FString> GetCameraNames();
     int32 GetCameraMode() const { return CameraMode; }
+    void RefreshViewerCamera(double DeltaSeconds) { UpdateCamera(DeltaSeconds); }
+    FVector GetViewerFocus() const { return LastCameraFocus; }
     void SetCameraMode(int32 Mode) { CameraMode=FMath::Clamp(Mode,0,CameraCount-1);CameraZoom=1; }
     UFUNCTION(BlueprintPure, Category="Recovery") FString GetPhaseLabel() const;
     const TArray<FVector2D>& GetTrace() const { return Trace; }

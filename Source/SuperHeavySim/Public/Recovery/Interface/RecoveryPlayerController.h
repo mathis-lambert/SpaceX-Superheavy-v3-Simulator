@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Recovery/Interface/RecoveryInput.h"
+#include "Recovery/Presentation/RecoveryPhotography.h"
 #include "RecoveryPlayerController.generated.h"
 
 class ASuperHeavyRecoveryDirector;
@@ -58,6 +59,11 @@ public:
     float EffectivePlaybackRate=1.f;
     float MasterVolume=0.75f;
     bool bAutomaticOrbit=true;
+    FRecoveryPhotography Photography;
+    void ApplyPhotoPreset(int32 Index);
+    void SavePhotoLook(int32 Slot);
+    void LoadPhotoLook(int32 Slot);
+    bool HasPhotoLook(int32 Slot) const;
     bool bVideoConfirmation=false;
     double VideoConfirmDeadline=0;
     void BeginVideoConfirmation(FIntPoint PreviousResolution,int32 PreviousWindowMode);
@@ -70,6 +76,7 @@ private:
     void TickOverhaulAudit();
     void TickWorldAudit();
     void TickControlsAudit();
+    void TickPhotographyAudit();
     int32 AuditStage=0;
     int32 AuditPendingCamera=-1;
     double AuditDeadline=0,AuditMissionTime=0;

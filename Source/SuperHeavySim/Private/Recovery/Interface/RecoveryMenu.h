@@ -17,6 +17,7 @@ private:
     TWeakObjectPtr<ARecoveryPlayerController> Controller;
     TSharedPtr<SBox> Content;
     int32 Page=0;
+    int32 PhotoSlot=0;
     struct FDisplayDraft
     {
         FIntPoint Resolution;
@@ -31,6 +32,7 @@ private:
         if(Id==12 || Id==14)return 2;
         if(Id==15)return 8;
         if(Id==16 || Id==17)return 10;
+        if(Id>=18 && Id<=21)return 7;
         return 0;
     }
     void ReadGraphics();
@@ -39,4 +41,6 @@ private:
     TSharedRef<SWidget> Button(const FString& Label,TFunction<void()> Action,bool bPrimary=false) const;
     void Choice(TSharedRef<SVerticalBox> Rows,const FString& Label,TArray<FString> Values,int32 Selected,TFunction<void(int32)> Changed);
     void Toggle(TSharedRef<SVerticalBox> Rows,const FString& Label,bool Selected,TFunction<void(bool)> Changed);
+    void PhotoSlider(TSharedRef<SVerticalBox> Rows,const FString& Label,float* Value,float Minimum,float Maximum,const TCHAR* Unit,bool Logarithmic=false);
+    void PhotoPage(TSharedRef<SVerticalBox> Rows);
 };

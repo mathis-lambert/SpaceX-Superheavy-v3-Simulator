@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "registered_tiles": 16,
+  "max_extent_error_degrees": 0,
+  "shared_boundaries": 24,
+  "world_axes": "X east, Y true north, Z up",
+  "road_length_m": 1019.7228714274745
+}

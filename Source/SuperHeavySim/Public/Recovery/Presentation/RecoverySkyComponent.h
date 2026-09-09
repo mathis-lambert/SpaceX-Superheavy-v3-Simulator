@@ -18,6 +18,8 @@ class SUPERHEAVYSIM_API URecoverySkyComponent : public UActorComponent
     GENERATED_BODY()
 public:
     URecoverySkyComponent();
+    UFUNCTION(BlueprintPure,Category="Environment|Sun")
+    static FVector CalculateSunDirection(double LatitudeDeg,double LongitudeDeg,double LocalHour,double UtcOffsetHours,int32 DayOfYear);
     virtual void TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn) override;
 private:
     TWeakObjectPtr<ADirectionalLight> Sun;
@@ -32,6 +34,9 @@ private:
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> StarField;
     bool bFound=false;
     float LastHour=-1;
+    int32 LastSolarDay=-1;
+    float LastUtcOffset=100.f;
+    FVector2D OriginLatLon=FVector2D(25.9973,-97.1569);
     float LastCloudSamples=-1;
     float ExposureEV=-1;
     void FindScene();

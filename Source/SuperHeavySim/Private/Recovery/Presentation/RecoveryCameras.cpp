@@ -52,7 +52,8 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
         return;
     }
     auto* PC=GetWorld()->GetFirstPlayerController();
-    const auto* Settings=Cast<ARecoveryPlayerController>(PC);
+    auto* Settings=Cast<ARecoveryPlayerController>(PC);
+    const double ViewDt=Dt/(Settings?FMath::Max(.01f,Settings->EffectivePlaybackRate):1.f);
     const bool AcceptInput=PC && (!Settings || !Settings->IsMenuOpen()) &&
         !bIgnoreCameraInput;
     const double Sensitivity=Settings?Settings->MouseSensitivity:0.65;
@@ -69,11 +70,14 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
     {
         const int Wheel=(PC->WasInputKeyJustPressed(EKeys::MouseScrollDown)?1:0)-(PC->WasInputKeyJustPressed(EKeys::MouseScrollUp)?1:0);
         if(CameraMode==8) FreeCameraSpeedMps=FMath::Clamp(FreeCameraSpeedMps*FMath::Pow(1.4,-Wheel),5.,2000000.);
+        else if(Wheel && Settings && !Settings->Photography.bAutomaticFraming && (CameraMode==1 || CameraMode==3 || CameraMode==9 || CameraMode==10))
+        {Settings->Photography.FocalLengthMm=FMath::Clamp(float(Settings->Photography.FocalLengthMm*FMath::Pow(1.18,-Wheel)),12.f,600.f);Settings->SavePreferences();}
         else CameraZoom=FMath::Clamp(CameraZoom*FMath::Pow(1.18,Wheel),0.25,6.);
     }
     if(CameraMode==8 && bCameraInitialized)
     {
-        Camera->GetCameraComponent()->SetFieldOfView(FMath::FInterpTo(Camera->GetCameraComponent()->FieldOfView,65.,Dt,3.));
+        const double FreeFov=Settings && !Settings->Photography.bAutomaticFraming?Settings->Photography.HorizontalFovDegrees():65.;
+        Camera->GetCameraComponent()->SetFieldOfView(FMath::FInterpTo(Camera->GetCameraComponent()->FieldOfView,FreeFov,ViewDt,3.));
         if(AcceptInput)
         {
                 float DX=0,DY=0;PC->GetInputMouseDelta(DX,DY);
@@ -101,7 +105,7 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
     switch(CameraMode)
     {
     case 1:
-        Position=Site+FVector(33000,-43000,1600);
+        Position=Site+FVector(55000,-72000,1600);
         Fov=FMath::Clamp(FMath::RadiansToDegrees(2*FMath::Atan2(10500.,(Focus-Position).Size()))*CameraZoom,1.2,55.);
         break;
     case 2:
@@ -130,7 +134,7 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
     }
     case 7:
     {
-        if(!bOrbitManuallyAdjusted && (!Settings || Settings->bAutomaticOrbit)) CinematicAzimuth+=Dt*0.004;
+        if(!bOrbitManuallyAdjusted && (!Settings || Settings->bAutomaticOrbit)) CinematicAzimuth+=ViewDt*0.004*(Settings?Settings->Photography.OrbitSpeed:1.f);
         const double Angle=CinematicAzimuth;
         const double Radius=FMath::Lerp(42000.,24500.,StageFraming)*CameraZoom;
         Position=Focus+FVector(FMath::Cos(Angle)*Radius,FMath::Sin(Angle)*Radius,Radius*0.27);
@@ -146,8 +150,8 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
         Fov=38*CameraZoom;
         break;
     case 11:
-        Position=Site+FVector(-250000,-320000,150000)*CameraZoom;
-        Focus=Site+FVector(0,0,18000);Fov=58;
+        Position=Site+FVector(-65000,-85000,38000)*CameraZoom;
+        Focus=Site+FVector(0,0,4000);Fov=58;
         break;
     case 12:
         Position=Centre+FVector(0,-2000000,1000000)*CameraZoom;
@@ -177,7 +181,8 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
         Position=Focus+Orbit.Vector()*Offset.Size();
     }
     if(CameraMode!=13) Position.Z=FMath::Max(Position.Z,Site.Z+250.);
-    Fov=FMath::Clamp(Fov,1.2,110.);
+    if(Settings && !Settings->Photography.bAutomaticFraming)Fov=Settings->Photography.HorizontalFovDegrees();
+    Fov=FMath::Clamp(Fov,1.2,Settings && !Settings->Photography.bAutomaticFraming?120.:110.);
     if(bCameraInitialized && Changed)
     { CameraBlendOffset=Camera->GetActorLocation()-Position;CameraLookBlend=LastCameraFocus-Focus;CameraTransitionRemaining=1.2; }
     // Finite duration avoids kilometre-scale exponential tails after a globe view.
@@ -186,7 +191,17 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
     CameraBlendOffset*=Blend;CameraLookBlend*=Blend;CameraTransitionRemaining=NextRemaining;
     Position+=CameraBlendOffset;Focus+=CameraLookBlend;
     Camera->SetActorLocation(Position);
-    Camera->SetActorRotation((Focus-Position).Rotation());
+    FRotator ViewRotation=(Focus-Position).Rotation();
+    // Small angular vibration belongs to the camera, never to the vehicle pose.
+    // Fade to zero at physical support so secured Chase framing stays stable.
+    if(Settings && Phase!=ERecoveryPhase::Captured)
+    {
+        const double T=GetWorld()->GetRealTimeSeconds();
+        const double Power=Settings->Photography.MotionStrength*(.015+.045*Throttle);
+        ViewRotation.Pitch+=Power*(FMath::Sin(T*8.7)+.35*FMath::Sin(T*21.1));
+        ViewRotation.Yaw+=Power*.6*FMath::Sin(T*6.3);
+    }
+    Camera->SetActorRotation(ViewRotation);
     Camera->GetCameraComponent()->SetFieldOfView(bCameraInitialized?FMath::FInterpTo(Camera->GetCameraComponent()->FieldOfView,Fov,Dt,2.3):Fov);
     LastCameraFocus=Focus;LastCameraMode=CameraMode;bCameraInitialized=true;
 }

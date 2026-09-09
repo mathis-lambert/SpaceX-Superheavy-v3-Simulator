@@ -21,6 +21,7 @@ private:
     UPROPERTY(Transient) TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> Batches;
     bool bBuilt=false;
     void Build(const FTransform& Site);
+    void BuildServiceFacilities();
     void Box(int32 Material,const FVector& CentreM,const FVector& SizeM,const FQuat& Rotation=FQuat::Identity);
     void Pipe(int32 Material,const FVector& StartM,const FVector& EndM,double DiameterM);
     void Ring(int32 Material,const FVector& CentreM,double RadiusM,double DiameterM);

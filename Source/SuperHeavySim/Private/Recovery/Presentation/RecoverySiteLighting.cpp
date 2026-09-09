@@ -29,16 +29,18 @@ void URecoverySkyComponent::BuildSiteLighting()
     // Real fixtures surround the mount and illuminate the tower from several heights.
     const FVector Locations[]={
         {5500,-2800,1200},{5500,2800,1200},{-1800,-2500,1100},{-1800,2500,1100},
-        {-600,-600,Height*.30f},{-600,600,Height*.50f},{-600,-600,Height*.72f},{-600,600,Height*.92f}};
+        {-600,-600,Height*.30f},{-600,600,Height*.50f},{-600,-600,Height*.72f},{-600,600,Height*.92f},
+        {13500,3900,650},{17900,3900,650},{11300,-5500,520},{-11700,8200,900}};
     for(int32 I=0;I<UE_ARRAY_COUNT(Locations);++I)
     {
-        const FVector Focus=I<4?FVector(2400,0,I<2?8500:900):FVector(1100,0,Locations[I].Z-1800);
+        const FVector Focus=I<4?FVector(2400,0,I<2?8500:900):I<8?FVector(1100,0,Locations[I].Z-1800):Locations[I]+FVector(0,-1600,-Locations[I].Z);
         auto* Light=NewObject<USpotLightComponent>(GetOwner());
         Light->SetMobility(EComponentMobility::Movable);
         Light->SetWorldLocationAndRotation(Site.TransformPosition(Locations[I]),Site.TransformVector(Focus-Locations[I]).Rotation());
         Light->SetIntensityUnits(ELightUnits::Candelas);Light->SetIntensity(0);
-        Light->SetAttenuationRadius(16000);Light->SetInnerConeAngle(35);Light->SetOuterConeAngle(65);
+        Light->SetAttenuationRadius(I<8?16000:4500);Light->SetInnerConeAngle(35);Light->SetOuterConeAngle(65);
         Light->SetSourceRadius(35);Light->SetLightColor(FLinearColor(1.f,.86f,.68f));
+        if(I>=8){Light->SetTemperature(4700);Light->SetUseTemperature(true);Light->MaxDrawDistance=120000;Light->MaxDistanceFadeRange=20000;}
         Light->SetCastShadows(I<2);Light->SetVolumetricScatteringIntensity(.6f);
         Light->RegisterComponent();GetOwner()->AddInstanceComponent(Light);FloodLights.Add(Light);
         MakePart(Locations[I],FVector(.15,.65,.32),FixtureMaterial,(Focus-Locations[I]).Rotation());
