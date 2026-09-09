@@ -3,7 +3,7 @@ import sys,math,json
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'Shared'))
 from project_paths import ART_ROOT
-from earth_geography import point,geo,height
+from earth_geography import point,geo,height,LIDAR
 from site_landscape import ROAD,dune_height,road_height
 import bpy
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
@@ -31,9 +31,9 @@ def grid(name,nx,ny,fn):
             a=j*(nx+1)+i;faces.append((a,a+1,a+nx+2,a+nx+1))
     mesh(name,vertices,faces,uv)
 
-# Replace the four central terrain tiles, rather than layering another ground
-# mesh. Match the old coarser edge vertices at the outer perimeter exactly.
-for j in (1,2):
+# Legacy fallback only. The surveyed build_lidar_terrain.py owns all sixteen
+# terrain tiles when LiDAR is available; this builder then authors roads only.
+for j in (() if LIDAR is not None else (1,2)):
     for i in (1,2):
         def terrain(u,v,i=i,j=j):
             x,y=-6000+3000*(i+u),-6000+3000*(j+v)

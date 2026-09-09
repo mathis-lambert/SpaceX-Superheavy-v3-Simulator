@@ -38,6 +38,7 @@ private:
     int FirstLaunchPSOPeak=0;
     TArray<double> FirstLaunchFrameMs;
     int32 PeakVolumes=0,PlumeLights=0,SiteLights=0,PlayingAudio=0;
+    int32 PeakTurbulentVolumes=0;
     int32 StarshipFrames=0,StarshipPlumes=0,SiteDetailInstances=0;
     double MaxStarshipErrorCm=0;
     int32 ChaseContactFrames=0;

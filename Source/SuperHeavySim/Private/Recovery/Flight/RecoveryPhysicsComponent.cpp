@@ -1,5 +1,9 @@
 #include "Recovery/Flight/RecoveryPhysicsComponent.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
+#include "Recovery/Flight/SuperHeavyLaunchTower.h"
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
+#include "PhysicsProxy/JointConstraintProxy.h"
+#include "Components/BoxComponent.h"
 #include "Recovery/Flight/RecoverySeparationModel.h"
 #include "Recovery/Shared/FlightGeometry.h"
 #include "Chaos/SimCallbackObject.h"
@@ -28,9 +32,10 @@ struct FRecoveryDynamicsInput : Chaos::FSimCallbackInput
     Chaos::FSingleParticlePhysicsProxy* Proxy=nullptr;
     Chaos::FSingleParticlePhysicsProxy* UpperStageProxy=nullptr;
     Chaos::FSingleParticlePhysicsProxy* RailProxy[2]={nullptr,nullptr};
+    Chaos::FJointConstraintPhysicsProxy* JointProxy[4]={nullptr,nullptr,nullptr,nullptr};
     FRecoveryDynamicsCommand Command;
     FVector WorldGravityMps2=FVector::ZeroVector;
-    void Reset() { Setup.Reset();Proxy=nullptr;UpperStageProxy=nullptr;RailProxy[0]=RailProxy[1]=nullptr; }
+    void Reset() { Setup.Reset();Proxy=nullptr;UpperStageProxy=nullptr;RailProxy[0]=RailProxy[1]=nullptr;for(auto& Joint:JointProxy)Joint=nullptr; }
 };
 struct FRecoveryDynamicsOutput : Chaos::FSimCallbackOutput
 {
@@ -48,6 +53,7 @@ class FRecoveryPhysicsCallback : public Chaos::TSimCallbackObject<FRecoveryDynam
     FRecoveryGuidanceModel Guidance;
     FRecoveryUpperStageModel UpperStage;
     FRecoveryRailSupport RailSupport;
+    FRecoveryTowerState TowerState;
     TSharedPtr<const FRecoveryDynamicsSetup,ESPMode::ThreadSafe> ActiveSetup;
 
     template<typename THandle>
@@ -92,6 +98,7 @@ class FRecoveryPhysicsCallback : public Chaos::TSimCallbackObject<FRecoveryDynam
             Guidance.Reset(ActiveSetup->Configuration);
             UpperStage.Reset(ActiveSetup->UpperStage);
             RailSupport=FRecoveryRailSupport();
+            TowerState=FRecoveryTowerState();
         }
         auto Body=ReadBody(Handle);
         auto Command=Input->Command;
@@ -131,6 +138,7 @@ class FRecoveryPhysicsCallback : public Chaos::TSimCallbackObject<FRecoveryDynam
         auto& Output=GetProducerOutputData_Internal();
         Output.State=State;Output.Guidance=Guidance.GetState();Output.UpperStage=UpperStage.GetState();Output.Generation=ActiveSetup->Generation;
         Output.State.RailSupport=RailSupport;
+        Output.State.Tower=TowerState;
     }
 
     virtual void OnPostSolve_Internal() override
@@ -139,6 +147,25 @@ class FRecoveryPhysicsCallback : public Chaos::TSimCallbackObject<FRecoveryDynam
         if(GetDeltaTime_Internal()<=0 || !ActiveSetup || !Input || Input->Setup!=ActiveSetup || !Input->Proxy)return;
         const auto* Particle=Input->Proxy->GetHandle_LowLevel();
         if(!Particle)return;
+        for(int32 I=0;I<4;++I)
+        {
+            const auto* Joint=Input->JointProxy[I]?Input->JointProxy[I]->GetHandle():nullptr;
+            if(!Joint)continue;
+            const bool Broken=Joint->IsConstraintBroken();
+            const double InvDt=1./GetDeltaTime_Internal();
+            if(I<2)
+            {
+                if(Broken)TowerState.BrokenRails|=1<<I;
+                TowerState.RailLoadN[I]=FVector(Joint->GetLinearImpulse()).Size()*.01*InvDt;
+                TowerState.PeakRailLoadN[I]=FMath::Max(TowerState.PeakRailLoadN[I],TowerState.RailLoadN[I]);
+            }
+            else
+            {
+                if(Broken)TowerState.BrokenHinges|=1<<(I-2);
+                TowerState.PeakHingeTorqueNm[I-2]=FMath::Max(TowerState.PeakHingeTorqueNm[I-2],FVector(Joint->GetAngularImpulse()).Size()*.0001*InvDt);
+            }
+        }
+        GetProducerOutputData_Internal().State.Tower=TowerState;
         RailSupport.CurrentMask=0;++RailSupport.SolverSamples;
         FVector StepImpulseNs[2]={FVector::ZeroVector,FVector::ZeroVector};
         Particle->ParticleCollisions().VisitConstCollisions([&](const Chaos::FPBDCollisionConstraint& Contact)
@@ -223,7 +250,7 @@ void URecoveryPhysicsComponent::InitializeMission(const FRecoveryGuidanceConfigu
     Setup=Next;
 }
 void URecoveryPhysicsComponent::Submit(UPrimitiveComponent& Body,UPrimitiveComponent* UpperStage,
-    UPrimitiveComponent& LeftRail,UPrimitiveComponent& RightRail,const FRecoveryDynamicsCommand& Command)
+    ASuperHeavyLaunchTower& Tower,const FRecoveryDynamicsCommand& Command)
 {
     if(!Callback || !Setup)return;
     auto* Input=Callback->GetProducerInputData_External();
@@ -232,9 +259,15 @@ void URecoveryPhysicsComponent::Submit(UPrimitiveComponent& Body,UPrimitiveCompo
     Input->Proxy=Instance?Instance->ActorHandle:nullptr;
     const auto* UpperInstance=UpperStage?UpperStage->GetBodyInstance():nullptr;
     Input->UpperStageProxy=UpperInstance?UpperInstance->ActorHandle:nullptr;
-    const auto* LeftInstance=LeftRail.GetBodyInstance();const auto* RightInstance=RightRail.GetBodyInstance();
+    const auto* LeftInstance=Tower.LeftRail->GetBodyInstance();const auto* RightInstance=Tower.RightRail->GetBodyInstance();
     Input->RailProxy[0]=LeftInstance?LeftInstance->ActorHandle:nullptr;
     Input->RailProxy[1]=RightInstance?RightInstance->ActorHandle:nullptr;
+    UPhysicsConstraintComponent* Joints[]={Tower.LeftSuspension,Tower.RightSuspension,Tower.LeftHinge,Tower.RightHinge};
+    for(int32 I=0;I<4;++I)
+    {
+        const auto& Handle=Joints[I]->ConstraintInstance.GetPhysicsConstraintRef();
+        Input->JointProxy[I]=Handle.IsValid()?static_cast<Chaos::FJointConstraintPhysicsProxy*>(Handle.Constraint->GetProxy()):nullptr;
+    }
     Input->WorldGravityMps2=FVector(0,0,GetWorld()->GetGravityZ()/100.);
 }
 bool URecoveryPhysicsComponent::Consume(FRecoveryDynamicsState& State,FRecoveryGuidanceState& Guidance,FRecoveryUpperStageState& UpperStage)

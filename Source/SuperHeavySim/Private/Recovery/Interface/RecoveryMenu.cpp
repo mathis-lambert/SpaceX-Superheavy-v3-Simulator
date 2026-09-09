@@ -3,6 +3,7 @@
 #include "Recovery/Shared/RecoveryUIStyle.h"
 #include "Recovery/Interface/RecoveryPlayerController.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
+#include "Recovery/Flight/SuperHeavyLaunchTower.h"
 #include "Recovery/Presentation/RecoveryRenderSettings.h"
 #include "Engine/Engine.h"
 #include "GameFramework/GameUserSettings.h"
@@ -335,6 +336,12 @@ void SRecoveryMenu::ShowPage(int32 NewPage)
             Toggle(Rows,TEXT("Disable RCS"),D->GetExperiment().bReactionJetsDisabled,[D](bool B){D->SetReactionJetsDisabled(B);});
             Choice(Rows,TEXT("Attitude response"),{TEXT("Gentle / 0.5×"),TEXT("Nominal / 1×"),TEXT("Aggressive / 1.5×")},FMath::RoundToInt(D->GetExperiment().AttitudeResponse*2)-1,[D](int32 I){D->SetAttitudeResponse((I+1)*.5);});
             Choice(Rows,TEXT("Scenario wind"),{TEXT("Calm"),TEXT("Nominal"),TEXT("Double"),TEXT("Triple")},FMath::RoundToInt(D->GetExperiment().WindScale),[D](int32 I){D->SetWindScale(I);});
+            Rows->AddSlot().AutoHeight().Padding(0,6,0,16)
+            [SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular",14)).ColorAndOpacity(RecoveryUI::Muted)
+                .Text_Lambda([D](){const auto* T=D->Tower.Get();if(!T)return FText::GetEmpty();
+                    return FText::FromString(FString::Printf(TEXT("RAILS L / R   %.2f / %.2f MN   |   %.0f / %.0f mm\nARM DRIVE   %.0f%%   |   %s"),
+                        T->RailLoadN.X*1.e-6,T->RailLoadN.Y*1.e-6,T->RailCompressionM.X*1000,T->RailCompressionM.Y*1000,
+                        T->ArmClosure*100,(T->BrokenRailMask|T->BrokenHingeMask)?TEXT("MECHANICAL FAILURE"):TEXT("HARDWARE INTACT")));})];
             Rows->AddSlot().AutoHeight().Padding(0,0,0,8)[Button(TEXT("Restore actuators"),[this,D](){D->ResetExperiments();ShowPage(13);})];
             Rows->AddSlot().AutoHeight()[Button(TEXT("Close"),[PC](){PC->ResumeFlight();},true)];
         }

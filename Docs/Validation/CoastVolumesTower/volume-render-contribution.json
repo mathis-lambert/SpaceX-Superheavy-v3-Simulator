@@ -1,0 +1,49 @@
+{
+  "success": true,
+  "purpose": "Verify actual rendered sparse-volume contribution, not a smoke-quality score.",
+  "isolation": "Both captures disable local/volumetric fog. NoVolumes additionally disables r.HeterogeneousVolumes. Same fixed camera, hour 14, 1080p DLSS Quality, T+3 and T+5.",
+  "samples": [
+    {
+      "image": "VFX_Close_003.png",
+      "roi_xywh": [
+        500,
+        500,
+        700,
+        300
+      ],
+      "mean_abs_difference": 0.09060204774141312,
+      "fraction_changed_over_0_03": 0.4971857142857143,
+      "sources": [
+        {
+          "path": "Saved\\Recovery\\Review\\OnlyVolume\\VFX_Close_003.png",
+          "sha256": "77c539281517a939e6b3d20ae862f5577c7b67c3ba2cc7e1846dc1e325854ca2"
+        },
+        {
+          "path": "Saved\\Recovery\\Review\\NoVolumes\\VFX_Close_003.png",
+          "sha256": "e9d072a2ff86bc7a9895c22ae918670d79cbb2881dff6d9e6beaff2be70d7738"
+        }
+      ]
+    },
+    {
+      "image": "VFX_Close_005.png",
+      "roi_xywh": [
+        500,
+        500,
+        700,
+        300
+      ],
+      "mean_abs_difference": 0.10007099062204361,
+      "fraction_changed_over_0_03": 0.5353952380952381,
+      "sources": [
+        {
+          "path": "Saved\\Recovery\\Review\\OnlyVolume\\VFX_Close_005.png",
+          "sha256": "9145b788f6c7e34893ce43f5772bd5c2f5f001e4d3acefc60163566a00eafb06"
+        },
+        {
+          "path": "Saved\\Recovery\\Review\\NoVolumes\\VFX_Close_005.png",
+          "sha256": "3d0378a824c2bb692030e8d2fed1ad33170e81443ad31cf24a55d4ba46443a12"
+        }
+      ]
+    }
+  ]
+}

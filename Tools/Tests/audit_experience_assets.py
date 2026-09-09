@@ -41,6 +41,13 @@ for name in ('M_Cladding','M_Graphite','M_Concrete','M_SafetyAmber'):
     assert mat.get_editor_property('used_with_instanced_static_meshes'),f'{name}: site details would use the fallback material'
 vapor=u.load_asset(root+'/Materials/M_VolumetricVapor')
 assert vapor.get_editor_property('material_domain')==u.MaterialDomain.MD_VOLUME
+flow=u.load_asset(root+'/FX/Volumes/SVT_TurbulentDeluge')
+assert flow and flow.get_num_frames()==64,'Turbulent flow sequence is incomplete'
+flow_material=u.load_asset(root+'/Materials/Effects/M_TurbulentDeluge')
+assert flow_material and flow_material.get_editor_property('material_domain')==u.MaterialDomain.MD_VOLUME
+assert flow_material.get_editor_property('blend_mode')==u.BlendMode.BLEND_ADDITIVE
+assert flow_material.get_editor_property('used_with_heterogeneous_volumes')
+report['turbulent_flow_frames']=flow.get_num_frames()
 extinction=u.MaterialEditingLibrary.get_material_property_input_node(vapor,u.MaterialProperty.MP_SUBSURFACE_COLOR)
 assert extinction and extinction.get_editor_property('description')=='Vapor extinction / inverse metres','Vapor extinction is not connected to the RGB volume output'
 opts=u.AssetRegistryDependencyOptions(include_soft_package_references=True,include_hard_package_references=True)

@@ -108,7 +108,7 @@ unchecked requirements are not part of the alpha completion claim.
 ## Fundamental physics (71–84)
 
 - [ ] 71. Decouple guidance and actuator cadence from rendering.
-- Current work: booster and upper-stage loads, guidance and fitting/rail sensing use fixed 120 Hz Chaos steps, including measured 200 ms display stalls. Ground-event delivery and the kinematic tower still involve game frames; see [fixed-clock evidence](Validation/FIXED_PHYSICS_CLOCK.md).
+- Current work: booster and upper-stage loads, guidance and fitting/rail sensing use fixed 120 Hz Chaos steps, including measured 200 ms display stalls. Alpha.6 adds dynamic arm hinges and rail suspension, with loads and break events sampled by the solver. Ground-event and tower motor-command delivery still involve game frames; see [fixed-clock evidence](Validation/FIXED_PHYSICS_CLOCK.md) and [mechanical capture](COAST_VOLUMES_TOWER.md).
 - [ ] 72. Verify numerical convergence as the integration step decreases.
 - 120/240/480 Hz testing shows ascent convergence and decreasing support drift, but recovery position/velocity differences do not decrease. The analyzer correctly reports failure; the item remains open.
 - [ ] 73. Extend mass, momentum and energy conservation checks.

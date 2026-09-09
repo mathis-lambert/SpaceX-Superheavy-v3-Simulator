@@ -5,7 +5,7 @@ $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 $saved=Join-Path $root 'Saved/Recovery'
 . (Join-Path $root 'Tools/Shared/validation_evidence.ps1')
 Write-RecoveryBuildEvidence -Root $root -Destination "$saved/$Prefix-source.json" -EngineRoot $EngineRoot
-foreach($fixture in @('Centered','AlongRail','WrongHeading','SideImpact')){
+foreach($fixture in @('EmptyTower','OpenTower','SleepingClose','Centered','AlongRail','WrongHeading','SideImpact','Overload')){
     $name="$Prefix$fixture"
     $started=Get-Date
     & $engine (Join-Path $root 'SuperHeavySim.uproject') /Game/Starbase/Maps/L_RecoveryLab -game -nullrhi -unattended -UseFixedTimeStep -FPS=60 -RecoveryAutoExit "-RecoveryContactFixture=$fixture" "-RecoveryReportName=$name" -DisablePython -nosplash -SCCProvider=None "-abslog=$saved/$name.log" *> "$saved/$name-console.log"

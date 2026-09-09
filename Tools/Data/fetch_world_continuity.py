@@ -30,7 +30,8 @@ title = next(ch.text for ch in selected if ch.tag.split('}')[-1] == 'Title')
 assert '2016' in title, title
 LAT, LON = 25.9973, -97.1569
 jobs = []
-for name, half in [('Coast', 1.2), ('Gulf', 12.)]:
+layers_to_fetch = [('Regional', .3)] if '--regional' in sys.argv else [('Coast', 1.2), ('Gulf', 12.)]
+for name, half in layers_to_fetch:
     for y in range(4):
         for x in range(4):
             bbox = [LON-half+x*half/2, LAT+half-(y+1)*half/2, LON-half+(x+1)*half/2, LAT+half-y*half/2]
@@ -62,7 +63,7 @@ def download(job):
 
 with ThreadPoolExecutor(max_workers=3) as pool:
     sources = list(pool.map(download, jobs))
-for name in ('Coast', 'Gulf'):
+for name, half in layers_to_fetch:
     mosaic = Image.new('RGB', (8192, 8192))
     for j in sources:
         if j['name'] == name:
@@ -74,5 +75,5 @@ manifest = dict(layer=LAYER, title=title, year=2016, license='CC BY 4.0',
     attribution='Data & Viewing Products: EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016)',
     note='Geographic mosaic; does not document current Starbase buildings. WMS output sampling is not a claim of sensor resolution.',
     sources=sources)
-(ROOT / 'sources.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
+(ROOT / ('regional-sources.json' if '--regional' in sys.argv else 'sources.json')).write_text(json.dumps(manifest, indent=2), encoding='utf-8')
 print('WORLD_CONTINUITY_SOURCES_READY', flush=True)

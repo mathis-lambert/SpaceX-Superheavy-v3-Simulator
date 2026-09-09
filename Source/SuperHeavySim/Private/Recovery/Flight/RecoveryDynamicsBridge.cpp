@@ -36,7 +36,7 @@ void ASuperHeavyRecoveryDirector::SubmitDynamicsCommand()
         DynamicsCommand.EngineCount=0;
         DynamicsCommand.ThrustAccelerationMps2=FVector::ZeroVector;
     }
-    PhysicsModel->Submit(*Body,bSeparated?UpperStageBody.Get():nullptr,*Tower->LeftRail,*Tower->RightRail,DynamicsCommand);
+    PhysicsModel->Submit(*Body,bSeparated?UpperStageBody.Get():nullptr,*Tower,DynamicsCommand);
 }
 
 void ASuperHeavyRecoveryDirector::ConsumeDynamicsState()
@@ -52,6 +52,8 @@ void ASuperHeavyRecoveryDirector::ConsumeDynamicsState()
         SeparationAngularMomentumRelativeError=UpperStageState.SeparationAngularMomentumRelativeError;
     }
     const auto& S=DynamicsState;
+    Tower->RailLoadN=S.Tower.RailLoadN;Tower->PeakRailLoadN=S.Tower.PeakRailLoadN;
+    Tower->BrokenRailMask=S.Tower.BrokenRails;Tower->BrokenHingeMask=S.Tower.BrokenHinges;
     SupportContactCount=S.RailSupport.Count();SupportImpulseNs=S.RailSupport.ImpulseNs;
     EverSupportContact[0]=(S.RailSupport.EverMask&1)!=0;EverSupportContact[1]=(S.RailSupport.EverMask&2)!=0;
     // Compatibility with the authored HUD/Blueprint properties is a read-only

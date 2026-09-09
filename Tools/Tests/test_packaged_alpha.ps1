@@ -1,6 +1,6 @@
 param(
     [string]$EngineRoot='D:/Engines/UE_5.8',
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.5'
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.6'
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -53,6 +53,7 @@ if($audio.LastWriteTime -lt $start){throw 'No fresh packaged audio recording'}
 & (Join-Path $EngineRoot 'Engine/Binaries/ThirdParty/Python3/Win64/python.exe') "$root/Tools/Tests/audit_audio_capture.py" $audio.FullName
 if($LASTEXITCODE -ne 0){throw 'Packaged launch audio is silent or clipped'}
 if(!(Test-RecoveryFrontApproach -Report $flight) -or $flight.solver_support_mask -ne 3 -or !$flight.contact_engine_shutdown -or $flight.unpowered_thrust_violation -or $flight.structural_contacts -ne 0){throw 'Packaged physical capture contract failed'}
+if(!$flight.tower_dynamic -or $flight.tower_broken_rail_mask -ne 0 -or $flight.tower_broken_hinge_mask -ne 0 -or !$render.turbulent_volume_budget_pass){throw 'Packaged tower or turbulent volume contract failed'}
 if($flight.landing_burn_seconds -ge 45 -or $flight.first_contact_speed_mps -ge 1.5 -or $flight.low_slow_approach_seconds -ge 8){throw 'Packaged return exceeds the landing thrust, contact speed or slow-approach limits'}
 if($render.chase_contact_frames -lt 50 -or $render.chase_contact_max_offset_step_cm -gt .01 -or $render.chase_contact_max_angle_step_deg -gt .001){throw 'Packaged Chase camera is unstable after capture'}
 foreach($log in @("$audit/startup.log","$audit/controls.log","$audit/flight.log")){

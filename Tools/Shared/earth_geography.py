@@ -22,14 +22,27 @@ assert DEM.shape==VALID.shape and DEM.ndim==2
 assert np.all(np.isfinite(DEM[VALID]))
 # Source GeoTIFF elevation is metres NAVD88; ocean/no-data uses sea level.
 DEM=np.where(VALID,DEM,0.)
-def height(x,y):
-    rows,cols=DEM.shape
-    ix=max(0,min(cols-1.000001,(x+6000)/12000*cols-.5));iy=max(0,min(rows-1.000001,(6000-y)/12000*rows-.5))
-    i,j=int(ix),int(iy);a,b=ix-i,iy-j
-    h=float((DEM[j,i]*(1-a)+DEM[j,i+1]*a)*(1-b)+(DEM[j+1,i]*(1-a)+DEM[j+1,i+1]*a)*b)-4.5
-    # Preserve the engineered platform and its physical zero-height reference.
-    apron=max(abs(x-65)-220,abs(y)-140)
-    road=max(abs(x-40)-355,abs(y+90)-10)
-    blend=max(0,min(1,min(apron,road)/45))
-    blend=blend*blend*(3-2*blend)
+LIDAR_ROOT=ROOT/'LidarCoast'
+LIDAR=np.load(LIDAR_ROOT/'height_m.npy',mmap_mode='r') if (LIDAR_ROOT/'height_m.npy').exists() else None
+LIDAR_WEIGHT=np.load(LIDAR_ROOT/'blend_weight.npy',mmap_mode='r') if (LIDAR_ROOT/'blend_weight.npy').exists() else None
+
+def sample_field(field,x,y):
+    """Pixel-centred, north-up bilinear sampling in the registered 12 km patch."""
+    rows,cols=field.shape
+    ix=np.clip((np.asarray(x)+6000)/12000*cols-.5,0,cols-1.000001)
+    iy=np.clip((6000-np.asarray(y))/12000*rows-.5,0,rows-1.000001)
+    i,j=ix.astype(np.int32),iy.astype(np.int32);a,b=ix-i,iy-j
+    return (field[j,i]*(1-a)+field[j,i+1]*a)*(1-b)+(field[j+1,i]*(1-a)+field[j+1,i+1]*a)*b
+
+def heights(x,y):
+    h=sample_field(DEM,x,y)
+    if LIDAR is not None and LIDAR_WEIGHT is not None:
+        detail=sample_field(LIDAR,x,y);weight=sample_field(LIDAR_WEIGHT,x,y)
+        h=np.where(np.isfinite(detail),h*(1-weight)+np.nan_to_num(detail)*weight,h)
+    h=h-4.5
+    apron=np.maximum(np.abs(np.asarray(x)-65)-220,np.abs(y)-140)
+    road=np.maximum(np.abs(np.asarray(x)-40)-355,np.abs(np.asarray(y)+90)-10)
+    blend=np.clip(np.minimum(apron,road)/45,0,1);blend=blend*blend*(3-2*blend)
     return -.35*(1-blend)+h*blend
+def height(x,y):
+    return float(heights(x,y))

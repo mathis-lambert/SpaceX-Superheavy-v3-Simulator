@@ -32,7 +32,7 @@ return lerp(float3(.035,.039,.043)*aggregate,float3(.58,.56,.49),max(lane*dash,e
 
 road=surface('M_ServiceRoad');shoulder=surface('M_ServiceShoulder',True)
 # Replace source meshes at their existing asset paths; no additional terrain layer.
-for j in (1,2):
+for j in (() if (ART_ROOT/'Earth/LidarCoast/Meshes/geometry.json').exists() else (1,2)):
     for i in (1,2):
         name=f'SM_BocaChica_{i}_{j}'
         mesh=import_scenery_mesh(SRC/(name+'.fbx'),ROOT+'/Meshes/Earth/'+name)

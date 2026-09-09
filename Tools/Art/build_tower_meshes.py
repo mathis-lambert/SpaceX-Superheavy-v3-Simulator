@@ -63,7 +63,8 @@ for y in [-0.55,0.55]:
         x=-13+i*2
         beam('Arm diagonal',(x,y,-0.85),(x+2,y,0.85),0.13,panel)
         beam('Arm diagonal',(x,y,0.85),(x+2,y,-0.85),0.13,panel)
-box('Capture rail',(0,0,0.96),(26,0.85,0.18),orange)
+# The load-bearing rail and hydraulic struts are independent moving components.
+# Baking the rail into the truss would leave a second, motionless rail underneath.
 box('Carriage attachment',(-12,0,0),(2,1.4,2.2),steel)
 arm=export('SM_CaptureArm',(1/26,1/1.1,1/1.7))
 

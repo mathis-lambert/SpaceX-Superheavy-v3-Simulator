@@ -82,6 +82,8 @@ void ASuperHeavyRecoveryDirector::BeginPlay()
     Camera=GetWorld()->SpawnActor<ACameraActor>();
     FParse::Value(FCommandLine::Get(),TEXT("RecoveryCamera="),CameraMode);
     CameraMode=FMath::Clamp(CameraMode,0,CameraCount-1);
+    if(bIgnoreCameraInput && FParse::Value(FCommandLine::Get(),TEXT("RecoveryReviewZoom="),CameraZoom))
+        CameraZoom=FMath::Clamp(CameraZoom,.25,6.);
     Camera->GetCameraComponent()->SetFieldOfView(55);
     // Establish a view above the pad before the renderer's first shadow pass.
     UpdateCamera(0);
@@ -162,7 +164,7 @@ void ASuperHeavyRecoveryDirector::SelectScenario(int32 Index)
     if(!bInitialized) return;
     ScenarioIndex=FMath::Clamp(Index,0,2);
     ReleaseLaunchHoldDown();
-    Tower->Release();
+    Tower->Release();Tower->ResetMechanism(0);
     RuntimeProfile=MissionProfile ? DuplicateObject<USuperHeavyRecoveryProfile>(MissionProfile,this) : NewObject<USuperHeavyRecoveryProfile>(this);
     ScenarioName=ScenarioIndex==1 ? TEXT("Crosswind") : ScenarioIndex==2 ? TEXT("Offset") : TEXT("Nominal");
     if(ScenarioIndex==1) RuntimeProfile->WindVelocityMps=FVector(0,14,0);

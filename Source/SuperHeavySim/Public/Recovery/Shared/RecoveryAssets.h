@@ -35,6 +35,8 @@ namespace RecoveryAssets
     inline constexpr TCHAR M_SafetyAmber[]=TEXT("/Game/Starbase/Materials/M_SafetyAmber.M_SafetyAmber");
     inline constexpr TCHAR M_VolumetricVapor[]=TEXT("/Game/Starbase/Materials/M_VolumetricVapor.M_VolumetricVapor");
     inline constexpr TCHAR M_CryogenicVapor[]=TEXT("/Game/Starbase/Materials/M_CryogenicVapor.M_CryogenicVapor");
+    inline constexpr TCHAR M_TurbulentDeluge[]=TEXT("/Game/Starbase/Materials/Effects/M_TurbulentDeluge.M_TurbulentDeluge");
+    inline constexpr TCHAR SVT_TurbulentDeluge[]=TEXT("/Game/Starbase/FX/Volumes/SVT_TurbulentDeluge.SVT_TurbulentDeluge");
     inline constexpr TCHAR SM_ServicePickup[]=TEXT("/Game/Starbase/Meshes/Starbase/SM_ServicePickup.SM_ServicePickup");
     inline constexpr TCHAR SM_WindFlag[]=TEXT("/Game/Starbase/Meshes/Starbase/SM_WindFlag.SM_WindFlag");
     inline constexpr TCHAR M_WindFlag[]=TEXT("/Game/Starbase/Materials/Starbase/M_WindFlag.M_WindFlag");
@@ -70,6 +72,8 @@ namespace RecoveryAssets
             FSoftObjectPath(M_SafetyAmber),
             FSoftObjectPath(M_VolumetricVapor),
             FSoftObjectPath(M_CryogenicVapor),
+            FSoftObjectPath(M_TurbulentDeluge),
+            FSoftObjectPath(SVT_TurbulentDeluge),
             FSoftObjectPath(SM_ServicePickup),
             FSoftObjectPath(SM_WindFlag),
             FSoftObjectPath(M_WindFlag),

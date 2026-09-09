@@ -1,6 +1,6 @@
 # Starbase Flight Simulator — Alpha 0.1.0
 
-Version: `0.1.0-alpha.5`. Windows x64, Unreal Engine 5.8.
+Version: `0.1.0-alpha.6`. Windows x64, Unreal Engine 5.8.
 
 ## Start
 
@@ -53,14 +53,21 @@ vapor, distance-delayed layered sound and restrained camera motion. Tower releas
 and contact sounds follow actual mechanism events. See `PROPULSION.md` for the
 audio sources and loading behavior.
 
+The coastal world now includes surveyed USGS LiDAR relief, finer regional imagery,
+shared shoreline shading and less repetitive water. Original Blender flow caches
+supply turbulent lit deluge volumes. Tower arms rotate on torque-driven physical
+hinges; the rails have springs, dampers, travel limits and overload failure.
+The Flight Lab shows their measured loads and compression. See
+`COAST-VOLUMES-TOWER.md` for data coverage, reproduction and model assumptions.
+
 ## Known alpha limitations
 
 - The guidance and aerodynamic coefficients are estimates. Whole-return
   numerical convergence remains incomplete; successful captures alone do not
   establish real-flight accuracy.
-- Tower arms use a kinematic mechanism; articulation, compliance, overloads and
-  failure behavior remain unfinished. Faster braking is not certification of
-  structural loads or a reconstruction of SpaceX flight telemetry.
+- Tower hardware parameters are estimates and the carriage is an ideal fixed
+  bearing. Mechanical tests do not certify real structural loads or reconstruct
+  SpaceX flight telemetry.
 - Earth imagery, cloud/smoke detail, site assets and graphics performance still
   have improvements pending. The new site layout is authored, not a current survey.
 - Hardware validation is currently limited to the development machine.

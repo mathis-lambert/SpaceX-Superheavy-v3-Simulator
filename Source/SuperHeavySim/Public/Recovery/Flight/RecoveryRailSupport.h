@@ -14,7 +14,8 @@ struct FRecoveryRailSupport
 namespace RecoveryContactGeometry
 {
     constexpr double RailHalfLengthM=13.;
-    constexpr double RailCentreOffsetM=-6.;
+    // The 26 m rail starts at the carriage, clear of the tower's front columns.
+    constexpr double RailCentreOffsetM=-4.;
     constexpr double FittingHalfLengthM=.9;
     inline bool OnUsableRailSpan(double AlongM)
     {

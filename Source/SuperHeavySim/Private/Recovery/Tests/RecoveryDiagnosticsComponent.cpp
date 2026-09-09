@@ -109,7 +109,7 @@ void URecoveryDiagnosticsComponent::TickComponent(float Dt,ELevelTick Type,FActo
         StarshipPlumes=FMath::Max(StarshipPlumes,VisibleJets);
     }
     if(const auto* V=D->FindComponentByClass<URecoveryVaporComponent>())
-    {PeakVolumes=FMath::Max(PeakVolumes,V->GetActiveVolumeCount());bVaporHasDensity|=V->HasRenderableDensity();}
+    {PeakVolumes=FMath::Max(PeakVolumes,V->GetActiveVolumeCount());bVaporHasDensity|=V->HasRenderableDensity();PeakTurbulentVolumes=FMath::Max(PeakTurbulentVolumes,V->GetTurbulentVolumeCount());}
     int Lights=0,Spots=0,Sounds=0;
     TInlineComponentArray<UPointLightComponent*> Points(D);
     for(const auto* L:Points)if(L->GetName().StartsWith(TEXT("PlumeLight_")))
@@ -151,6 +151,9 @@ void URecoveryDiagnosticsComponent::EndPlay(const EEndPlayReason::Type Reason)
         R->SetNumberField(TEXT("peak_active_vapor_volumes"),PeakVolumes);R->SetNumberField(TEXT("plume_lights"),PlumeLights);R->SetNumberField(TEXT("site_spotlights"),SiteLights);R->SetNumberField(TEXT("playing_audio_sources"),PlayingAudio);
         R->SetBoolField(TEXT("vapor_voxelized_with_local_lights"),LitVolume && bVaporLit);R->SetBoolField(TEXT("captured"),bCaptured);
         R->SetBoolField(TEXT("vapor_volume_material_has_density"),bVaporHasDensity);
+        R->SetNumberField(TEXT("peak_turbulent_svt_volumes"),PeakTurbulentVolumes);
+        R->SetBoolField(TEXT("turbulent_volume_budget_pass"),PeakTurbulentVolumes>0 && PeakTurbulentVolumes<=8);
+        R->SetBoolField(TEXT("success"),R->GetBoolField(TEXT("success")) && PeakTurbulentVolumes>0 && PeakTurbulentVolumes<=8);
         R->SetNumberField(TEXT("starship_visible_physical_frames"),StarshipFrames);
         R->SetNumberField(TEXT("max_starship_render_pose_error_cm"),MaxStarshipErrorCm);
         R->SetNumberField(TEXT("starship_visible_exhausts"),StarshipPlumes);

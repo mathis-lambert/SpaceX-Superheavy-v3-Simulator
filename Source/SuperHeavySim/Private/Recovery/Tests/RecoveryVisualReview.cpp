@@ -6,6 +6,8 @@
 #include "Engine/GameViewportClient.h"
 #include "HAL/IConsoleManager.h"
 #include "Misc/FileHelper.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "Serialization/JsonSerializer.h"
 #include "UnrealClient.h"
 
@@ -19,8 +21,13 @@ void URecoveryDiagnosticsComponent::TickVisualReview()
     if(LastReviewPhase!=int32(D->Phase) && D->GetPhaseTimeS()>(D->Phase==ERecoveryPhase::Ascent?8.:1.))
     {LastReviewPhase=int32(D->Phase);Name=D->GetPhaseLabel();}
     if(D->Phase==ERecoveryPhase::Ascent)
+    {
         for(double At:{16.,28.,45.,70.,100.})
             if(PreviousReviewTime<At && Time>=At)Name=FString::Printf(TEXT("VFX_Ascent_%03d"),int(At));
+        if(FParse::Param(FCommandLine::Get(),TEXT("RecoveryDetailReview")))
+            for(double At:{1.,3.,5.})
+                if(PreviousReviewTime<At && Time>=At)Name=FString::Printf(TEXT("VFX_Close_%03d"),int(At));
+    }
     if(D->GetCameraMode()==12 && PreviousReviewTime<210. && Time>=210.)Name=TEXT("EarthHorizon");
     if(bCloudReview)
     {

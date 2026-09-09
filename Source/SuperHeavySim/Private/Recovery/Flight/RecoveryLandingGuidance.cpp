@@ -172,7 +172,15 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
         const double Across=FMath::Abs(RailOffset.Y);
         // Reserve clearance for the frame below the rail and the small roll
         // while the second fitting takes weight after the first contact.
-        const double SafeGap=4.5/FMath::Max(.1,Up.Z)+.55+Across+.10;
+        const FVector LocalUp=Config.TowerRotation.UnrotateVector(Up);
+        const double Slope=LocalUp.Y/FMath::Max(.1,Up.Z);
+        // Clear the entire truss, including its lower chord under the moving
+        // rail. A rail-height-only test let a rolled hull brush that chord.
+        const double RailToFrame=RecoveryTowerGeometry::RailCentreHeightM+.09+.18;
+        const double LowerAcross=FMath::Abs(RailOffset.Y-Slope*(RailToFrame+.85));
+        const double UpperAcross=FMath::Abs(RailOffset.Y-Slope*(RailToFrame-.85));
+        // Reserve 24 cm for the measured transverse weight-transfer motion.
+        const double SafeGap=4.5/FMath::Max(.1,Up.Z)+.55+FMath::Max3(Across,LowerAcross,UpperAcross)+.24;
         // Loaded rails must not withdraw in response to the initial settling
         // motion. Hold their command during weight transfer and support.
         if(!State.bContactShutdown && External.SupportContactCount==0)

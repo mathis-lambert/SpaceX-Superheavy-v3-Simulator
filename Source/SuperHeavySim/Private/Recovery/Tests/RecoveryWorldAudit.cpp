@@ -62,6 +62,15 @@ void ARecoveryPlayerController::TickWorldAudit()
     case 19:
         SetHardwareRayTracing(false);ReturnHome();AuditDeadline=Now+3;break;
     case 20:
+        TimeOfDay=14.f;PlaceCamera(FVector(0,-100000,500000),FVector(10000,0,0));AuditDeadline=Now+8;break;
+    case 21:Shot(TEXT("Coast5km.png"));AuditDeadline=Now+2;break;
+    case 22:PlaceCamera(FVector(0,-100000,2000000),FVector(10000,0,0));AuditDeadline=Now+8;break;
+    case 23:Shot(TEXT("Coast20km.png"));AuditDeadline=Now+2;break;
+    case 24:PlaceCamera(FVector(46000,-55000,1400),FVector(85000,10000,-300));AuditDeadline=Now+8;break;
+    case 25:Shot(TEXT("Dunes.png"));AuditDeadline=Now+2;break;
+    case 26:PlaceCamera(FVector(90000,-40000,500),FVector(160000,60000,-300));AuditDeadline=Now+8;break;
+    case 27:Shot(TEXT("ShoreWater.png"));AuditDeadline=Now+2;break;
+    case 28:
     {
         auto R=MakeShared<FJsonObject>();R->SetBoolField(TEXT("success"),bAuditPassed);
         TArray<TSharedPtr<FJsonValue>> Values;for(const auto& Result:AuditChecks)Values.Add(MakeShared<FJsonValueString>(Result));R->SetArrayField(TEXT("checks"),Values);

@@ -80,6 +80,7 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
     const FVector Up=D->GetBody()->GetUpVector();
     const FVector Wind=D->GetWindVelocityMps(30)*100;
     UpdateCryogenic(Dt,*D);
+    UpdateTurbulent(Dt,*D,Delivered);
     if(D->AltitudeM<=170)LastTrailPosition=Base;
     // Ground water flow and engine exhaust coexist with the cryogenic vents.
     // Separate clocks prevent active conditioning from suppressing the deluge.
@@ -93,7 +94,7 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
         {
             const double Angle=Next*2.399963;
             const FVector Radial(FMath::Cos(Angle),FMath::Sin(Angle),0);
-            Spawn(FVector(Base.X,Base.Y,250)+Radial*(650+J*130),Radial*((Hot?2100:600)+J*140)+Wind+FVector(0,0,Hot?110+J*55:30),Hot?22:9,Hot?3+J*.6f:1.1,Hot?2.2f:.8f,(Hot?3.f:.6f)*D->GetDelugeFlow(),EVaporKind::Deluge);
+            Spawn(FVector(Base.X,Base.Y,250)+Radial*(650+J*130),Radial*((Hot?2100:600)+J*140)+Wind+FVector(0,0,Hot?110+J*55:30),Hot?22:9,Hot?3+J*.6f:1.1,Hot?2.2f:.8f,(Hot?.65f:.6f)*D->GetDelugeFlow(),EVaporKind::Deluge);
         }
     }
     else if(Delivered>.01 && D->Phase==ERecoveryPhase::Ascent && D->AltitudeM>170 && D->AltitudeM<12000 && (Base-LastTrailPosition).Size()>6500)

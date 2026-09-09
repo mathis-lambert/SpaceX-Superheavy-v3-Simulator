@@ -1,6 +1,6 @@
 """One metric layout for authored service roads and coastal surface detail."""
 import math
-from earth_geography import height
+from earth_geography import height,LIDAR
 
 # Authored service infrastructure around the existing simulator apron, not a survey.
 ROAD=[(-137,-90),(-120,-73),(-120,74),(-103,91),(192,91),(215,68),(215,-68),(193,-90),(-137,-90)]
@@ -11,6 +11,7 @@ def smooth(a,b,x):
 
 def dune_height(x,y):
     base=height(x,y)
+    if LIDAR is not None:return base
     # Sub-metre procedural detail on the measured dune band. Sea and pad stay fixed.
     land=smooth(-3.2,-1.7,base)
     band=math.exp(-((x-(560-.045*y))/80)**2)*land*(1-smooth(2600,2900,abs(y)))

@@ -1,0 +1,235 @@
+{
+  "layer": "s2cloudless",
+  "title": "Sentinel-2 cloudless layer for 2016 by EOX - 4326",
+  "year": 2016,
+  "license": "CC BY 4.0",
+  "license_url": "https://cloudless.eox.at/pricing",
+  "attribution": "Data & Viewing Products: EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016)",
+  "note": "Geographic mosaic; does not document current Starbase buildings. WMS output sampling is not a claim of sensor resolution.",
+  "sources": [
+    {
+      "name": "Regional",
+      "x": 0,
+      "y": 0,
+      "bbox": [
+        -97.45689999999999,
+        26.1473,
+        -97.30689999999998,
+        26.2973
+      ],
+      "file": "Regional_0_0.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.45689999999999%2C26.1473%2C-97.30689999999998%2C26.2973&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "ffc5f6ede4dc72c47442d55a342ce44e490b10e1491cf0f0e867947394642976"
+    },
+    {
+      "name": "Regional",
+      "x": 1,
+      "y": 0,
+      "bbox": [
+        -97.30689999999998,
+        26.1473,
+        -97.1569,
+        26.2973
+      ],
+      "file": "Regional_1_0.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.30689999999998%2C26.1473%2C-97.1569%2C26.2973&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "8ee32bd818bb5fa5830ef0ce7e66f7c032b36fa95638348c9df79fc9ade77345"
+    },
+    {
+      "name": "Regional",
+      "x": 2,
+      "y": 0,
+      "bbox": [
+        -97.1569,
+        26.1473,
+        -97.00689999999999,
+        26.2973
+      ],
+      "file": "Regional_2_0.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.1569%2C26.1473%2C-97.00689999999999%2C26.2973&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "7403086e2805de7545e595d253451541c5a2140fe06250f9b417a27d43a7f211"
+    },
+    {
+      "name": "Regional",
+      "x": 3,
+      "y": 0,
+      "bbox": [
+        -97.00689999999999,
+        26.1473,
+        -96.8569,
+        26.2973
+      ],
+      "file": "Regional_3_0.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.00689999999999%2C26.1473%2C-96.8569%2C26.2973&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "251cf5abd85e40b123611809acaafa8c9e27bfaa86536044050f74c9e8fbdfb0"
+    },
+    {
+      "name": "Regional",
+      "x": 0,
+      "y": 1,
+      "bbox": [
+        -97.45689999999999,
+        25.9973,
+        -97.30689999999998,
+        26.1473
+      ],
+      "file": "Regional_0_1.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.45689999999999%2C25.9973%2C-97.30689999999998%2C26.1473&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "b725df761fca1696d7b49b67acfb40283d5b599dc9f1baf39ef0ff9e17a417e9"
+    },
+    {
+      "name": "Regional",
+      "x": 1,
+      "y": 1,
+      "bbox": [
+        -97.30689999999998,
+        25.9973,
+        -97.1569,
+        26.1473
+      ],
+      "file": "Regional_1_1.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.30689999999998%2C25.9973%2C-97.1569%2C26.1473&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "82f312a4847e1a20123355aa8e8f079739c910eab9506533083bd65fdf9cd664"
+    },
+    {
+      "name": "Regional",
+      "x": 2,
+      "y": 1,
+      "bbox": [
+        -97.1569,
+        25.9973,
+        -97.00689999999999,
+        26.1473
+      ],
+      "file": "Regional_2_1.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.1569%2C25.9973%2C-97.00689999999999%2C26.1473&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "11a5b4d0495048003bbdf2f4e8f1414360f00fe04a50532cf91e71edc04aabb0"
+    },
+    {
+      "name": "Regional",
+      "x": 3,
+      "y": 1,
+      "bbox": [
+        -97.00689999999999,
+        25.9973,
+        -96.8569,
+        26.1473
+      ],
+      "file": "Regional_3_1.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.00689999999999%2C25.9973%2C-96.8569%2C26.1473&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "364ddf19151d609ec6179b7c75a680c1c9378f5dffd7e5eb38e498493b201147"
+    },
+    {
+      "name": "Regional",
+      "x": 0,
+      "y": 2,
+      "bbox": [
+        -97.45689999999999,
+        25.8473,
+        -97.30689999999998,
+        25.9973
+      ],
+      "file": "Regional_0_2.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.45689999999999%2C25.8473%2C-97.30689999999998%2C25.9973&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "594a961edb1289f26ec1cdab41a1d8473dddf396b52727345af1f2f3360c4c07"
+    },
+    {
+      "name": "Regional",
+      "x": 1,
+      "y": 2,
+      "bbox": [
+        -97.30689999999998,
+        25.8473,
+        -97.1569,
+        25.9973
+      ],
+      "file": "Regional_1_2.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.30689999999998%2C25.8473%2C-97.1569%2C25.9973&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "634f0e9d2a308337432521b967e5621e68f36b16f50581ac31bcf9d86a04e16d"
+    },
+    {
+      "name": "Regional",
+      "x": 2,
+      "y": 2,
+      "bbox": [
+        -97.1569,
+        25.8473,
+        -97.00689999999999,
+        25.9973
+      ],
+      "file": "Regional_2_2.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.1569%2C25.8473%2C-97.00689999999999%2C25.9973&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "c8fb5023183bcf6492bb7c263cd68295c5899f5b6130c49abe381da078c7c77c"
+    },
+    {
+      "name": "Regional",
+      "x": 3,
+      "y": 2,
+      "bbox": [
+        -97.00689999999999,
+        25.8473,
+        -96.8569,
+        25.9973
+      ],
+      "file": "Regional_3_2.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.00689999999999%2C25.8473%2C-96.8569%2C25.9973&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "c6a7ed20ff1dd2a714f6e1f45141e97e5ac15144617d20ce9a13fded21b96912"
+    },
+    {
+      "name": "Regional",
+      "x": 0,
+      "y": 3,
+      "bbox": [
+        -97.45689999999999,
+        25.6973,
+        -97.30689999999998,
+        25.8473
+      ],
+      "file": "Regional_0_3.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.45689999999999%2C25.6973%2C-97.30689999999998%2C25.8473&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "7e8a04368a298080c6449f04481d6a48d30dde22db44ce0d0db47c62f903ff71"
+    },
+    {
+      "name": "Regional",
+      "x": 1,
+      "y": 3,
+      "bbox": [
+        -97.30689999999998,
+        25.6973,
+        -97.1569,
+        25.8473
+      ],
+      "file": "Regional_1_3.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.30689999999998%2C25.6973%2C-97.1569%2C25.8473&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "90224eaa667d6f397b32cba5846255884598af4ad978874379b78bb85306d914"
+    },
+    {
+      "name": "Regional",
+      "x": 2,
+      "y": 3,
+      "bbox": [
+        -97.1569,
+        25.6973,
+        -97.00689999999999,
+        25.8473
+      ],
+      "file": "Regional_2_3.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.1569%2C25.6973%2C-97.00689999999999%2C25.8473&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "1d0416065a768b15f6aaef55e9967abbd9ffa7970ce41498638face7b0eb77f7"
+    },
+    {
+      "name": "Regional",
+      "x": 3,
+      "y": 3,
+      "bbox": [
+        -97.00689999999999,
+        25.6973,
+        -96.8569,
+        25.8473
+      ],
+      "file": "Regional_3_3.png",
+      "url": "https://tiles.maps.eox.at/wms?service=WMS&request=GetMap&version=1.1.1&layers=s2cloudless&styles=&srs=EPSG%3A4326&bbox=-97.00689999999999%2C25.6973%2C-96.8569%2C25.8473&width=2048&height=2048&format=image%2Fpng",
+      "sha256": "375efa666bb339610811f2eac423376cc843fbbbbb9109675d082a295c00c29c"
+    }
+  ]
+}

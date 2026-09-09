@@ -6,6 +6,7 @@
 #include "RecoveryPhysicsComponent.generated.h"
 
 class UPrimitiveComponent;
+class ASuperHeavyLaunchTower;
 class FRecoveryPhysicsCallback;
 struct FRecoveryDynamicsSetup;
 
@@ -21,8 +22,7 @@ public:
     static FRecoveryUpperStageConfiguration BuildUpperStageConfiguration(const USuperHeavyRecoveryProfile& Profile);
     void InitializeMission(const FRecoveryGuidanceConfiguration& Configuration,const TArray<FRecoveryEngineState>& Geometry,
         double FuelKg,double RcsFuelKg,const FRecoveryUpperStageConfiguration& UpperStage,uint32 Generation);
-    void Submit(UPrimitiveComponent& Body,UPrimitiveComponent* UpperStage,UPrimitiveComponent& LeftRail,
-        UPrimitiveComponent& RightRail,const FRecoveryDynamicsCommand& Command);
+    void Submit(UPrimitiveComponent& Body,UPrimitiveComponent* UpperStage,ASuperHeavyLaunchTower& Tower,const FRecoveryDynamicsCommand& Command);
     bool Consume(FRecoveryDynamicsState& State,FRecoveryGuidanceState& Guidance,FRecoveryUpperStageState& UpperStage);
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;

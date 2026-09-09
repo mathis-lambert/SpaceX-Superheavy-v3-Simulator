@@ -15,7 +15,9 @@ ROOT='/Game/Starbase'
 tools=u.AssetToolsHelpers.get_asset_tools()
 def import_texture(name,path,srgb=True,compression=u.TextureCompressionSettings.TC_BC7):
     existing=u.load_asset(ROOT+'/Textures/Earth/'+name)
-    if existing and '-WorldReimportTextures' not in u.SystemLibrary.get_command_line():return existing
+    command_line=u.SystemLibrary.get_command_line()
+    refresh_coast='-CoastalShadingReimport' in command_line and name in ('T_CoastalWaterMask','T_CoastalHydrology')
+    if existing and '-WorldReimportTextures' not in command_line and not refresh_coast:return existing
     task=u.AssetImportTask();task.filename=str(path);task.destination_path=ROOT+'/Textures/Earth';task.destination_name=name
     task.automated=True;task.replace_existing=True;task.save=True
     tools.import_asset_tasks([task]);t=u.load_asset(task.destination_path+'/'+name);assert t,name
@@ -27,8 +29,10 @@ def import_texture(name,path,srgb=True,compression=u.TextureCompressionSettings.
 
 coast=import_texture('T_CoastContinuous',ART_ROOT/'Earth/Continuity/Coast8192.png')
 gulf=import_texture('T_GulfContinuous',ART_ROOT/'Earth/Continuity/Gulf8192.png')
+regional=import_texture('T_RegionalContinuous',ART_ROOT/'Earth/Continuity/Regional8192.png')
 globe=u.load_asset(ROOT+'/Textures/Earth/T_EarthSeptember')
 coast_mask=import_texture('T_CoastalWaterMask',ART_ROOT/'Earth/Continuity/CoastalWaterMask.png',False,u.TextureCompressionSettings.TC_MASKS)
+hydrology=import_texture('T_CoastalHydrology',ART_ROOT/'Earth/Continuity/CoastalHydrology.png',False,u.TextureCompressionSettings.TC_MASKS)
 GEO='''float3 q=normalize(float3(P.xy,P.z+637100000.0));
 float3 e=float3(.992208696,-.124586893,0),n=float3(.054610022,.434913642,.898814703),up=float3(-.111980532,-.891811774,.438328791);
 float3 p=e*q.x+n*q.y+up*q.z;
@@ -48,48 +52,67 @@ def build_surface(name,tile=None):
         return custom(m,{'B':base,'C':detail,'UV':uv},'float edge=min(min(UV.x,1-UV.x),min(UV.y,1-UV.y));return lerp(B,C,smoothstep(0,.08,edge));')
     base=blend((global_color,'RGB'),(region,'RGB'),gulfuv)
     base=blend(base,(local,'RGB'),coastuv)
+    regionaluv=custom(m,{'G':geo},'return float2((G.x+97.4569)/.6,(26.2973-G.y)/.6);',u.CustomMaterialOutputType.CMOT_FLOAT2)
+    regional_color=sample(m,regional,regionaluv)
+    base=blend(base,(regional_color,'RGB'),regionaluv)
     water=custom(m,{'C':base},'return smoothstep(.001,.012,C.b-C.r*1.13)*smoothstep(0,.009,C.g-C.r*.9);',u.CustomMaterialOutputType.CMOT_FLOAT1)
-    shore=None
+    half_lat=math.degrees(6000/6371000);half_lon=half_lat/math.cos(math.radians(25.9973))
+    maskuv=custom(m,{'G':geo},f'return float2((G.x-({-97.1569-half_lon:.12f}))/{half_lon*2:.12f},({25.9973+half_lat:.12f}-G.y)/{half_lat*2:.12f});',u.CustomMaterialOutputType.CMOT_FLOAT2)
+    hydro=sample(m,hydrology,maskuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
+    coverage=custom(m,{'UV':maskuv},'return smoothstep(0,.05,min(min(UV.x,1-UV.x),min(UV.y,1-UV.y)));',u.CustomMaterialOutputType.CMOT_FLOAT1)
+    water=custom(m,{'W':water,'H':hydro,'Coverage':coverage},'return lerp(W,H.r,Coverage);',u.CustomMaterialOutputType.CMOT_FLOAT1)
     if tile is not None:
         i,j=tile;half_lat=math.degrees(6000/6371000);half_lon=half_lat/math.cos(math.radians(25.9973))
         lo=-97.1569-half_lon+i*half_lon/2;hi=25.9973-half_lat+(j+1)*half_lat/2
         tileuv=custom(m,{'G':geo},f'return float2((G.x-({lo:.12f}))/{half_lon/2:.12f},({hi:.12f}-G.y)/{half_lat/2:.12f});',u.CustomMaterialOutputType.CMOT_FLOAT2)
         aerial=sample(m,ROOT+f'/Textures/Earth/T_BocaChica_{i}_{j}',tileuv)
-        maskuv=custom(m,{'G':geo},f'return float2((G.x-({-97.1569-half_lon:.12f}))/{half_lon*2:.12f},({25.9973+half_lat:.12f}-G.y)/{half_lat*2:.12f});',u.CustomMaterialOutputType.CMOT_FLOAT2)
-        mask=sample(m,coast_mask,maskuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
-        water=custom(m,{'W':water,'P':p,'Mask':(mask,'R')},'return lerp(W,Mask,smoothstep(0,60000,600000-max(abs(P.x),abs(P.y))));',u.CustomMaterialOutputType.CMOT_FLOAT1)
-        shoreuv=custom(m,{'UV':maskuv},'return UV-float2(80./12000.,0);',u.CustomMaterialOutputType.CMOT_FLOAT2)
-        shore=sample(m,coast_mask,shoreuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
         base=custom(m,{'B':base,'C':(aerial,'RGB'),'A':(aerial,'A'),'UV':tileuv,'P':p,'Camera':camera},'''
 float edge=600000-max(abs(P.x),abs(P.y));
-float near=1-smoothstep(1200000,5000000,length(Camera-P));
+float near=1-smoothstep(3000000,9000000,length(Camera-P));
 return lerp(B,C,A*smoothstep(0,60000,edge)*near);''')
     # Water comes from a BRDF, not a lit photograph of an old ocean surface.
-    base=custom(m,{'C':base,'W':water},'return lerp(C,float3(.006,.023,.032),W);')
+    base=custom(m,{'C':base,'W':water,'H':hydro,'Coverage':coverage},'float shallow=Coverage*exp(-H.b*7);float3 sea=lerp(float3(.004,.018,.028),float3(.022,.067,.067),shallow);return lerp(C,sea,W);')
     grounduv=custom(m,{'P':p},'return P.xy/430;',u.CustomMaterialOutputType.CMOT_FLOAT2)
     grain=sample(m,'/Game/ThirdParty/MWLandscapeAutoMaterial/Textures/Ground/TEX_MWAM_SandA_col',grounduv)
+    secondaryuv=custom(m,{'P':p},'return float2(P.x*.73+P.y*.683,-P.x*.683+P.y*.73)/1130+float2(.37,.81);',u.CustomMaterialOutputType.CMOT_FLOAT2)
+    secondarygrain=sample(m,'/Game/ThirdParty/MWLandscapeAutoMaterial/Textures/Ground/TEX_MWAM_SandA_col',secondaryuv)
+    grainmix=custom(m,{'A':(grain,'RGB'),'B':(secondarygrain,'RGB'),'P':p},'float weight=.5+.2*sin(P.x*.00013+sin(P.y*.00021));return lerp(A,B,weight);')
     ground=sample(m,'/Game/ThirdParty/MWLandscapeAutoMaterial/Textures/Ground/TEX_MWAM_SandA_nrm',grounduv,normal=True)
-    base=custom(m,{'C':base,'D':(grain,'RGB'),'W':water,'P':p,'Camera':camera},'float detail=(1-W)*(1-smoothstep(15000,150000,length(Camera-P)));return C*lerp(1.,.8+dot(D,float3(.299,.587,.114))*.45,detail*.45);')
+    base=custom(m,{'C':base,'D':grainmix,'W':water,'P':p,'Camera':camera},'''float detail=(1-W)*(1-smoothstep(15000,150000,length(Camera-P)));
+float grain=clamp(dot(D,float3(.299,.587,.114))*2.6,.5,1.6);
+float close=(1-W)*(1-smoothstep(4000,40000,length(Camera-P)));
+float3 tint=C/max(.08,dot(C,float3(.299,.587,.114)));
+float3 granular=clamp(tint,float3(.6,.6,.6),float3(1.4,1.4,1.4))*D*1.7;
+return lerp(C*lerp(1.,grain,detail*.8),granular,close*.9);''')
     connect(m,base,u.MaterialProperty.MP_BASE_COLOR)
-    uv1=custom(m,{'P':p,'T':time},'return P.xy/2400+float2(T*.009,T*.003);',u.CustomMaterialOutputType.CMOT_FLOAT2)
-    uv2=custom(m,{'P':p,'T':time},'return P.yx/7300+float2(-T*.004,T*.002);',u.CustomMaterialOutputType.CMOT_FLOAT2)
+    uv1=custom(m,{'P':p,'T':time},'float2 warp=float2(sin(P.y*.00009),sin(P.x*.000071))*.34;return P.xy/2400+warp+float2(T*.009,T*.003);',u.CustomMaterialOutputType.CMOT_FLOAT2)
+    uv2=custom(m,{'P':p,'T':time},'return float2(P.x*.819+P.y*.574,-P.x*.574+P.y*.819)/7300+float2(-T*.004,T*.002);',u.CustomMaterialOutputType.CMOT_FLOAT2)
     wavepath='/Game/ThirdParty/WaterMaterials/Textures/T_Ocean_Waves01_Normals'
     w1=sample(m,wavepath,uv1,sampler=u.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
     w2=sample(m,wavepath,uv2,sampler=u.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
-    if shore is not None:
-        surf=custom(m,{'C':base,'W':water,'Inland':(shore,'R'),'P':p,'T':time,'Wave':(w1,'RGB')},'''
-float crest=smoothstep(.72,.98,sin(P.x*.0035+P.y*.00013+T*1.4));
-float foam=W*(1-Inland)*smoothstep(35000,60000,P.x)*crest*smoothstep(.25,.7,Wave.r);
-return lerp(C,float3(.38,.44,.43),foam*.65);''')
-        connect(m,surf,u.MaterialProperty.MP_BASE_COLOR)
+    surf=custom(m,{'C':base,'W':water,'H':hydro,'Coverage':coverage,'P':p,'Camera':camera,'T':time,'Wave':(w1,'RGB')},'''
+float distance=(H.g-.5)*256;
+float crest=smoothstep(.5,.97,sin(distance*.24+T*1.25+sin(P.y*.003)*.7));
+float visible=1-smoothstep(20000,150000,length(Camera-P));
+float foam=W*Coverage*(1-smoothstep(3,24,abs(distance)))*crest*smoothstep(.42,.76,Wave.r)*visible;
+return lerp(C,float3(.52,.57,.56),foam*.5);''')
+    connect(m,surf,u.MaterialProperty.MP_BASE_COLOR)
+    swell=custom(m,{'P':p,'T':time,'W':water,'Camera':camera,'H':hydro,'Coverage':coverage},'''
+float distance=(H.g-.5)*256;
+float shoal=lerp(1,smoothstep(0,35,distance),Coverage);
+float fade=1-smoothstep(150000,400000,length(P-Camera));
+float height=(sin(P.x*.0019+P.y*.0008-T*1.1)*24+sin(P.x*.0007-P.y*.0013-T*.72)*12)*W*shoal*fade;
+return normalize(P+float3(0,0,637100000))*height;''')
+    connect(m,swell,u.MaterialProperty.MP_WORLD_POSITION_OFFSET)
     vertex=ex(m,u.MaterialExpressionVertexNormalWS)
     normal=custom(m,{'P':p,'Camera':camera,'W':water,'A':(w1,'RGB'),'B':(w2,'RGB'),'Terrain':vertex,'Ground':(ground,'RGB')},'''
 float3 up=normalize(P+float3(0,0,637100000));
 float3 east=normalize(cross(float3(0,1,0),up));float3 north=cross(up,east);
-float detail=1-smoothstep(250000,2000000,length(Camera-P));
-float2 slope=((A.xy*2-1)*.34+(B.xy*2-1)*.2)*detail;
+float detail=1-smoothstep(30000,250000,length(Camera-P));
+float2 slope=((A.xy*2-1)*.16+(B.xy*2-1)*.10)*detail;
 float near=1-smoothstep(15000,150000,length(Camera-P));
-float3 land=normalize(Terrain+(east*Ground.x+north*Ground.y)*near*.24);
+float ripples=sin(P.x*.23+P.y*.11+sin(P.y*.017)*.8)*.07*(1-smoothstep(1200,6500,length(Camera-P)));
+float3 land=normalize(Terrain+(east*Ground.x+north*Ground.y)*near*.55+(east*.9+north*.43)*ripples);
 return normalize(lerp(land,normalize(up+east*slope.x+north*slope.y),W));''')
     connect(m,normal,u.MaterialProperty.MP_NORMAL)
     rough=custom(m,{'W':water,'P':p,'Camera':camera},'return lerp(.86,lerp(.14,.28,smoothstep(100000,1500000,length(Camera-P))),W);',u.CustomMaterialOutputType.CMOT_FLOAT1)
@@ -127,6 +150,6 @@ for a in u.get_editor_subsystem(u.EditorActorSubsystem).get_all_level_actors():
     if a.get_actor_label()=='Recovery_Sun':
         prop(a.light_component,'cloud_shadow_extent',150.)
 levels.save_current_level()
-report=dict(success=True,materials=19,shared_geographic_contract=True,coast_pixels=8192,gulf_pixels=8192,star_field='Procedural / exposure-dependent',cloud_start_max_distance_km=1800)
+report=dict(success=True,materials=19,shared_geographic_contract=True,coast_pixels=8192,gulf_pixels=8192,regional_pixels=8192,regional_extent_deg=.6,shore_distance_shared=True,ocean_displacement_max_cm=36,star_field='Procedural / exposure-dependent',cloud_start_max_distance_km=1800)
 (SAVED_ROOT/'world-continuity-assets.json').write_text(json.dumps(report,indent=2))
 print('WORLD_CONTINUITY_ASSETS_READY')
