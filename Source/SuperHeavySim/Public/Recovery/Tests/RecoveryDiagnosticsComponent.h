@@ -19,6 +19,7 @@ private:
     void TickVisualReview();
     void WriteVisualReview();
     bool bVisualReview=false,bCloudReview=false;
+    bool bWeakReactionReviewed=false;
     FString VisualReviewDirectory;
     double PreviousReviewTime=-DBL_MAX;
     int32 LastReviewPhase=-1;

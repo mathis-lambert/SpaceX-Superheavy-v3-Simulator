@@ -13,6 +13,7 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
         // Report that incoming velocity, not the already arrested contact state.
         State.FirstContactSpeedMps=Dynamics.Body.VelocityMps.Size();
         State.FirstContactVerticalSpeedMps=Dynamics.Body.VelocityMps.Z;
+        State.FirstContactAngularSpeedDegS=FMath::RadiansToDegrees(Dynamics.Body.AngularVelocityWorldRadS.Size());
         State.FirstContactTiltDeg=FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(Dynamics.Body.Rotation.GetUpVector().Z,-1.,1.)));
     }
     if(State.FirstContactTimeS<0 && N.AltitudeM-Config.CaptureWorldM.Z<100 && N.VelocityMps.Size()<5)
@@ -32,7 +33,7 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
     const FQuat ArrivalQ=FRotationMatrix::MakeFromZX(ArrivalThrust.IsNearlyZero()?FVector::UpVector:ArrivalThrust.GetSafeNormal(),CaptureQ.GetForwardVector()).ToQuat();
     // Target the equilibrium arrival attitude. Chasing the current tilted
     // fitting with the COM controller couples rotation back into translation.
-    const FVector Goal=Config.CaptureWorldM+CaptureQ.RotateVector(LugMid)-ArrivalQ.RotateVector(LugMid-FVector(0,0,Centre))-FVector(0,0,.20);
+    const FVector Goal=Config.CaptureWorldM+CaptureQ.RotateVector(LugMid)-ArrivalQ.RotateVector(LugMid-FVector(0,0,Centre))-FVector(0,0,.025);
     const FVector Error=Goal-Position;
     const double AvailablePerEngine=Config.EngineThrustN*N.EngineIspS/Config.SpecificImpulseSeaLevelS;
     double CoreThrust=0,LandingThrust=0;
@@ -84,12 +85,12 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
         State.TerminalReferenceM=Reference;State.TerminalReferenceVelocityMps=Plan.VelocityAt(T);
         State.TerminalPeakTrackingErrorM=FMath::Max(State.TerminalPeakTrackingErrorM,(Reference-Position).Size());
         const FVector PositionError=Reference-Position,VelocityError=Plan.VelocityAt(T)-N.VelocityMps;
-        // The opening is narrow across the rails but tolerates longitudinal
-        // displacement. Give crossrange tracking its own damped response in
-        // tower coordinates, independent of the world's compass orientation.
+        // Keep lateral feedback slower than the physical attitude response.
+        // Excessive crossrange gain drives a late oscillation at weight transfer.
+        // All gains act in tower coordinates, independently of compass heading.
         const FVector Feedback=Config.TowerRotation.RotateVector(
-            Config.TowerRotation.UnrotateVector(PositionError)*FVector(.06,.10,.4)+
-            Config.TowerRotation.UnrotateVector(VelocityError)*FVector(.35,.50,1.2));
+            Config.TowerRotation.UnrotateVector(PositionError)*FVector(.06,.06,.4)+
+            Config.TowerRotation.UnrotateVector(VelocityError)*FVector(.35,.35,1.2));
         FVector Net=Plan.AccelerationAt(T)+Feedback;
         const double ValveLead=FMath::Min(Config.Engines.OpeningTimeConstantS,Plan.HorizonS*.25);
         Net.Z=Plan.AccelerationAt(FMath::Min(T+ValveLead,Plan.HorizonS)).Z+Feedback.Z;
@@ -179,12 +180,14 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
         const double RailToFrame=RecoveryTowerGeometry::RailCentreHeightM+.09+.18;
         const double LowerAcross=FMath::Abs(RailOffset.Y-Slope*(RailToFrame+.85));
         const double UpperAcross=FMath::Abs(RailOffset.Y-Slope*(RailToFrame-.85));
-        // Reserve 24 cm for the measured transverse weight-transfer motion.
-        const double SafeGap=4.5/FMath::Max(.1,Up.Z)+.55+FMath::Max3(Across,LowerAcross,UpperAcross)+.24;
+        // Retain hull clearance while leaving both fittings over the rails.
+        // The slower transverse arrival needs 12 cm of settling reserve.
+        const double SafeGap=4.5/FMath::Max(.1,Up.Z)+.55+FMath::Max3(Across,LowerAcross,UpperAcross)+.12;
         // Loaded rails must not withdraw in response to the initial settling
         // motion. Hold their command during weight transfer and support.
         if(!State.bContactShutdown && External.SupportContactCount==0)
-            State.ArmClosure=FMath::Min(FMath::Clamp((60.-Height)/25.,0.,1.),FMath::Clamp((10.-SafeGap)/4.85,0.,1.));
+            State.ArmClosure=FMath::Min(FMath::Clamp((60.-Height)/25.,0.,1.),
+                RecoveryTowerGeometry::ClosureForGap(SafeGap,RailOffset.X,RecoveryTowerGeometry::HalfArmM-RecoveryContactGeometry::RailCentreOffsetM));
         // Transfer weight on the first verified fitting contact. Continuing
         // hover thrust would hold the other fitting a few centimetres above
         // its rail in crosswind. Longitudinal offset is acceptable within the

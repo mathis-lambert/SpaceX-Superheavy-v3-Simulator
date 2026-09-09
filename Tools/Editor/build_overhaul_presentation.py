@@ -32,10 +32,8 @@ for name in ['SM_StarshipDetailed','SM_RCSBlock']:
         label=str(slot.material_slot_name);chosen=next((v for k,v in mapping.items() if k in label),steel);m.set_material(i,chosen)
         print('ART_SLOT',name,i,label,chosen.get_name())
     settings=m.get_editor_property('nanite_settings');prop(settings,'enabled',True);prop(settings,'position_precision',2);prop(m,'nanite_settings',settings);A.save_loaded_asset(m,False)
-gas=mat('M_AttitudeGas');prop(gas,'blend_mode',u.BlendMode.BLEND_ADDITIVE);prop(gas,'shading_model',u.MaterialShadingModel.MSM_UNLIT);prop(gas,'two_sided',True)
-uv=ex(gas,u.MaterialExpressionTextureCoordinate);power=scalar(gas,'Power',0);time=scalar(gas,'Time',0)
-connect(gas,custom(gas,{'UV':uv,'P':power,'T':time},'return float3(.46,.64,1)*2300*P*pow(saturate(1-UV.y),2)*(0.7+0.3*sin(UV.y*47-T*33));'),u.MaterialProperty.MP_EMISSIVE_COLOR)
-connect(gas,custom(gas,{'UV':uv,'P':power},'return .25*P*smoothstep(0,.04,UV.y)*pow(saturate(1-UV.y),1.4);',u.CustomMaterialOutputType.CMOT_FLOAT1),u.MaterialProperty.MP_OPACITY);save(gas)
+from attitude_gas import build_attitude_gas
+build_attitude_gas()
 # Preserve the existing authored atlas, but let real scene light illuminate it.
 for name in ['M_GroundVapor','M_VaporTrail']:
     m=u.load_asset(ROOT+'/Materials/'+name);prop(m,'shading_model',u.MaterialShadingModel.MSM_DEFAULT_LIT)

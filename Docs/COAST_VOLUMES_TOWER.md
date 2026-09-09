@@ -52,8 +52,10 @@ The motor uses a force-mode PD drive (600 MN m/rad stiffness, 180 MN m s/rad
 damping), capped at 12 MN m. It wakes sleeping bodies on new commands. Rail
 load and overload events are sampled after every 120 Hz solver step, not from
 game-frame notifications. The Flight Lab displays live rail loads, suspension
-compression and hardware state. Guidance reserves 24 cm for transverse weight
-transfer while retaining fitting overlap. The hull and arm frames still collide.
+compression and hardware state. Guidance reserves 12 cm for transverse weight
+transfer with the slower arrival. The commanded gap is evaluated at the actual
+fitting position along the hinged rails, retaining overlap away from the nominal
+catch axis. The hull and arm frames still collide.
 
 ## Geography
 
@@ -74,8 +76,12 @@ Land detail adds two decorrelated texture scales and close sand ripple normals.
 A shared 4096-square hydrology mask supplies water coverage, signed shore
 distance and an estimated optical shallows term. It is derived from elevation,
 not surveyed bathymetry or a tidal model. Shore foam is bounded near the shoreline
-and fades with viewing distance. Two warped wave-normal scales and up to 36 cm
-of near-water vertex displacement avoid a full ocean-fluid simulation.
+and fades with viewing distance. Twelve non-harmonic directional waves replace
+the crossed repeating normal texture; two long swells displace near-water
+vertices by up to 36 cm. Pixel derivatives fade unresolved slopes into distant
+roughness. The shared implementation in `Tools/Shared/water_surface.py` follows
+the two-scale approach described in [NVIDIA GPU Gems](https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models).
+This bounded visual spectrum is not a full ocean-fluid simulation.
 Small geometric swells are restricted to the local hydrology patch. Vertex and
 velocity passes sample that mask directly, without evaluating the orbital imagery
 pyramid used by the pixel shader; more distant water retains wave normals.
@@ -85,15 +91,33 @@ pyramid used by the pixel shader; more distant water retains wave normals.
 `bake_turbulent_volumes.py` uses Blender 5.2.1 Mantaflow to bake 64 frames of warm
 inflow rolling around a low deflector in a 20 × 16 × 12 m domain. The OpenVDB noise
 cache becomes one animated sparse volume texture (126 × 100 × 74 voxels; 53 MB
-uncooked asset). Eight runtime instances share that streamed cache, with a six
+uncooked asset). Eight runtime instances share that streamed cache, with a twelve
 second lifetime, advection, expansion, smooth extinction and distance fading.
 Volume albedo receives local lighting and shadows; its emission is zero.
 
 This is an offline visual flow simulation. It does not solve live fluid collisions
 with every site object or model rocket-exhaust chemistry. The existing inexpensive
-fog/trail pool supplies distant transport, with reduced hot-deluge density. The
+fog/trail pool supplies dense ground transport with larger billows.
+Expired slots are reused; visible clouds are never overwritten to spawn new ones.
+Deluge delivery drives both systems during launch and landing. The
 two cryogenic vent fields remain a separate effect. Sparse-volume performance
 must be assessed in the packaged renderer, not inferred from the pool limit.
+
+## Final contact and attitude jets
+
+The mission requests a 0.25 m/s vertical arrival. Lateral feedback is tuned below
+the attitude response bandwidth to reduce side-to-side oscillation; it commands
+real engine and gimbal forces. Engine valves close on verified fitting support,
+and the suspension continues to carry and settle the freely moving vehicle.
+Contact reports include incoming translational and angular velocity, rail loads
+and the stability interval after shutdown. Release validation records the measured
+return durations and contact values for all three reference scenarios.
+
+RCS artwork reads each nozzle's delivered force. The old 6 kN visibility cutoff
+and squared optical attenuation are removed. A compressed intensity response
+reveals weak pulses, with a 120 ms decay retaining the last exhaust direction.
+These are optical presentation choices; force, valve delay and propellant use
+remain unchanged. The shared material builder is `Tools/Shared/attitude_gas.py`.
 
 ## Reproduction and ownership
 
@@ -108,7 +132,8 @@ Generated source caches live under `../ArtSource`; runtime assets are under
    `bake_turbulent_volumes.py`, and `build_tower_meshes.py`.
 3. In Unreal Python commandlets run `import_coast_volumes.py`,
    `build_world_continuity.py -CoastalShadingReimport` (the flag belongs on the
-   commandlet command line), then `finalize_coast_mechanics.py`.
+   commandlet command line), then `finalize_coast_mechanics.py`,
+   `configure_dynamic_return.py` and `build_attitude_gas.py`.
 4. Run `audit_lidar_meshes.py` in Blender. Run the model, contact-fixture,
    physical-flight and experience audits, then test the packaged game.
 

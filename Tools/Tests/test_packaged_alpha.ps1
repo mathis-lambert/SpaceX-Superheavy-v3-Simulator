@@ -45,7 +45,7 @@ Invoke-Alpha -LogName 'controls' -Arguments @("-UserDir=$userDir/",'-windowed','
 $controls=Read-FreshAlphaReport 'ControlsAudit/result.json' $start
 Write-Host 'Packaged controls PASS'
 $start=Get-Date
-Invoke-Alpha -LogName 'flight' -Arguments @("-UserDir=$userDir/",'-windowed','-ForceRes','-ResX=1920','-ResY=1080','-UseFixedTimeStep','-FPS=15','-RecoveryPhysicsAudit','-ini:Engine:[Audio]:UnfocusedVolumeMultiplier=1','-RecoveryExperienceAudit','-RecoveryAudioAudit','-RecoveryReview','-RecoveryChaseReview','-RecoveryAutoExit','-RecoveryScenario=Crosswind','-RecoveryReportName=AlphaFlight','-RecoveryReconstruction=3','-nosplash','-unattended',"-abslog=$audit/flight.log")
+Invoke-Alpha -LogName 'flight' -Arguments @("-UserDir=$userDir/",'-windowed','-ForceRes','-ResX=1920','-ResY=1080','-UseFixedTimeStep','-FPS=15','-RecoveryPhysicsAudit','-ini:Engine:[Audio]:UnfocusedVolumeMultiplier=1','-RecoveryExperienceAudit','-RecoveryAudioAudit','-RecoveryReview','-RecoveryDetailReview','-RecoveryChaseReview','-RecoveryAutoExit','-RecoveryScenario=Crosswind','-RecoveryReportName=AlphaFlight','-RecoveryReconstruction=3','-nosplash','-unattended',"-abslog=$audit/flight.log")
 $flight=Read-FreshAlphaReport 'AlphaFlight.json' $start
 $render=Read-FreshAlphaReport 'experience-flight-audit.json' $start
 $audio=Get-Item -LiteralPath "$saved/Audio/LaunchMix.wav"
@@ -54,7 +54,7 @@ if($audio.LastWriteTime -lt $start){throw 'No fresh packaged audio recording'}
 if($LASTEXITCODE -ne 0){throw 'Packaged launch audio is silent or clipped'}
 if(!(Test-RecoveryFrontApproach -Report $flight) -or $flight.solver_support_mask -ne 3 -or !$flight.contact_engine_shutdown -or $flight.unpowered_thrust_violation -or $flight.structural_contacts -ne 0){throw 'Packaged physical capture contract failed'}
 if(!$flight.tower_dynamic -or $flight.tower_broken_rail_mask -ne 0 -or $flight.tower_broken_hinge_mask -ne 0 -or !$render.turbulent_volume_budget_pass){throw 'Packaged tower or turbulent volume contract failed'}
-if($flight.landing_burn_seconds -ge 45 -or $flight.first_contact_speed_mps -ge 1.5 -or $flight.low_slow_approach_seconds -ge 8){throw 'Packaged return exceeds the landing thrust, contact speed or slow-approach limits'}
+if(!(Test-RecoveryGentleContact -Report $flight)){throw 'Packaged return exceeds the gentle-contact or short-burn limits'}
 if($render.chase_contact_frames -lt 50 -or $render.chase_contact_max_offset_step_cm -gt .01 -or $render.chase_contact_max_angle_step_deg -gt .001){throw 'Packaged Chase camera is unstable after capture'}
 foreach($log in @("$audit/startup.log","$audit/controls.log","$audit/flight.log")){
     if(Select-String -Quiet -LiteralPath $log -Pattern 'Fatal error:|Handled ensure|Ensure condition failed|LogDLSSBlueprint: Error:|Failed to compile Material|Couldn.t find file for package|Failed to find object.*(/Game/|/Starbase/)'){throw "Packaged content failure: $log"}

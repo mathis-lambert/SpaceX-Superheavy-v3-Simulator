@@ -64,7 +64,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ground systems | Estimated") double ConditioningVentKgS = 1.8;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ground systems | Estimated") double ConditioningJetSpeedMps = 40;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture") double CaptureRadiusM = 0.35;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture") double CaptureSpeedMps = 0.6;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture") double CaptureSpeedMps = 0.25;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture") double CaptureTiltDeg = 1.5;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture") double CaptureHeadingToleranceDeg = 2;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture") double CaptureDwellSeconds = 0.6;

@@ -125,6 +125,7 @@ void URecoveryPresentationComponent::Build()
         auto* MID=UMaterialInstanceDynamic::Create(LoadObject<UMaterialInterface>(nullptr,RecoveryAssets::M_AttitudeGas),this);
         Jet->SetMaterial(0,MID);Jet->SetCollisionEnabled(ECollisionEnabled::NoCollision);Jet->SetCastShadow(false);
         Jet->RegisterComponent();GetOwner()->AddInstanceComponent(Jet);RcsPlumes.Add(Jet);RcsMaterials.Add(MID);
+        RcsEnvelopes.Add(0);RcsDirections.Add(FVector::UpVector);
     }
     // Reuse the project's foliage and rock assets. Instances have no collision
     // and a bounded draw distance, so ground detail does not alter flight physics.
@@ -151,7 +152,12 @@ void URecoveryPresentationComponent::TickComponent(float Dt,ELevelTick Type,FAct
     if(!FApp::CanEverRender()) { SetComponentTickEnabled(false); return; }
     auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());if(!D || !D->GetBody()) return;
     if(!bBuilt) Build();if(!bBuilt) return;
-    if(LastGeneration!=D->GetMissionGeneration()){for(double& E:ExhaustEnvelopes)E=0;LastGeneration=D->GetMissionGeneration();}
+    if(LastGeneration!=D->GetMissionGeneration())
+    {
+        for(double& E:ExhaustEnvelopes)E=0;
+        for(double& E:RcsEnvelopes)E=0;
+        LastGeneration=D->GetMissionGeneration();
+    }
     SyncActuatorMeshes();
     Clock+=Dt;
     const auto* P=D->GetProfile(); const double Vacuum=1-FMath::Sqrt(FMath::Clamp(D->PressurePa/101325.,0.,1.));
@@ -248,10 +254,15 @@ void URecoveryPresentationComponent::TickComponent(float Dt,ELevelTick Type,FAct
     {
         const FQuat Q=D->GetBody()->GetComponentQuat();const FVector Position=Base+Q.RotateVector(Positions[I])*100;
         RcsPods[I]->SetWorldLocationAndRotation(Position,Q*FRotationMatrix::MakeFromX(FVector(Positions[I].X,Positions[I].Y,0)).ToQuat());
-        const double Power=FMath::Clamp(Forces[I].Size()/240000.,0.,1.);
-        RcsPlumes[I]->SetVisibility(Power>0.025 && D->ActiveEngines==0 && !D->bContactShutdown);
-        RcsPlumes[I]->SetWorldLocationAndRotation(Position,FRotationMatrix::MakeFromZ(Q.RotateVector(Forces[I].GetSafeNormal())).ToQuat());
-        RcsPlumes[I]->SetWorldScale3D(FVector(.6+Power*1.5,.6+Power*1.5,4+Power*9));
+        const double ForceN=Forces[I].Size();
+        if(ForceN>=1)RcsDirections[I]=Forces[I]/ForceN;
+        RcsEnvelopes[I]=RecoveryPropulsionVisuals::ReactionEnvelope(RcsEnvelopes[I],ForceN,Dt);
+        const double Power=RcsEnvelopes[I];
+        RcsPlumes[I]->SetVisibility(Power>0);
+        // The envelope extends along local -Z, opposite the measured force.
+        RcsPlumes[I]->SetWorldLocationAndRotation(Position,FRotationMatrix::MakeFromZ(Q.RotateVector(RcsDirections[I])).ToQuat());
+        const double Width=(.8+Power*2.8)*(1+Vacuum*.65);
+        RcsPlumes[I]->SetWorldScale3D(FVector(Width,Width,(5+Power*18)*(1+Vacuum*.3)));
         RcsMaterials[I]->SetScalarParameterValue(TEXT("Power"),Power);RcsMaterials[I]->SetScalarParameterValue(TEXT("Time"),Clock);
     }
     D->UpdateCamera(Dt);

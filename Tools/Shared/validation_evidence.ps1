@@ -3,6 +3,17 @@ function Test-RecoveryFrontApproach {
     return $Report.front_approach_samples -gt 0 -and $Report.front_ingress_verified -and $null -ne $Report.front_min_mast_clearance_m -and $null -ne $Report.front_min_corridor_margin_m -and $Report.front_min_mast_clearance_m -ge 0 -and $Report.front_min_corridor_margin_m -ge 0
 }
 
+function Test-RecoveryGentleContact {
+    param([object]$Report)
+    # Measured incoming solver state, before support removes momentum.
+    return $Report.first_contact_time_s -gt $Report.landing_ignition_time_s -and `
+        $Report.landing_burn_seconds -lt 45 -and $Report.low_slow_approach_seconds -lt 8 -and `
+        $Report.first_contact_speed_mps -lt .85 -and `
+        $null -ne $Report.first_contact_vertical_speed_mps -and [math]::Abs($Report.first_contact_vertical_speed_mps) -lt .35 -and `
+        $Report.first_contact_tilt_deg -lt 1.2 -and `
+        $null -ne $Report.first_contact_angular_speed_deg_s -and $Report.first_contact_angular_speed_deg_s -lt 3.2
+}
+
 function Write-RecoveryBuildEvidence {
     param([string]$Root,[string]$Destination,[string]$EngineRoot)
     $files=@(Get-Item -LiteralPath (Join-Path $Root 'SuperHeavySim.uproject'),(Join-Path $Root 'Binaries/Win64/UnrealEditor-SuperHeavySim.dll'))

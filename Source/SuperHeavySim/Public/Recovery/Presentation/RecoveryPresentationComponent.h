@@ -28,6 +28,8 @@ private:
     UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> RcsPods;
     UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> RcsPlumes;
     UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> RcsMaterials;
+    TArray<double> RcsEnvelopes;
+    TArray<FVector> RcsDirections;
     UPROPERTY(Transient) TArray<TObjectPtr<UPointLightComponent>> EngineLights;
     UPROPERTY(Transient) TObjectPtr<UNiagaraComponent> VaporTrail;
     UPROPERTY(Transient) TArray<TObjectPtr<UPointLightComponent>> PlumeLights;

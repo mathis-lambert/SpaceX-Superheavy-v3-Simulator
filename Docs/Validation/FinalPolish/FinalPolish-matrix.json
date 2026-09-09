@@ -1,0 +1,44 @@
+[
+  {
+    "scenario": "Nominal",
+    "success": true,
+    "fps": 60,
+    "physics_hz": 119.99999374151263,
+    "report": "Saved/Recovery/FinalPolish_Nominal_60.json"
+  },
+  {
+    "scenario": "Crosswind",
+    "success": true,
+    "fps": 60,
+    "physics_hz": 119.99999374151263,
+    "report": "Saved/Recovery/FinalPolish_Crosswind_60.json"
+  },
+  {
+    "scenario": "Offset",
+    "success": true,
+    "fps": 60,
+    "physics_hz": 119.99999374151263,
+    "report": "Saved/Recovery/FinalPolish_Offset_60.json"
+  },
+  {
+    "scenario": "Nominal",
+    "success": true,
+    "fps": 15,
+    "physics_hz": 119.99999374151263,
+    "report": "Saved/Recovery/FinalPolish_Nominal_15.json"
+  },
+  {
+    "scenario": "Crosswind",
+    "success": true,
+    "fps": 15,
+    "physics_hz": 119.99999374151263,
+    "report": "Saved/Recovery/FinalPolish_Crosswind_15.json"
+  },
+  {
+    "scenario": "Offset",
+    "success": true,
+    "fps": 15,
+    "physics_hz": 119.99999374151263,
+    "report": "Saved/Recovery/FinalPolish_Offset_15.json"
+  }
+]

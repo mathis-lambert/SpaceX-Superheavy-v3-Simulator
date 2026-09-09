@@ -16,7 +16,7 @@ struct FRecoveryGuidanceConfiguration : FRecoveryDynamicsConfiguration
     double LandingWindLeadS=8;
     double ReturnWindReferenceAltitudeM=0,LandingBurnMarginM=0,LandingDecelerationMps2=0;
     double MaxEntryAngleDeg=0,MaxTiltDeg=0,TimeoutSeconds=0;
-    double ContactDescentSpeedMps=.6;
+    double ContactDescentSpeedMps=.25;
 };
 
 enum class ERecoveryGuidanceReason : uint8
@@ -76,7 +76,7 @@ struct FRecoveryGuidanceState
     double LandingIgnitionTimeS=0,LandingIgnitionSpeedMps=0,LandingIgnitionMassKg=0;
     double LandingIgnitionDistanceM=0,LandingIgnitionFuelKg=0,LandingIgnitionThrustN=0;
     double FirstContactTimeS=-1,FirstContactSpeedMps=0,FirstContactVerticalSpeedMps=0;
-    double FirstContactTiltDeg=0,LowSlowApproachSeconds=0;
+    double FirstContactTiltDeg=0,FirstContactAngularSpeedDegS=0,LowSlowApproachSeconds=0;
     double SettledContactSeconds=0,CaptureErrorAtLatch=0,CaptureSpeedAtLatch=0,CaptureTiltAtLatch=0;
     double CaptureHeadingAtLatch=0,CaptureLugAtLatch=0;
     FVector LatchPositionM=FVector::ZeroVector;

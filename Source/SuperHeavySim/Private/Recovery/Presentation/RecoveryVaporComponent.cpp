@@ -39,7 +39,13 @@ void URecoveryVaporComponent::Build()
 
 void URecoveryVaporComponent::Spawn(const FVector& Position,const FVector& Velocity,float Life,float Radius,float Growth,float Density,EVaporKind Kind)
 {
-    const int32 I=Next++%Billows.Num();
+    // Keep older clouds until their fade completes instead of visibly replacing
+    // dense ground volumes when the pool wraps during sustained deluge flow.
+    int32 I=INDEX_NONE;
+    for(int32 Offset=0;Offset<Billows.Num();++Offset)
+        if(Billows[(Next+Offset)%Billows.Num()].Age>=Billows[(Next+Offset)%Billows.Num()].Life)
+        {I=(Next+Offset)%Billows.Num();Next+=Offset+1;break;}
+    if(I==INDEX_NONE)return;
     Billows[I]={Position,Velocity,0,Life,Radius,Growth,Density};
     Billows[I].Kind=Kind;Billows[I].Seed=Next*.6180339f;
     Billows[I].FlowAxis=Velocity.GetSafeNormal(UE_SMALL_NUMBER,FVector::ForwardVector);
@@ -85,16 +91,16 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
     // Ground water flow and engine exhaust coexist with the cryogenic vents.
     // Separate clocks prevent active conditioning from suppressing the deluge.
     DelugeSpawnClock+=Dt;
-    if(D->GetDelugeFlow()>.05 && D->AltitudeM<220 && DelugeSpawnClock>.25)
+    if(D->GetDelugeFlow()>.05 && D->AltitudeM<220 && DelugeSpawnClock>.5)
     {
-        DelugeSpawnClock=FMath::Fmod(DelugeSpawnClock,.25);
+        DelugeSpawnClock=FMath::Fmod(DelugeSpawnClock,.5);
         const bool Hot=Delivered>.003;
-        const int32 Count=Delivered>.1?5:3;
+        const int32 Count=3;
         for(int32 J=0;J<Count;++J)
         {
             const double Angle=Next*2.399963;
             const FVector Radial(FMath::Cos(Angle),FMath::Sin(Angle),0);
-            Spawn(FVector(Base.X,Base.Y,250)+Radial*(650+J*130),Radial*((Hot?2100:600)+J*140)+Wind+FVector(0,0,Hot?110+J*55:30),Hot?22:9,Hot?3+J*.6f:1.1,Hot?2.2f:.8f,(Hot?.65f:.6f)*D->GetDelugeFlow(),EVaporKind::Deluge);
+            Spawn(FVector(Base.X,Base.Y,600)+Radial*(900+J*200),Radial*((Hot?3500:600)+J*140)+Wind+FVector(0,0,Hot?180+J*65:30),Hot?18:9,Hot?8+J:1.1,Hot?3.2f:.8f,(Hot?2.6f:.6f)*D->GetDelugeFlow(),EVaporKind::Deluge);
         }
     }
     else if(Delivered>.01 && D->Phase==ERecoveryPhase::Ascent && D->AltitudeM>170 && D->AltitudeM<12000 && (Base-LastTrailPosition).Size()>6500)

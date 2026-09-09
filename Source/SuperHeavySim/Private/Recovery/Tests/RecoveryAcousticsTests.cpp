@@ -52,6 +52,11 @@ bool FRecoveryAcousticMixTest::RunTest(const FString&)
     const double Tail=RecoveryPropulsionVisuals::ExhaustEnvelope(1,0,.1);
     TestTrue(TEXT("Extinction persists briefly and fades"),Tail>.3 && Tail<.4);
     TestTrue(TEXT("Tail never undercuts delivered thrust"),RecoveryPropulsionVisuals::ExhaustEnvelope(.1,.5,1)>=.5);
+    TestEqual(TEXT("Inactive RCS has no optical emission"),RecoveryPropulsionVisuals::ReactionEnvelope(0,0,.1),0.);
+    TestTrue(TEXT("Small real RCS pulses remain visible"),RecoveryPropulsionVisuals::ReactionEnvelope(0,100,.1)>.05);
+    double Reaction=1;
+    for(int I=0;I<120;++I)Reaction=RecoveryPropulsionVisuals::ReactionEnvelope(Reaction,0,1./120.);
+    TestEqual(TEXT("RCS exhaust clears after the pulse"),Reaction,0.);
     return true;
 }
 #endif

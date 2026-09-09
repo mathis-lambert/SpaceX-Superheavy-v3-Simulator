@@ -42,7 +42,7 @@ See `PHOTOGRAPHY.md` for controls, sources and scope.
 
 This version delays landing ignition according to predicted stopping distance,
 current mass, velocity, available thrust and engine response. The three reference
-scenarios now take approximately 30–32 seconds of landing thrust, with a soft
+scenarios now take approximately 30–33 seconds of landing thrust, with a soft
 physical fitting contact and immediate weight transfer onto the rails. See
 `FLIGHT.md` for the measured comparison and model limitations.
 
@@ -59,6 +59,11 @@ supply turbulent lit deluge volumes. Tower arms rotate on torque-driven physical
 hinges; the rails have springs, dampers, travel limits and overload failure.
 The Flight Lab shows their measured loads and compression. See
 `COAST-VOLUMES-TOWER.md` for data coverage, reproduction and model assumptions.
+
+The final polish increases launch and landing vapor coverage and density within
+the existing volume budgets. Weak RCS pulses are more legible, ocean shading uses
+directional wave scales instead of a repeating crossed texture, and the mission
+requests 0.25 m/s vertical contact with less lateral oscillation.
 
 ## Known alpha limitations
 

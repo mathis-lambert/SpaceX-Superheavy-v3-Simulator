@@ -29,6 +29,18 @@ void URecoveryDiagnosticsComponent::TickVisualReview()
                 if(PreviousReviewTime<At && Time>=At)Name=FString::Printf(TEXT("VFX_Close_%03d"),int(At));
     }
     if(D->GetCameraMode()==12 && PreviousReviewTime<210. && Time>=210.)Name=TEXT("EarthHorizon");
+    if(FParse::Param(FCommandLine::Get(),TEXT("RecoveryDetailReview")))
+    {
+        double PeakReaction=0;
+        for(const auto& Force:D->GetReactionForcesBodyN())PeakReaction=FMath::Max(PeakReaction,Force.Size());
+        if(!bWeakReactionReviewed && D->Phase==ERecoveryPhase::Coast && D->AltitudeM>50000 && PeakReaction>=100 && PeakReaction<6000)
+        {Name=TEXT("RCS_WeakCorrection");bWeakReactionReviewed=true;}
+        const double Contact=D->GetGuidanceState().FirstContactTimeS;
+        if(Contact>0)
+            for(double Delay:{0.,.2,.5,1.,2.,4.})
+                if(PreviousReviewTime<Contact+Delay && Time>=Contact+Delay)
+                    Name=FString::Printf(TEXT("Contact_%03d"),FMath::RoundToInt(Delay*100));
+    }
     if(bCloudReview)
     {
         // Matching one-second sequences through the cloud layer, across its top,
@@ -55,6 +67,9 @@ void URecoveryDiagnosticsComponent::TickVisualReview()
     Frame->SetStringField(TEXT("phase"),D->GetPhaseLabel());
     Frame->SetNumberField(TEXT("camera"),D->GetCameraMode());
     Frame->SetNumberField(TEXT("fov_deg"),PC->PlayerCameraManager->GetFOVAngle());
+    double PeakReaction=0;
+    for(const auto& Force:D->GetReactionForcesBodyN())PeakReaction=FMath::Max(PeakReaction,Force.Size());
+    Frame->SetNumberField(TEXT("peak_rcs_force_n"),PeakReaction);
     const auto Vector=[&](const TCHAR* Key,const FVector& V)
     {
         TArray<TSharedPtr<FJsonValue>> Values;

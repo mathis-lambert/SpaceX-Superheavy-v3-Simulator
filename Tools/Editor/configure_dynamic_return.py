@@ -11,7 +11,7 @@ if not backup.exists():
     shutil.copy2(source, backup)
 profile = u.load_asset('/Game/Starbase/Data/DA_RecoveryMission')
 defaults = u.get_default_object(u.SuperHeavyRecoveryProfile)
-for name in ('front_return_offset_m', 'landing_wind_lead_s', 'landing_deceleration_mps2', 'landing_burn_margin_m', 'max_tilt_deg'):
+for name in ('front_return_offset_m', 'landing_wind_lead_s', 'landing_deceleration_mps2', 'landing_burn_margin_m', 'max_tilt_deg', 'capture_speed_mps'):
     profile.set_editor_property(name, defaults.get_editor_property(name))
 u.EditorAssetLibrary.save_loaded_asset(profile)
 u.log('DYNAMIC_RETURN_PROFILE_SAVED')

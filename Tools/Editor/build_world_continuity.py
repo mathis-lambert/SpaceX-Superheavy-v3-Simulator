@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'Shared'))
 from project_paths import ART_ROOT, SAVED_ROOT
 from unreal_materials import u, E, A, prop, expression as ex, material, custom, sample, scalar, vector, constant, color, connect, save
+from water_surface import normal_code, displacement_code
 import json
 import math
 
@@ -85,41 +86,24 @@ float3 tint=C/max(.08,dot(C,float3(.299,.587,.114)));
 float3 granular=clamp(tint,float3(.6,.6,.6),float3(1.4,1.4,1.4))*D*1.7;
 return lerp(C*lerp(1.,grain,detail*.8),granular,close*.9);''')
     connect(m,base,u.MaterialProperty.MP_BASE_COLOR)
-    uv1=custom(m,{'P':p,'T':time},'float2 warp=float2(sin(P.y*.00009),sin(P.x*.000071))*.34;return P.xy/2400+warp+float2(T*.009,T*.003);',u.CustomMaterialOutputType.CMOT_FLOAT2)
-    uv2=custom(m,{'P':p,'T':time},'return float2(P.x*.819+P.y*.574,-P.x*.574+P.y*.819)/7300+float2(-T*.004,T*.002);',u.CustomMaterialOutputType.CMOT_FLOAT2)
-    wavepath='/Game/ThirdParty/WaterMaterials/Textures/T_Ocean_Waves01_Normals'
-    w1=sample(m,wavepath,uv1,sampler=u.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
-    w2=sample(m,wavepath,uv2,sampler=u.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
-    surf=custom(m,{'C':base,'W':water,'H':hydro,'Coverage':coverage,'P':p,'Camera':camera,'T':time,'Wave':(w1,'RGB')},'''
+    surf=custom(m,{'C':base,'W':water,'H':hydro,'Coverage':coverage,'P':p,'Camera':camera,'T':time},'''
 float distance=(H.g-.5)*256;
 float crest=smoothstep(.5,.97,sin(distance*.24+T*1.25+sin(P.y*.003)*.7));
 float visible=1-smoothstep(20000,150000,length(Camera-P));
-float foam=W*Coverage*(1-smoothstep(3,24,abs(distance)))*crest*smoothstep(.42,.76,Wave.r)*visible;
+float breakup=.5+.24*sin(P.x*.012+sin(P.y*.019))+.26*sin(P.y*.032+P.x*.017);
+float foam=W*Coverage*(1-smoothstep(3,24,abs(distance)))*crest*smoothstep(.32,.8,breakup)*visible;
 return lerp(C,float3(.52,.57,.56),foam*.5);''')
     connect(m,surf,u.MaterialProperty.MP_BASE_COLOR)
     # Vertex deformation only needs the surveyed local water mask. Passing the
     # pixel-stage water classification here also samples every orbital imagery
     # layer per vertex, including in the velocity pass. Outside this local patch
     # the ocean keeps its wave normals; small vertex swells are not evaluated.
-    swell=custom(m,{'P':p,'T':time,'Camera':camera,'H':hydro,'Coverage':coverage},'''
-float distance=(H.g-.5)*256;
-float shoal=lerp(1,smoothstep(0,35,distance),Coverage);
-float fade=1-smoothstep(150000,400000,length(P-Camera));
-float height=(sin(P.x*.0019+P.y*.0008-T*1.1)*24+sin(P.x*.0007-P.y*.0013-T*.72)*12)*H.r*Coverage*shoal*fade;
-return normalize(P+float3(0,0,637100000))*height;''')
+    swell=custom(m,{'P':p,'T':time,'Camera':camera,'H':hydro,'Coverage':coverage},displacement_code())
     connect(m,swell,u.MaterialProperty.MP_WORLD_POSITION_OFFSET)
     vertex=ex(m,u.MaterialExpressionVertexNormalWS)
-    normal=custom(m,{'P':p,'Camera':camera,'W':water,'A':(w1,'RGB'),'B':(w2,'RGB'),'Terrain':vertex,'Ground':(ground,'RGB')},'''
-float3 up=normalize(P+float3(0,0,637100000));
-float3 east=normalize(cross(float3(0,1,0),up));float3 north=cross(up,east);
-float detail=1-smoothstep(30000,250000,length(Camera-P));
-float2 slope=((A.xy*2-1)*.16+(B.xy*2-1)*.10)*detail;
-float near=1-smoothstep(15000,150000,length(Camera-P));
-float ripples=sin(P.x*.23+P.y*.11+sin(P.y*.017)*.8)*.07*(1-smoothstep(1200,6500,length(Camera-P)));
-float3 land=normalize(Terrain+(east*Ground.x+north*Ground.y)*near*.55+(east*.9+north*.43)*ripples);
-return normalize(lerp(land,normalize(up+east*slope.x+north*slope.y),W));''')
+    normal=custom(m,{'P':p,'Camera':camera,'T':time,'W':water,'Terrain':vertex,'Ground':(ground,'RGB')},normal_code())
     connect(m,normal,u.MaterialProperty.MP_NORMAL)
-    rough=custom(m,{'W':water,'P':p,'Camera':camera},'return lerp(.86,lerp(.14,.28,smoothstep(100000,1500000,length(Camera-P))),W);',u.CustomMaterialOutputType.CMOT_FLOAT1)
+    rough=custom(m,{'W':water,'P':p,'Camera':camera},'return lerp(.86,lerp(.12,.25,smoothstep(10000,650000,length(Camera-P))),W);',u.CustomMaterialOutputType.CMOT_FLOAT1)
     connect(m,rough,u.MaterialProperty.MP_ROUGHNESS)
     connect(m,constant(m,.38),u.MaterialProperty.MP_SPECULAR)
     save(m)

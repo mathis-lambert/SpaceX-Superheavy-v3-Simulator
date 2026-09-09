@@ -40,4 +40,11 @@ namespace RecoveryTowerGeometry
     { return FMath::RadiansToDegrees(FMath::Atan(GapTravelM*(1-FMath::Clamp(Closure,0.,1.))/CaptureLeverM)); }
     inline double Closure(double AngleDeg,double CaptureLeverM)
     { return FMath::Clamp(1-FMath::Tan(FMath::DegreesToRadians(FMath::Abs(AngleDeg)))*CaptureLeverM/GapTravelM,0.,1.); }
+    inline double ClosureForGap(double HalfGapM,double AlongOffsetM,double CaptureLeverM)
+    {
+        // Hinged rails diverge toward their tips. Evaluate the opening at the
+        // actual fitting position, rather than only at the nominal catch axis.
+        const double LocalLever=FMath::Max(1.,CaptureLeverM+AlongOffsetM);
+        return FMath::Clamp(1-(HalfGapM-ClosedGapM)*CaptureLeverM/(LocalLever*GapTravelM),0.,1.);
+    }
 }

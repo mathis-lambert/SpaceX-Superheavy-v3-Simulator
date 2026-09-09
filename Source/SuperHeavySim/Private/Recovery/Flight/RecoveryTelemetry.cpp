@@ -133,6 +133,7 @@ void ASuperHeavyRecoveryDirector::WriteResult(bool bSuccess,const FString& Reaso
     Result->SetNumberField(TEXT("first_contact_speed_mps"),GuidanceState.FirstContactSpeedMps);
     Result->SetNumberField(TEXT("first_contact_vertical_speed_mps"),GuidanceState.FirstContactVerticalSpeedMps);
     Result->SetNumberField(TEXT("first_contact_tilt_deg"),GuidanceState.FirstContactTiltDeg);
+    Result->SetNumberField(TEXT("first_contact_angular_speed_deg_s"),GuidanceState.FirstContactAngularSpeedDegS);
     Result->SetNumberField(TEXT("low_slow_approach_seconds"),GuidanceState.LowSlowApproachSeconds);
     Result->SetNumberField(TEXT("peak_q_pa"),PeakDynamicPressurePa);
     Result->SetNumberField(TEXT("peak_speed_mps"),PeakSpeedMps);

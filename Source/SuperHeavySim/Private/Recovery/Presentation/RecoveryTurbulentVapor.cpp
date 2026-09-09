@@ -40,15 +40,15 @@ void URecoveryVaporComponent::UpdateTurbulent(float Dt,const ASuperHeavyRecovery
     }
     const FVector Base=FlightGeometry::BoosterBaseCm(*D.GetBody()),Wind=D.GetWindVelocityMps(30)*100;
     TurbulentSpawnClock+=Dt;
-    if(Delivered>.003 && D.GetDelugeFlow()>.05 && D.AltitudeM<180 && TurbulentSpawnClock>.8)
+    if(Delivered>.003 && D.GetDelugeFlow()>.05 && D.AltitudeM<220 && TurbulentSpawnClock>1.5)
     {
         const int I=NextTurbulent%TurbulentBillows.Num();auto& B=TurbulentBillows[I];
         if(B.Age>=B.Life)
         {
             const double Angle=NextTurbulent*2.399963;const FVector Radial(FMath::Cos(Angle),FMath::Sin(Angle),0);
-            B=FBillow();B.Age=0;B.Life=6.;B.Seed=NextTurbulent*.618034f;
-            B.Position=FVector(Base.X,Base.Y,1650)+Radial*1700;
-            B.Velocity=Radial*800+Wind;B.FlowAxis=Radial;B.Density=FMath::Clamp(D.GetDelugeFlow()*1.3,.1,1.3);
+            B=FBillow();B.Age=0;B.Life=12.;B.Seed=NextTurbulent*.618034f;
+            B.Position=FVector(Base.X,Base.Y,2850)+Radial*2400;
+            B.Velocity=Radial*1600+Wind;B.FlowAxis=Radial;B.Density=FMath::Clamp(D.GetDelugeFlow()*2.6,.1,2.6);
             ++NextTurbulent;TurbulentSpawnClock=0;
         }
     }
@@ -60,17 +60,19 @@ void URecoveryVaporComponent::UpdateTurbulent(float Dt,const ASuperHeavyRecovery
         if(B.Age>=B.Life){V->SetVisibility(false);continue;}
         B.Age+=Dt;
         B.Velocity=FMath::Lerp(B.Velocity,Wind+FVector(0,0,80),1-FMath::Exp(-Dt/3));B.Position+=B.Velocity*Dt;
-        const float Fade=FMath::SmoothStep(0.f,.7f,B.Age)*(1-FMath::SmoothStep(3.8f,B.Life,B.Age));
+        const float Fade=FMath::SmoothStep(0.f,.8f,B.Age)*(1-FMath::SmoothStep(7.5f,B.Life,B.Age));
         const float DistanceFade=1-FMath::SmoothStep(220000.f,420000.f,float(FVector::Distance(Camera,B.Position)));
         V->SetVisibility(Fade*DistanceFade>.002f);
         if(!V->IsVisible())continue;
         // Original 20 x 16 x 12 m baked domain. Uniform scaling preserves
         // isotropic extinction; instances share one streamed 64-frame cache.
-        const double Expansion=2.7+B.Age*.16,ScaleCm=100*Expansion;
+        const double Expansion=4.6+B.Age*.18,ScaleCm=100*Expansion;
+        B.Position.Z=FMath::Max(double(B.Position.Z),6*ScaleCm+100);
         const FQuat Q=FRotationMatrix::MakeFromX(B.FlowAxis).ToQuat();
         V->SetWorldLocationAndRotation(B.Position-Q.RotateVector(TurbulentFrameOffset*ScaleCm),Q);
         V->SetWorldScale3D(FVector(ScaleCm));
-        V->SetFrame(FMath::Clamp(B.Age*18.f,0.f,63.f));
+        const float Frame=FMath::Clamp(B.Age*8.f,0.f,63.f);
+        if(!FMath::IsNearlyEqual(V->Frame,Frame))V->SetFrame(Frame);
         V->SetStreamingMipBias(FVector::DistSquared(Camera,B.Position)>100000.*100000.?1:0);
         M->SetScalarParameterValue(TEXT("DensityScale"),B.Density*Fade*DistanceFade/Expansion);
         M->SetScalarParameterValue(TEXT("MetersPerVoxel"),TurbulentVoxelM*Expansion);
