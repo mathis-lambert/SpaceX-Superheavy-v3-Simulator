@@ -11,7 +11,10 @@ void ASuperHeavyRecoveryDirector::OnVehicleContact(UPrimitiveComponent* HitCompo
     {
         // Validate that the impulse is under one of the actual fitting volumes,
         // not the cylindrical hull or a side hit. Both supports are independent.
-        const FVector Local=Body->GetComponentQuat().UnrotateVector(Hit.ImpactPoint/100-BasePositionM);
+        // Use one component transform throughout. Mixing its current rotation
+        // with the previous telemetry base position mislabels valid support
+        // notifications during delayed game frames.
+        const FVector Local=Body->GetComponentQuat().UnrotateVector(Hit.ImpactPoint-Body->GetComponentLocation())/100.+FVector(0,0,BaseOffsetM);
         const FVector Plus=Local-RuntimeProfile->CatchLugPlusM,Minus=Local-RuntimeProfile->CatchLugMinusM;
         if(RecoveryContactGeometry::AtFitting(Plus) || RecoveryContactGeometry::AtFitting(Minus))
         {
@@ -34,6 +37,7 @@ void ASuperHeavyRecoveryDirector::InitializeContactFixture()
     const double Heading=ContactFixture==TEXT("WrongHeading")?0:RuntimeProfile->CaptureHeadingDeg;
     const FQuat Q=Tower->GetActorQuat()*FQuat(FVector::UpVector,FMath::DegreesToRadians(Heading));
     if(ContactFixture==TEXT("SideImpact")) P+=Tower->GetActorRightVector()*12;
+    if(ContactFixture==TEXT("AlongRail")) P+=Tower->GetActorForwardVector()*3;
     Body->SetSimulatePhysics(false);
     Vehicle->SetActorLocationAndRotation((P+FVector(0,0,BaseOffsetM))*100,Q,false,nullptr,ETeleportType::TeleportPhysics);
     Body->SetWorldLocationAndRotation((P+FVector(0,0,BaseOffsetM))*100,Q,false,nullptr,ETeleportType::TeleportPhysics);
@@ -51,7 +55,7 @@ void ASuperHeavyRecoveryDirector::TickContactFixture(double Dt)
     if(MissionTime<5)return;
     const bool Both=EverSupportContact[0] && EverSupportContact[1];
     bool Passed=false;
-    if(ContactFixture==TEXT("Centered"))Passed=Both && VelocityMps.Size()<0.15 && FMath::Abs(AltitudeM-CaptureWorldM.Z)<0.1;
+    if(ContactFixture==TEXT("Centered") || ContactFixture==TEXT("AlongRail"))Passed=Both && StructuralContactCount==0 && VelocityMps.Size()<0.15 && FMath::Abs(AltitudeM-CaptureWorldM.Z)<0.1;
     else if(ContactFixture==TEXT("WrongHeading"))Passed=!Both && AltitudeM<CaptureWorldM.Z-0.5;
     else if(ContactFixture==TEXT("SideImpact"))Passed=StructuralContactCount>0 && !Both;
     WriteResult(Passed,TEXT("Unpowered contact fixture evaluated after five seconds"));

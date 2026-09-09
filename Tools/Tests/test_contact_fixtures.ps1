@@ -5,7 +5,7 @@ $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 $saved=Join-Path $root 'Saved/Recovery'
 . (Join-Path $root 'Tools/Shared/validation_evidence.ps1')
 Write-RecoveryBuildEvidence -Root $root -Destination "$saved/$Prefix-source.json" -EngineRoot $EngineRoot
-foreach($fixture in @('Centered','WrongHeading','SideImpact')){
+foreach($fixture in @('Centered','AlongRail','WrongHeading','SideImpact')){
     $name="$Prefix$fixture"
     $started=Get-Date
     & $engine (Join-Path $root 'SuperHeavySim.uproject') /Game/Starbase/Maps/L_RecoveryLab -game -nullrhi -unattended -UseFixedTimeStep -FPS=60 -RecoveryAutoExit "-RecoveryContactFixture=$fixture" "-RecoveryReportName=$name" -DisablePython -nosplash -SCCProvider=None "-abslog=$saved/$name.log" *> "$saved/$name-console.log"
@@ -14,7 +14,7 @@ foreach($fixture in @('Centered','WrongHeading','SideImpact')){
     if(!(Test-Path $file) -or (Get-Item $file).LastWriteTime -lt $started){throw "No fresh fixture report: $fixture"}
     $report=Get-Content -Raw $file|ConvertFrom-Json
     if($engineExit -ne 0 -or !$report.success -or $report.solver_support_samples -le 0){throw "Contact fixture failed: $fixture"}
-    if($fixture -eq 'Centered'){
+    if($fixture -in @('Centered','AlongRail')){
         # A released, initially stationary body settles without propulsion.
         # Its total upward reaction must balance gravity's integrated impulse.
         $weightImpulse=$report.mass_kg*9.80665*$report.dynamics_time_s

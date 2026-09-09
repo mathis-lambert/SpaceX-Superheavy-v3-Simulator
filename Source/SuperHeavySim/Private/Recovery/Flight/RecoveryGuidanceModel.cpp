@@ -7,7 +7,7 @@ void FRecoveryGuidanceModel::Guide(const FRecoveryDynamicsState& Dynamics,const 
     PredictorClock+=Dt;
     if(PredictorClock>=0.25) { PredictorClock-=0.25; PredictBallistic(); }
     const FVector Downrange=Config.TowerRotation.GetForwardVector();
-    const FVector SiteWind=WindAt(Config.LandingIgnitionCeilingM);
+    const FVector SiteWind=WindAt(Config.ReturnWindReferenceAltitudeM);
     FVector Crosswind=SiteWind-Downrange*FVector::DotProduct(SiteWind,Downrange);Crosswind.Z=0;
     // The coast predictor has no powered-braking model. Reserve front distance
     // and an estimated upwind offset before the final force-constrained transfer.
@@ -70,10 +70,27 @@ void FRecoveryGuidanceModel::Guide(const FRecoveryDynamicsState& Dynamics,const 
             FVector Correction=(-DesiredA/FMath::Max(0.1,Authority)).GetClampedToMaxSize(FMath::Tan(FMath::DegreesToRadians(Config.MaxEntryAngleDeg)));
             TargetUp=(TargetUp+Correction).GetSafeNormal();
         }
-        // Ignition follows energy and available deceleration, not a fixed timer.
-        if(State.Navigation.VerticalSpeedMps<-20 && State.Navigation.AltitudeM<Config.LandingIgnitionCeilingM && State.Navigation.AltitudeM-Config.CaptureWorldM.Z<=State.Navigation.BrakingDistanceM+Config.LandingBurnMarginM)
+        LandingPredictionClock-=Dt;
+        if(State.Navigation.VerticalSpeedMps<-20 && State.Navigation.AltitudeM<10000 && LandingPredictionClock<=0)
+        {
+            LandingPredictionClock=.1;
+            State.LandingPrediction=RecoveryLanding::Predict(Config,Dynamics,State.Navigation.AltitudeM,
+                State.Navigation.VerticalSpeedMps,Body.Rotation.GetUpVector().Z,Config.LandingDecelerationMps2,External.Experiment.FailedEngine);
+        }
+        // The extra control interval covers the sampled decision latency. The
+        // prediction itself includes the physical engine opening response.
+        const double TriggerDistance=State.LandingPrediction.DistanceM+Config.LandingBurnMarginM+
+            FMath::Max(0.,-State.Navigation.VerticalSpeedMps)*.1;
+        if(State.Navigation.VerticalSpeedMps<-20 && State.LandingPrediction.bFeasible &&
+            State.Navigation.AltitudeM-Config.CaptureWorldM.Z<=TriggerDistance)
         {
             State.LandingIgnitionAltitudeM=State.Navigation.AltitudeM;
+            State.LandingIgnitionTimeS=State.SampleTimeS;
+            State.LandingIgnitionSpeedMps=-State.Navigation.VerticalSpeedMps;
+            State.LandingIgnitionMassKg=State.Navigation.MassKg;
+            State.LandingIgnitionDistanceM=State.LandingPrediction.DistanceM;
+            State.LandingIgnitionFuelKg=State.LandingPrediction.FuelKg;
+            State.LandingIgnitionThrustN=State.LandingPrediction.LandingThrustN;
             Transition(ERecoveryPhase::LandingBurn,ERecoveryGuidanceReason::LandingBurn);
         }
     }

@@ -13,8 +13,16 @@ struct FRecoveryRailSupport
 
 namespace RecoveryContactGeometry
 {
+    constexpr double RailHalfLengthM=13.;
+    constexpr double RailCentreOffsetM=-6.;
+    constexpr double FittingHalfLengthM=.9;
+    inline bool OnUsableRailSpan(double AlongM)
+    {
+        // Leave the full fitting and a half-metre end margin on the rail.
+        return FMath::Abs(AlongM-RailCentreOffsetM)<RailHalfLengthM-FittingHalfLengthM-.5;
+    }
     inline bool AtFitting(const FVector& OffsetM)
     {
-        return FMath::Abs(OffsetM.X)<0.9 && FMath::Abs(OffsetM.Y)<0.8 && FMath::Abs(OffsetM.Z)<0.5;
+        return FMath::Abs(OffsetM.X)<FittingHalfLengthM && FMath::Abs(OffsetM.Y)<0.8 && FMath::Abs(OffsetM.Z)<0.5;
     }
 }

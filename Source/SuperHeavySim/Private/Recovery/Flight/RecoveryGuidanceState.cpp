@@ -6,7 +6,7 @@
 void FRecoveryGuidanceModel::Reset(const FRecoveryGuidanceConfiguration& Configuration)
 {
     Config=Configuration;State=FRecoveryGuidanceState();State.Events.Reserve(16);
-    PredictorClock=0;TerminalClock=0;LandingEngineGroup=13;
+    PredictorClock=0;TerminalClock=0;LandingPredictionClock=0;LandingEngineGroup=13;
 }
 void FRecoveryGuidanceModel::Transition(ERecoveryPhase Phase,ERecoveryGuidanceReason Reason)
 {

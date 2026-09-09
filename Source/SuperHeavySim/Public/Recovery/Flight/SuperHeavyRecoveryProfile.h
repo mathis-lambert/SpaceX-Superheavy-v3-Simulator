@@ -31,9 +31,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance | Estimated") double BoostbackReserveKg = 400000;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance | Estimated") double LandingDriftCorrectionS = -8;
     // Estimated braking reserve in front of the opening; measured in tower-local +X.
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance | Approach", meta=(ClampMin="400", ClampMax="5000")) double FrontReturnOffsetM = 1400;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance | Estimated", meta=(ClampMin="0", ClampMax="60")) double LandingWindLeadS = 18;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance") double LandingIgnitionCeilingM = 4500;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance | Approach", meta=(ClampMin="400", ClampMax="5000")) double FrontReturnOffsetM = 1100;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance | Estimated", meta=(ClampMin="0", ClampMax="60")) double LandingWindLeadS = 8;
+    // Keep the serialized property name for existing mission assets. Ignition
+    // now follows predicted stopping distance, not this wind-sampling altitude.
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance | Estimated", meta=(DisplayName="Return Wind Reference Altitude (m)", ClampMin="500", ClampMax="10000")) double LandingIgnitionCeilingM = 4500;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actuators") double ThrottleTimeConstant = 0.25;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actuators | Estimated") double EngineShutdownTimeS = 0.35;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actuators") double MaxGimbalDeg = 8;
@@ -55,9 +57,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Aerodynamics") double GridFinMaxAngleDeg = 25;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Aerodynamics") double GridFinRateDegS = 45;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Aerodynamics") double MaxEntryAngleDeg = 10;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance") double MaxTiltDeg = 15;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance") double LandingDecelerationMps2 = 19;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance") double LandingBurnMarginM = 350;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance") double MaxTiltDeg = 20;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance") double LandingDecelerationMps2 = 55;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Guidance") double LandingBurnMarginM = 80;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Environment") double SeaLevelTemperatureOffsetK = 8;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ground systems | Estimated") double ConditioningVentKgS = 1.8;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Ground systems | Estimated") double ConditioningJetSpeedMps = 40;

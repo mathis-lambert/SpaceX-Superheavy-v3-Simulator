@@ -1,10 +1,22 @@
 #include "Recovery/Flight/RecoveryGuidanceModel.h"
+#include "Recovery/Flight/RecoveryRailSupport.h"
 #include "Recovery/Shared/FlightGeometry.h"
 
 void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics,const FRecoveryDynamicsCommand& External,
     double Dt,FVector& ForceAccel,FVector& TargetUp)
 {
     const auto& N=State.Navigation;
+    if(State.FirstContactTimeS<0 && External.SupportContactCount>0)
+    {
+        State.FirstContactTimeS=State.SampleTimeS;
+        // The previous force sample precedes the solver's first support impulse.
+        // Report that incoming velocity, not the already arrested contact state.
+        State.FirstContactSpeedMps=Dynamics.Body.VelocityMps.Size();
+        State.FirstContactVerticalSpeedMps=Dynamics.Body.VelocityMps.Z;
+        State.FirstContactTiltDeg=FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(Dynamics.Body.Rotation.GetUpVector().Z,-1.,1.)));
+    }
+    if(State.FirstContactTimeS<0 && N.AltitudeM-Config.CaptureWorldM.Z<100 && N.VelocityMps.Size()<5)
+        State.LowSlowApproachSeconds+=Dt;
     if(Dynamics.ThrustN>1)State.LandingBurnSeconds+=Dt;
     if(State.Phase==ERecoveryPhase::LandingBurn && State.TerminalPlan.bFeasible && N.AltitudeM<350 &&
         N.HorizontalErrorM<150 && N.HeadingErrorDeg<10)
@@ -13,10 +25,14 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
     const FVector Position=N.BasePositionM+Body.Rotation.GetUpVector()*Centre;
     const FVector LugMid=(Config.CatchLugPlusM+Config.CatchLugMinusM)*.5;
     const FQuat CaptureQ=Config.TowerRotation*FQuat(FVector::UpVector,FMath::DegreesToRadians(Config.CaptureHeadingDeg));
-    const FVector FittingTarget=Config.CaptureWorldM+CaptureQ.RotateVector(LugMid)-Body.Rotation.RotateVector(LugMid-FVector(0,0,Centre));
     const double Height=FMath::Max(0.,N.AltitudeM-Config.CaptureWorldM.Z);
-    const double PoseBlend=1-FMath::SmoothStep(30.,130.,Height);
-    const FVector Goal=FMath::Lerp(Config.CaptureWorldM+FVector(0,0,Centre),FittingTarget,PoseBlend)-FVector(0,0,.20);
+    FVector ArrivalThrust;
+    RecoveryTerminalGuidance::TryRequiredThrustAcceleration(FVector::ZeroVector,FVector(0,0,-Config.ContactDescentSpeedMps),
+        Config.CaptureWorldM,N.MassKg,WindAt(Config.CaptureWorldM.Z),Config,FVector::UpVector,ArrivalThrust);
+    const FQuat ArrivalQ=FRotationMatrix::MakeFromZX(ArrivalThrust.IsNearlyZero()?FVector::UpVector:ArrivalThrust.GetSafeNormal(),CaptureQ.GetForwardVector()).ToQuat();
+    // Target the equilibrium arrival attitude. Chasing the current tilted
+    // fitting with the COM controller couples rotation back into translation.
+    const FVector Goal=Config.CaptureWorldM+CaptureQ.RotateVector(LugMid)-ArrivalQ.RotateVector(LugMid-FVector(0,0,Centre))-FVector(0,0,.20);
     const FVector Error=Goal-Position;
     const double AvailablePerEngine=Config.EngineThrustN*N.EngineIspS/Config.SpecificImpulseSeaLevelS;
     double CoreThrust=0,LandingThrust=0;
@@ -35,6 +51,7 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
         TerminalClock+=.2;++State.TerminalReplans;
         FRecoveryTerminalInput Input;
         Input.PositionM=Position;Input.VelocityMps=N.VelocityMps;Input.TargetM=Goal;
+        Input.TargetVelocityMps=FVector(0,0,-Config.ContactDescentSpeedMps);
         // Include fins, vents and radial gravity in the incoming net force.
         for(const auto& Force:Dynamics.Forces)Input.AccelerationMps2+=Force.ForceN/N.MassKg;
         Input.UpWorld=Body.Rotation.GetUpVector();Input.WindMps=WindAt(N.AltitudeM);
@@ -44,13 +61,6 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
         Input.FittingMidFromBaseM=LugMid;Input.TargetFittingWorldM=Config.CaptureWorldM+CaptureQ.RotateVector(LugMid);
         Input.MassKg=N.MassKg;Input.FuelKg=Dynamics.PropellantKg;Input.CoreThrustN=CoreThrust;
         Input.LandingThrustN=LandingThrust;Input.IspS=N.EngineIspS;Input.MaxTiltDeg=Config.MaxTiltDeg;
-        FVector ArrivalThrust;
-        if(RecoveryTerminalGuidance::TryRequiredThrustAcceleration(FVector::ZeroVector,Input.TargetVelocityMps,
-            Config.CaptureWorldM,N.MassKg,Input.WindMps,Config,FVector::UpVector,ArrivalThrust))
-        {
-            const FQuat ArrivalQ=FRotationMatrix::MakeFromZX(ArrivalThrust.GetSafeNormal(),Input.HeadingWorld).ToQuat();
-            Input.TargetM=Input.TargetFittingWorldM-ArrivalQ.RotateVector(LugMid-FVector(0,0,Centre))-FVector(0,0,.2);
-        }
         const auto Candidate=RecoveryTerminalGuidance::Plan(Input,Config);
         if(!State.TerminalPlan.bFeasible)State.TerminalInput=Input;
         State.TerminalCandidate=Candidate;
@@ -69,12 +79,17 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
         const double T=FMath::Min(Plan.ElapsedS,Plan.HorizonS);
         // Retain the accepted arrival deadline and reference history. Near the
         // rails regulate the physical fittings as the mass centre moves.
-        const double FittingBlend=1-FMath::SmoothStep(5.,25.,Height);
+        const double FittingBlend=1-FMath::SmoothStep(30.,130.,Height);
         const FVector Reference=Plan.PositionAt(T)+(Goal-Plan.PositionAt(Plan.HorizonS))*FittingBlend;
         State.TerminalReferenceM=Reference;State.TerminalReferenceVelocityMps=Plan.VelocityAt(T);
         State.TerminalPeakTrackingErrorM=FMath::Max(State.TerminalPeakTrackingErrorM,(Reference-Position).Size());
         const FVector PositionError=Reference-Position,VelocityError=Plan.VelocityAt(T)-N.VelocityMps;
-        const FVector Feedback=PositionError*FVector(.035,.035,.4)+VelocityError*FVector(.20,.20,1.2);
+        // The opening is narrow across the rails but tolerates longitudinal
+        // displacement. Give crossrange tracking its own damped response in
+        // tower coordinates, independent of the world's compass orientation.
+        const FVector Feedback=Config.TowerRotation.RotateVector(
+            Config.TowerRotation.UnrotateVector(PositionError)*FVector(.06,.10,.4)+
+            Config.TowerRotation.UnrotateVector(VelocityError)*FVector(.35,.50,1.2));
         FVector Net=Plan.AccelerationAt(T)+Feedback;
         const double ValveLead=FMath::Min(Config.Engines.OpeningTimeConstantS,Plan.HorizonS*.25);
         Net.Z=Plan.AccelerationAt(FMath::Min(T+ValveLead,Plan.HorizonS)).Z+Feedback.Z;
@@ -104,12 +119,26 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
         // velocity. A vertical-only stopping curve can reach the rail altitude
         // hundreds of metres away from the opening.
         const double LateralAcceleration=FMath::Max(.25,N.Gravity*FMath::Tan(FMath::DegreesToRadians(Config.MaxTiltDeg))*.7);
-        const double LateralTime=2*FMath::Sqrt(FVector2D(Error).Size()/LateralAcceleration)+FVector2D(N.VelocityMps).Size()/LateralAcceleration;
+        const double LateralTime=1.15*FMath::Max(
+            RecoveryLanding::MinimumTransferTime(Error.X,N.VelocityMps.X,LateralAcceleration),
+            RecoveryLanding::MinimumTransferTime(Error.Y,N.VelocityMps.Y,LateralAcceleration))+2*Config.Engines.OpeningTimeConstantS;
         const double DescentLimit=2*Height/FMath::Max(1.,LateralTime);
         const double DesiredVz=Error.Z>0?FMath::Min(3.,Error.Z*.5):-FMath::Min3(FMath::Sqrt(2*FMath::Max(1.,Decel)*Height),FMath::Max(.35,Height*.7),FMath::Max(.35,DescentLimit));
-        const FVector DesiredVelocity=FVector(Error.X,Error.Y,0).GetClampedToMaxSize(200)*.25;
-        FVector Net=(DesiredVelocity-N.VelocityMps)*.3;
-        Net.Z=FMath::Clamp((DesiredVz-N.VelocityMps.Z)*.8,-4.,LandingThrust/N.MassKg-N.Gravity);
+        // Lateral approach speed must fit inside the remaining stopping
+        // distance on each axis. A proportional 50 m/s target kept accelerating
+        // toward the mast after the main vertical braking pulse had ended.
+        const auto ClosingAcceleration=[&](double Distance,double Velocity)
+        {
+            const double EnergySpeed=FMath::Sqrt(2*LateralAcceleration*FMath::Abs(Distance));
+            const bool EnergyLimited=EnergySpeed<.4*FMath::Abs(Distance);
+            const double Desired=FMath::Sign(Distance)*(EnergyLimited?EnergySpeed:.4*FMath::Abs(Distance));
+            const double Slope=EnergyLimited?LateralAcceleration/FMath::Max(.01,EnergySpeed):.4;
+            // Feed forward the deceleration of the closing-speed envelope.
+            // Velocity feedback alone follows it late and overshoots the rails.
+            return -Slope*Velocity+.65*(Desired-Velocity);
+        };
+        FVector Net(ClosingAcceleration(Error.X,N.VelocityMps.X),ClosingAcceleration(Error.Y,N.VelocityMps.Y),0);
+        Net.Z=FMath::Clamp((DesiredVz-N.VelocityMps.Z)*.8,-4.,FMath::Min(Config.LandingDecelerationMps2,LandingThrust/N.MassKg-N.Gravity+Dynamics.AeroForceN.Z/N.MassKg));
         ForceAccel=Net-Dynamics.AeroForceN/N.MassKg+FVector(0,0,N.Gravity);
         ForceAccel.Z=FMath::Max(N.Gravity*.5,ForceAccel.Z);
         const FVector AirVelocity=N.VelocityMps-WindAt(N.AltitudeM);
@@ -139,16 +168,22 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
         const FVector Up=Body.Rotation.GetUpVector();
         const FVector RailTarget=Config.CaptureWorldM+CaptureQ.RotateVector(LugMid);
         const FVector AtRail=N.BasePositionM+Up*((RailTarget.Z-N.BasePositionM.Z)/FMath::Max(.1,Up.Z));
-        const double Across=FMath::Abs(Config.TowerRotation.UnrotateVector(AtRail-RailTarget).Y);
-        const double SafeGap=4.5/FMath::Max(.1,Up.Z)+.55+Across+.05;
+        const FVector RailOffset=Config.TowerRotation.UnrotateVector(AtRail-RailTarget);
+        const double Across=FMath::Abs(RailOffset.Y);
+        // Reserve clearance for the frame below the rail and the small roll
+        // while the second fitting takes weight after the first contact.
+        const double SafeGap=4.5/FMath::Max(.1,Up.Z)+.55+Across+.10;
         // Loaded rails must not withdraw in response to the initial settling
         // motion. Hold their command during weight transfer and support.
         if(!State.bContactShutdown && External.SupportContactCount==0)
             State.ArmClosure=FMath::Min(FMath::Clamp((60.-Height)/25.,0.,1.),FMath::Clamp((10.-SafeGap)/4.85,0.,1.));
         // Transfer weight on the first verified fitting contact. Continuing
         // hover thrust would hold the other fitting a few centimetres above
-        // its rail in crosswind. State.Navigation.Gravity settles both supports physically.
-        if(External.SupportContactCount>0 && State.Navigation.CatchLugErrorM<0.5 && State.Navigation.VelocityMps.Size()<1.5 && State.Navigation.TiltDeg<3 && !State.bContactShutdown)
+        // its rail in crosswind. Longitudinal offset is acceptable within the
+        // usable rail span: centring a supported vehicle with thrust can drive
+        // it into the arm frame. Gravity settles both supports physically.
+        if(External.SupportContactCount>0 && RecoveryContactGeometry::OnUsableRailSpan(RailOffset.X) && Across<.4 &&
+            N.HeadingErrorDeg<2 && N.VelocityMps.Size()<1.5 && N.TiltDeg<3 && !State.bContactShutdown)
         {
             State.bContactShutdown=true;
         }

@@ -123,6 +123,17 @@ void ASuperHeavyRecoveryDirector::WriteResult(bool bSuccess,const FString& Reaso
     Result->SetNumberField(TEXT("fin_control_seconds"),FinControlSeconds);
     Result->SetNumberField(TEXT("landing_ignition_altitude_m"),LandingIgnitionAltitudeM);
     Result->SetNumberField(TEXT("landing_burn_seconds"),LandingBurnSeconds);
+    Result->SetNumberField(TEXT("landing_ignition_time_s"),GuidanceState.LandingIgnitionTimeS);
+    Result->SetNumberField(TEXT("landing_ignition_speed_mps"),GuidanceState.LandingIgnitionSpeedMps);
+    Result->SetNumberField(TEXT("landing_ignition_mass_kg"),GuidanceState.LandingIgnitionMassKg);
+    Result->SetNumberField(TEXT("landing_predicted_distance_m"),GuidanceState.LandingIgnitionDistanceM);
+    Result->SetNumberField(TEXT("landing_predicted_fuel_kg"),GuidanceState.LandingIgnitionFuelKg);
+    Result->SetNumberField(TEXT("landing_available_thrust_n"),GuidanceState.LandingIgnitionThrustN);
+    Result->SetNumberField(TEXT("first_contact_time_s"),GuidanceState.FirstContactTimeS);
+    Result->SetNumberField(TEXT("first_contact_speed_mps"),GuidanceState.FirstContactSpeedMps);
+    Result->SetNumberField(TEXT("first_contact_vertical_speed_mps"),GuidanceState.FirstContactVerticalSpeedMps);
+    Result->SetNumberField(TEXT("first_contact_tilt_deg"),GuidanceState.FirstContactTiltDeg);
+    Result->SetNumberField(TEXT("low_slow_approach_seconds"),GuidanceState.LowSlowApproachSeconds);
     Result->SetNumberField(TEXT("peak_q_pa"),PeakDynamicPressurePa);
     Result->SetNumberField(TEXT("peak_speed_mps"),PeakSpeedMps);
     Result->SetNumberField(TEXT("peak_downrange_m"),PeakDownrangeM);

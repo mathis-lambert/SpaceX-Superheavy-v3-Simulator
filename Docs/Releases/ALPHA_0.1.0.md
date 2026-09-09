@@ -1,6 +1,6 @@
 # Starbase Flight Simulator — Alpha 0.1.0
 
-Version: `0.1.0-alpha.3`. Windows x64, Unreal Engine 5.8.
+Version: `0.1.0-alpha.4`. Windows x64, Unreal Engine 5.8.
 
 ## Start
 
@@ -33,20 +33,27 @@ fixed 120 Hz physical clock. Fitting support is read from resolved Chaos contact
 including during display stalls. Menus, camera selection, experiment controls,
 optional DLSS and hardware Lumen are included.
 
-This version adds registered coastal imagery, refined central terrain, service
+The site includes registered coastal imagery, refined central terrain, service
 roads, maintenance facilities, four service vehicles and active tank vents.
 **Settings → Photography** provides five factory looks, three saved looks,
 camera optics, exposure/color controls and a geographic solar calendar. The
 clock is local Starbase time (CDT or CST); September solar noon is around 13:25 CDT.
 See `PHOTOGRAPHY.md` for controls, sources and scope.
 
+This version delays landing ignition according to predicted stopping distance,
+current mass, velocity, available thrust and engine response. The three reference
+scenarios now take approximately 30–32 seconds of landing thrust, with a soft
+physical fitting contact and immediate weight transfer onto the rails. See
+`FLIGHT.md` for the measured comparison and model limitations.
+
 ## Known alpha limitations
 
 - The guidance and aerodynamic coefficients are estimates. Whole-return
   numerical convergence remains incomplete; successful captures alone do not
   establish real-flight accuracy.
-- Landing burns are still too long. Tower arms use a kinematic mechanism;
-  articulation, compliance, overloads and failure behavior remain unfinished.
+- Tower arms use a kinematic mechanism; articulation, compliance, overloads and
+  failure behavior remain unfinished. Faster braking is not certification of
+  structural loads or a reconstruction of SpaceX flight telemetry.
 - Earth imagery, cloud/smoke detail, site assets and graphics performance still
   have improvements pending. The new site layout is authored, not a current survey.
 - Hardware validation is currently limited to the development machine.

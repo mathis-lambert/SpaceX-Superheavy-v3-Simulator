@@ -291,11 +291,12 @@ FRecoveryGuidanceConfiguration URecoveryPhysicsComponent::BuildGuidanceConfigura
     Configuration.LandingDriftCorrectionS=P.LandingDriftCorrectionS;
     Configuration.FrontReturnOffsetM=P.FrontReturnOffsetM;
     Configuration.LandingWindLeadS=P.LandingWindLeadS;
-    Configuration.LandingIgnitionCeilingM=P.LandingIgnitionCeilingM;
+    Configuration.ReturnWindReferenceAltitudeM=P.LandingIgnitionCeilingM;
     Configuration.LandingBurnMarginM=P.LandingBurnMarginM;
     Configuration.LandingDecelerationMps2=P.LandingDecelerationMps2;
     Configuration.MaxEntryAngleDeg=P.MaxEntryAngleDeg;
     Configuration.MaxTiltDeg=P.MaxTiltDeg;
+    Configuration.ContactDescentSpeedMps=P.CaptureSpeedMps;
     Configuration.TimeoutSeconds=P.TimeoutSeconds;
     Configuration.CatchLugPlusM=P.CatchLugPlusM;
     Configuration.CatchLugMinusM=P.CatchLugMinusM;

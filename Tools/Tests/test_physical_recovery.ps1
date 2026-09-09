@@ -40,7 +40,8 @@ foreach ($fps in $Cadences) {
         $pass=$pass -and $r.registered_engines -eq 33 -and $r.peak_engine_force_ratio -le 1.000001 -and $r.peak_gimbal_deg -le 8.001 -and $r.upper_stage_physical -and $r.launch_hold_released
         $pass=$pass -and $r.separation_velocity_error_mps -lt .001 -and $r.separation_momentum_relative_error -lt .00001 -and $r.separation_angular_momentum_relative_error -lt .01
         $pass=$pass -and $null -ne $r.propellant_balance_error_kg -and [math]::Abs($r.propellant_balance_error_kg) -lt .1 -and $r.restraint_drift_m -lt .25 -and $r.final_speed_mps -lt .1
-        $pass=$pass -and (Test-RecoveryFrontApproach -Report $r)
+        $pass=$pass -and (Test-RecoveryFrontApproach -Report $r) -and $r.structural_contacts -eq 0
+        $pass=$pass -and $r.landing_burn_seconds -lt 45 -and $r.first_contact_time_s -gt $r.landing_ignition_time_s -and $r.first_contact_speed_mps -lt 1.5 -and $r.low_slow_approach_seconds -lt 8
         $pass=$pass -and $r.solver_support_samples -gt 0 -and $r.solver_support_mask -eq 3 -and $r.left_support_impulse_ns -gt 0 -and $r.right_support_impulse_ns -gt 0
         $results+=@{scenario=$scenario;fps=$fps;physics_hz=1./$fixed;success=$pass;report="Saved/Recovery/$name.json"}
         Write-Host "$name PASS=$pass support drift=$($r.restraint_drift_m) m"

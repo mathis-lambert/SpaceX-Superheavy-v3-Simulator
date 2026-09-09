@@ -1,4 +1,5 @@
 #include "Recovery/Flight/SuperHeavyLaunchTower.h"
+#include "Recovery/Flight/RecoveryRailSupport.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/BoxComponent.h"
@@ -40,7 +41,7 @@ ASuperHeavyLaunchTower::ASuperHeavyLaunchTower()
             Box->SetRelativeScale3D(FVector(1./26,1./1.1,1./1.7));
         }
         auto* Rail=Side==0?LeftRail.Get():RightRail.Get();
-        Rail->SetBoxExtent(FVector(1300,42.5,9));Rail->SetRelativeLocation(FVector(0,0,96./1.7));
+        Rail->SetBoxExtent(FVector(RecoveryContactGeometry::RailHalfLengthM*100,42.5,9));Rail->SetRelativeLocation(FVector(0,0,96./1.7));
         auto* Frame=Side==0?LeftArmCollider.Get():RightArmCollider.Get();
         Frame->SetBoxExtent(FVector(1300,55,85));
     }
@@ -92,8 +93,8 @@ void ASuperHeavyLaunchTower::SetArmClosure(double Value)
 {
     ArmClosure=FMath::Clamp(Value,0.,1.);
     const double Gap=FMath::Lerp(10.,5.15,ArmClosure);
-    LeftArm->SetRelativeLocation(FVector((CaptureOffsetM.X-6)*100,(CaptureOffsetM.Y-Gap)*100,0));
-    RightArm->SetRelativeLocation(FVector((CaptureOffsetM.X-6)*100,(CaptureOffsetM.Y+Gap)*100,0));
+    LeftArm->SetRelativeLocation(FVector((CaptureOffsetM.X+RecoveryContactGeometry::RailCentreOffsetM)*100,(CaptureOffsetM.Y-Gap)*100,0));
+    RightArm->SetRelativeLocation(FVector((CaptureOffsetM.X+RecoveryContactGeometry::RailCentreOffsetM)*100,(CaptureOffsetM.Y+Gap)*100,0));
     LeftArm->SetRelativeRotation(FRotator(0,FMath::Lerp(-12.,0.,ArmClosure),0));
     RightArm->SetRelativeRotation(FRotator(0,FMath::Lerp(12.,0.,ArmClosure),0));
 }

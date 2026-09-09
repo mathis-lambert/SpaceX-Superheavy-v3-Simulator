@@ -1,5 +1,5 @@
 param(
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.2'
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.4'
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -39,7 +39,8 @@ $start=Get-Date
 Invoke-Alpha -LogName 'flight' -Arguments @("-UserDir=$userDir/",'-windowed','-ForceRes','-ResX=1920','-ResY=1080','-UseFixedTimeStep','-FPS=15','-RecoveryPhysicsAudit','-RecoveryExperienceAudit','-RecoveryReview','-RecoveryChaseReview','-RecoveryAutoExit','-RecoveryScenario=Crosswind','-RecoveryReportName=AlphaFlight','-RecoveryReconstruction=3','-nosplash','-unattended',"-abslog=$audit/flight.log")
 $flight=Read-FreshAlphaReport 'AlphaFlight.json' $start
 $render=Read-FreshAlphaReport 'experience-flight-audit.json' $start
-if(!(Test-RecoveryFrontApproach -Report $flight) -or $flight.solver_support_mask -ne 3 -or !$flight.contact_engine_shutdown -or $flight.unpowered_thrust_violation){throw 'Packaged physical capture contract failed'}
+if(!(Test-RecoveryFrontApproach -Report $flight) -or $flight.solver_support_mask -ne 3 -or !$flight.contact_engine_shutdown -or $flight.unpowered_thrust_violation -or $flight.structural_contacts -ne 0){throw 'Packaged physical capture contract failed'}
+if($flight.landing_burn_seconds -ge 45 -or $flight.first_contact_speed_mps -ge 1.5 -or $flight.low_slow_approach_seconds -ge 8){throw 'Packaged return exceeds the landing thrust, contact speed or slow-approach limits'}
 if($render.chase_contact_frames -lt 50 -or $render.chase_contact_max_offset_step_cm -gt .01 -or $render.chase_contact_max_angle_step_deg -gt .001){throw 'Packaged Chase camera is unstable after capture'}
 foreach($log in @("$audit/controls.log","$audit/flight.log")){
     if(Select-String -Quiet -LiteralPath $log -Pattern 'Fatal error:|Handled ensure|Ensure condition failed|LogDLSSBlueprint: Error:|Failed to compile Material|Couldn.t find file for package|Failed to find object.*(/Game/|/Starbase/)'){throw "Packaged content failure: $log"}

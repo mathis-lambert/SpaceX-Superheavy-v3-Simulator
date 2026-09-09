@@ -75,6 +75,8 @@ FRecoveryTerminalPlan RecoveryTerminalGuidance::Plan(const FRecoveryTerminalInpu
     if(I.MassKg<=0 || I.FuelKg<=0 || I.CoreThrustN<=0 || I.IspS<=0)return Result;
     constexpr int32 Samples=24;
     const double MinimumThrust=I.CoreThrustN*C.Engines.MinimumThrottle;
+    const double WindReferenceHeight=FlightGeometry::AltitudeM((I.PositionM-I.UpWorld*I.CentreFromBaseM)*100.);
+    const double WindReferenceFactor=RecoveryAtmosphere::WindAt(FVector::ForwardVector,WindReferenceHeight,1.).X;
     for(double T=1.;T<=75.;T+=.5)
     for(double LateralBias:{0.,.75,1.5})
     {
@@ -100,8 +102,10 @@ FRecoveryTerminalPlan RecoveryTerminalGuidance::Plan(const FRecoveryTerminalInpu
         {
             const double Time=T*Sample/Samples,Dt=T/Samples;
             const FVector P=Candidate.PositionAt(Time),V=Candidate.VelocityAt(Time);
+            const double WindHeight=FlightGeometry::AltitudeM((P-PreviousUp*I.CentreFromBaseM)*100.);
+            const FVector SampleWind=I.WindMps*(RecoveryAtmosphere::WindAt(FVector::ForwardVector,WindHeight,1.).X/FMath::Max(.001,WindReferenceFactor));
             FVector ThrustAcceleration;
-            if(!TryRequiredThrustAcceleration(Candidate.AccelerationAt(Time),V,P,Mass,I.WindMps,C,PreviousUp,ThrustAcceleration))
+            if(!TryRequiredThrustAcceleration(Candidate.AccelerationAt(Time),V,P,Mass,SampleWind,C,PreviousUp,ThrustAcceleration))
             {++Result.ThrustRejected;Feasible=false;break;}
             const FVector Force=ThrustAcceleration*Mass;
             const double Thrust=Force.Size();
@@ -114,7 +118,10 @@ FRecoveryTerminalPlan RecoveryTerminalGuidance::Plan(const FRecoveryTerminalInpu
             // the command envelope on future samples, not retroactively on it.
             if(!FMath::IsFinite(Thrust) || Force.Z<=0 || (Sample>0 && (Thrust<MinimumThrust || (!CoreRange && !LandingRange))))
             {++Result.ThrustRejected;Feasible=false;break;}
-            if(Sample>0 && (Tilt>I.MaxTiltDeg || Rate>(Sample==1?RecoveryActuators::MaximumBodyRateRadS*.85:.05)))
+            const double ArrivalHeight=P.Z-Up.Z*I.CentreFromBaseM-I.CaptureBaseHeightM;
+            const double RateLimit=Sample==1?RecoveryActuators::MaximumBodyRateRadS*.85:
+                (ArrivalHeight<30?.05:RecoveryActuators::MaximumBodyRateRadS*.5);
+            if(Sample>0 && (Tilt>I.MaxTiltDeg || Rate>RateLimit))
             {++Result.AttitudeRejected;Feasible=false;break;}
             const FVector Base=P-Up*I.CentreFromBaseM;
             const FVector Top=Base+Up*70.88;

@@ -1,0 +1,2093 @@
+{
+  "git_head": "9c1ae8963ebbfbf8349f1377952ddeda774fda4a",
+  "schema_version": 1,
+  "scope": "Project source, authored content, config, tools, project descriptor and loaded game-module DLL. Engine and vendor binaries are not hashed.",
+  "git_status": [
+    " M Config/DefaultGame.ini",
+    " M Docs/Releases/ALPHA_0.1.0.md",
+    " M Source/SuperHeavySim/Private/Recovery/Flight/RecoveryContacts.cpp",
+    " M Source/SuperHeavySim/Private/Recovery/Flight/RecoveryGuidanceModel.cpp",
+    " M Source/SuperHeavySim/Private/Recovery/Flight/RecoveryGuidanceState.cpp",
+    " M Source/SuperHeavySim/Private/Recovery/Flight/RecoveryLandingGuidance.cpp",
+    " M Source/SuperHeavySim/Private/Recovery/Flight/RecoveryPhysicsComponent.cpp",
+    " M Source/SuperHeavySim/Private/Recovery/Flight/RecoveryTelemetry.cpp",
+    " M Source/SuperHeavySim/Private/Recovery/Flight/RecoveryTerminalGuidance.cpp",
+    " M Source/SuperHeavySim/Private/Recovery/Flight/SuperHeavyLaunchTower.cpp",
+    " M Source/SuperHeavySim/Private/Recovery/Tests/RecoveryTerminalGuidanceTests.cpp",
+    " M Source/SuperHeavySim/Public/Recovery/Flight/RecoveryGuidanceModel.h",
+    " M Source/SuperHeavySim/Public/Recovery/Flight/RecoveryRailSupport.h",
+    " M Source/SuperHeavySim/Public/Recovery/Flight/RecoveryTerminalGuidance.h",
+    " M Source/SuperHeavySim/Public/Recovery/Flight/SuperHeavyRecoveryProfile.h",
+    " M Tools/Runtime/build_simulator.ps1",
+    " M Tools/Runtime/package_alpha.ps1",
+    " M Tools/Tests/test_contact_fixtures.ps1",
+    " M Tools/Tests/test_packaged_alpha.ps1",
+    " M Tools/Tests/test_physical_recovery.ps1",
+    "?? Docs/DYNAMIC_RETURN.md",
+    "?? Docs/Validation/DynamicReturn/",
+    "?? Source/SuperHeavySim/Private/Recovery/Flight/RecoveryLandingPrediction.cpp",
+    "?? Source/SuperHeavySim/Private/Recovery/Tests/RecoveryContactGeometryTests.cpp",
+    "?? Source/SuperHeavySim/Private/Recovery/Tests/RecoveryLandingPredictionTests.cpp",
+    "?? Source/SuperHeavySim/Public/Recovery/Flight/RecoveryLandingPrediction.h",
+    "?? Tools/Editor/configure_dynamic_return.py",
+    "?? Tools/Tests/analyze_dynamic_return.py"
+  ],
+  "engine": {
+    "MajorVersion": 5,
+    "MinorVersion": 8,
+    "PatchVersion": 2,
+    "Changelist": 56702186,
+    "CompatibleChangelist": 55116800,
+    "IsLicenseeVersion": 0,
+    "IsPromotedBuild": 1,
+    "BranchName": "++UE5+Release-5.8"
+  },
+  "utc_recorded": "2026-09-09T15:23:50.1197910Z",
+  "files": [
+    {
+      "bytes": 1785856,
+      "sha256": "bbe16de95aa7dc32638a599b58070f9e738d6eaa41d3f323bad06d9ce44cf003",
+      "path": "Binaries/Win64/UnrealEditor-SuperHeavySim.dll"
+    },
+    {
+      "bytes": 55537,
+      "sha256": "81f3e5c5a013180d529ccab7ee7b5769a5813640128e11754eebc55fa005bf83",
+      "path": "Config/DefaultEditor.ini"
+    },
+    {
+      "bytes": 3066,
+      "sha256": "a825efaa8d361fad6da097f8e81000ff4f349248789d677e46dcfd47a1ab4630",
+      "path": "Config/DefaultEngine.ini"
+    },
+    {
+      "bytes": 1102,
+      "sha256": "67f5d7a8c9d325747f538962ac909a3eca7d71ef6fe82429a32f346f135c8c64",
+      "path": "Config/DefaultGame.ini"
+    },
+    {
+      "bytes": 523,
+      "sha256": "e19e1117b9bdad6b2ebf1b4621d55db4aca45e37e23c312244c87a5ae9df0b02",
+      "path": "Config/DefaultGameUserSettings.ini"
+    },
+    {
+      "bytes": 9355,
+      "sha256": "bdcd11939494fdbb1c71267e7d28f6c8f8ec152c2e823a2a65082416ed0d6afd",
+      "path": "Config/DefaultInput.ini"
+    },
+    {
+      "bytes": 2066705,
+      "sha256": "bc4b245b89c42c50b87a5b224b0bba0e86bc97ab52da9fb8942db6171f04e45b",
+      "path": "Content/Starbase/Audio/S_CoastalWind.uasset"
+    },
+    {
+      "bytes": 501042,
+      "sha256": "a5b2011c9fd8fafcda9771380230fd0ddfbd86eed96f20f796f304d4b783e1a5",
+      "path": "Content/Starbase/Audio/S_EngineRoar.uasset"
+    },
+    {
+      "bytes": 28656,
+      "sha256": "a424131e2d9f18f02abd749c5c6729ef9bf17538d793297b11cdd8c9b7a50bc5",
+      "path": "Content/Starbase/Blueprints/BP_LaunchTower.uasset"
+    },
+    {
+      "bytes": 24683,
+      "sha256": "859bcc74cf07deba094b821f6fa0f9a38a7eaa0dacd8998ae9228cc2da2d6470",
+      "path": "Content/Starbase/Blueprints/BP_RecoveryDirector.uasset"
+    },
+    {
+      "bytes": 2836123,
+      "sha256": "75cb596369f5d4b9fa66c66e34cc329baf3e23f55aa6fe3fea0002b404e5c063",
+      "path": "Content/Starbase/Data/DA_RecoveryEnvironment.uasset"
+    },
+    {
+      "bytes": 1403,
+      "sha256": "c4e5a2ddd2348a3031d1b3d5df791a3d3d8a2c0b4c355ebc874beaca410de57d",
+      "path": "Content/Starbase/Data/DA_RecoveryMission.uasset"
+    },
+    {
+      "bytes": 609092,
+      "sha256": "54ad6ca57e8dcfa209204eaea104d1127aef0a34760460cb9626d9a49fbb5db6",
+      "path": "Content/Starbase/FX/NS_RecoveryVaporTrail.uasset"
+    },
+    {
+      "bytes": 755799,
+      "sha256": "60e80af3fbbb7493392fba5e22c06b9edc00e1f596dcf8dee91a387a50d36584",
+      "path": "Content/Starbase/Maps/L_RecoveryLab.umap"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "383a2e9b57d7862fb72a18fbd60e00e05828a8d9e1a40db40e7ba45151c9bfda",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_0_0.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "642a3965008d6c2b1764709e54d7d6d9331e41df864822944a458a33cc429b23",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_0_1.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "e5c59fb5d72ae06ec712cc738cfb0c14f4a159922f1a2b050d90a03d2d6e34bb",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_0_2.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "6e89d810dfec8283efd31d2203f9fe8e9cb9450756baa9d1ca08ac48c4524ecb",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_0_3.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "ec64951b79f29179c0a5d0afb750c751c89f08c0258ac364a4cbbd620e8486c7",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_1_0.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "04bb6121cde9028ff09f33824cdb91008715c48db8019e278074773b2f14cf25",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_1_1.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "e639493eb20eeb231a9a6da72e7b77a94ada2487f094de427d701cde0fee56ed",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_1_2.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "f44950379b6f55ecaccd17a972fd9f411d0499cb5fcc28f3b1ffbc4a6f597782",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_1_3.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "446d3924d1a603d0be8b4d01285bc6bc8d7abfa9e36896a2f8e12e7bca9768f4",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_2_0.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "7de549f24abf2350c332b94633b3c6c774552a0d0095b4ca30cd1e7d3ada05e0",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_2_1.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "262cbf6f244ecb14f18b722b506cc43200cf62e648d82933883a424b0b2ddede",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_2_2.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "e6e14582534c8d61248509f8c50b590480b9263848814a4487d8b7ff7bbdd3f3",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_2_3.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "428a71304de12a1dc0ccc11076e0e6bb244652fc4b45c83412b15dd40bb94962",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_3_0.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "832adc9945fbc1da2ed8aca1e4abe84a52bcaba25c68709a1f9912caf3a3e34e",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_3_1.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "fdb052607da579bc867aaa07b39e4a11700d20919050aff6142d6733f5b3c1ec",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_3_2.uasset"
+    },
+    {
+      "bytes": 48066,
+      "sha256": "1c27be0aee20c9c523ec5be386e428ba44e99e09ac565846de537be3a7793c44",
+      "path": "Content/Starbase/Materials/Earth/M_BocaChica_3_3.uasset"
+    },
+    {
+      "bytes": 34912,
+      "sha256": "d74fd424e6c696bd8dc1d51a8d4f5689d0a193e1dd7f2dbf916b83b19f3c9702",
+      "path": "Content/Starbase/Materials/Earth/M_BocaRegion.uasset"
+    },
+    {
+      "bytes": 33340,
+      "sha256": "3dd06f4d33481bd9e18278897cb3e021cc5b4e9151a89d470f47857573b6c913",
+      "path": "Content/Starbase/Materials/Earth/M_EarthGlobe.uasset"
+    },
+    {
+      "bytes": 34367,
+      "sha256": "ff52dfbe9d10ed69c1f7e168ea51be788faf9aaab2255d02b321bf2f0fe8172e",
+      "path": "Content/Starbase/Materials/Earth/M_GulfRegion.uasset"
+    },
+    {
+      "bytes": 8098,
+      "sha256": "4b0b7cb31b3f548baeca391d5a34d500b8357b5868e1746badb6a423b9d3f862",
+      "path": "Content/Starbase/Materials/M_Asphalt.uasset"
+    },
+    {
+      "bytes": 9127,
+      "sha256": "d145126bc28d2cc5a7fbb5deec785f9e2695f29293b8e3ea14c9b812e9aaf63b",
+      "path": "Content/Starbase/Materials/M_AttitudeGas.uasset"
+    },
+    {
+      "bytes": 10615,
+      "sha256": "f3eb33c76c5199f992940f7f28b186c948b5483c4307377e24a19194b8cf2ac6",
+      "path": "Content/Starbase/Materials/M_BoosterFlight.uasset"
+    },
+    {
+      "bytes": 5685,
+      "sha256": "4bc61dd593dbc6c0552b3c94ecd0a9039a9858a3dd0007e6bcec95cd9574c1c8",
+      "path": "Content/Starbase/Materials/M_Cladding.uasset"
+    },
+    {
+      "bytes": 211373,
+      "sha256": "6fd77f61657d3a0429617dfcefb31de9a30d0a7fb08184a1f014028b72ad72f6",
+      "path": "Content/Starbase/Materials/M_CloudFlight.uasset"
+    },
+    {
+      "bytes": 8167,
+      "sha256": "eddad870fc05aee5c978cd46ca0419faa724cd23f083947e27d89f81c5deb9bf",
+      "path": "Content/Starbase/Materials/M_Concrete.uasset"
+    },
+    {
+      "bytes": 22658,
+      "sha256": "7f8cd643916be2bf0b2b281df049c3ed8daeac8a60666a751c34adfe01a906dc",
+      "path": "Content/Starbase/Materials/M_CryogenicVapor.uasset"
+    },
+    {
+      "bytes": 5573,
+      "sha256": "cff92930dad370bc5bf0240bec142fb4f6799d700794da55b19917b43104ba2c",
+      "path": "Content/Starbase/Materials/M_ExpansionJoint.uasset"
+    },
+    {
+      "bytes": 5955,
+      "sha256": "9a0edbfc02ad09562ef9a3b174929651b0c83bfdda7f7eb9cbfb385c60bba99f",
+      "path": "Content/Starbase/Materials/M_FlightMechanisms.uasset"
+    },
+    {
+      "bytes": 5937,
+      "sha256": "6a95ecf1d661c4fce27b32e7b08ba4aae69e2dabfae13e78874bec9226debc74",
+      "path": "Content/Starbase/Materials/M_FlightNozzles.uasset"
+    },
+    {
+      "bytes": 5685,
+      "sha256": "441941556a281cf9110d85971ed2ebca110ad3cf3dc360029c899ad06e640541",
+      "path": "Content/Starbase/Materials/M_Graphite.uasset"
+    },
+    {
+      "bytes": 8729,
+      "sha256": "5ec66bfe8839219d614197a4083cde435985ea5a84552c02638fae57fe3a02ef",
+      "path": "Content/Starbase/Materials/M_GridFinAlloy.uasset"
+    },
+    {
+      "bytes": 6024,
+      "sha256": "7f31c685b629f346c1ca56305e3e8e3720e5d3bf6a9e4a8dd39d2a576f17adfc",
+      "path": "Content/Starbase/Materials/M_GuidanceLight.uasset"
+    },
+    {
+      "bytes": 5538,
+      "sha256": "af0e7ba5d129f3fffba53d2f15eab6e0b207a98e417aca3125b7416393327560",
+      "path": "Content/Starbase/Materials/M_Marking.uasset"
+    },
+    {
+      "bytes": 19012,
+      "sha256": "ed449094f2988bc3b2c36c56ed94c35738d38a7dc0c1c94505037f3ab9374784",
+      "path": "Content/Starbase/Materials/M_RaptorPlume.uasset"
+    },
+    {
+      "bytes": 11219,
+      "sha256": "602972c814aa6f271065c4a2c96530eac6447948b1c1bcc037f1b49b3281419f",
+      "path": "Content/Starbase/Materials/M_RecoveryRock.uasset"
+    },
+    {
+      "bytes": 5700,
+      "sha256": "92ed47a72de073caa880600924b4f546e84adaf9f5709d16237c60a3710f7324",
+      "path": "Content/Starbase/Materials/M_SafetyAmber.uasset"
+    },
+    {
+      "bytes": 6970,
+      "sha256": "e1fbeb093fa87e65c1ca70ff07c4ccdd7bf579d0a2ca9505df09d2b31624bd6f",
+      "path": "Content/Starbase/Materials/M_SiteLamp.uasset"
+    },
+    {
+      "bytes": 7273,
+      "sha256": "b890b037cd17dc7752f45a23f5176f97569d02c1cdbb725a0679aedcc802450e",
+      "path": "Content/Starbase/Materials/M_StainlessFlight.uasset"
+    },
+    {
+      "bytes": 7688,
+      "sha256": "b8d452e9ca7c03fff228d51c9a647339629db3db89041c98273201837b6cb260",
+      "path": "Content/Starbase/Materials/M_StarField.uasset"
+    },
+    {
+      "bytes": 6853,
+      "sha256": "97253e18b767290497e06942da2c0429819a3d25100f6f5f8b9a0a47cd3ee03b",
+      "path": "Content/Starbase/Materials/M_StarshipHeatShield.uasset"
+    },
+    {
+      "bytes": 19176,
+      "sha256": "56d0deabac4a289e368ee70edf3eb05cbbdba7a214f62581ce85eba0f7898990",
+      "path": "Content/Starbase/Materials/M_VaporTrail.uasset"
+    },
+    {
+      "bytes": 20769,
+      "sha256": "0fd51bea7cfcf02654ea940cc686be7f951d8e2fd1656f57550922f926b94184",
+      "path": "Content/Starbase/Materials/M_VolumetricVapor.uasset"
+    },
+    {
+      "bytes": 6877,
+      "sha256": "95fae2e40c1cc71a6112f3909a3068e04b6105d073f8f7a58ff4787e6490ebed",
+      "path": "Content/Starbase/Materials/MI_CloudFlight.uasset"
+    },
+    {
+      "bytes": 5831,
+      "sha256": "1958f7ae6bbe2efe4465656e597757e74fd2a0b5814c677e93d21ee86c09145a",
+      "path": "Content/Starbase/Materials/Starbase/M_ServiceGlass.uasset"
+    },
+    {
+      "bytes": 6195,
+      "sha256": "bfc3a552c35bdcfe606311f631e04eac0dc7c9d1a3a0727747f2b34e3339f546",
+      "path": "Content/Starbase/Materials/Starbase/M_ServiceLamp.uasset"
+    },
+    {
+      "bytes": 5831,
+      "sha256": "dcf7fdeed0abd6eff1345cc8067609b706a7d49bbcbdbf149dfacb691a7966a5",
+      "path": "Content/Starbase/Materials/Starbase/M_ServiceMetal.uasset"
+    },
+    {
+      "bytes": 5831,
+      "sha256": "ed42a676d17514bf63def800d962e19eaca668c30be06c63cd5d8c2b73473863",
+      "path": "Content/Starbase/Materials/Starbase/M_ServicePaint.uasset"
+    },
+    {
+      "bytes": 9089,
+      "sha256": "cf4ac1f9ca2ad4f584e5a19c1b0ea0e5d8638aee89257591b699fd78ea057e81",
+      "path": "Content/Starbase/Materials/Starbase/M_ServiceRoad.uasset"
+    },
+    {
+      "bytes": 5778,
+      "sha256": "e184051213f5326cb142414b140b7d256c02ee1a714e7a9e9db50b97761fdf54",
+      "path": "Content/Starbase/Materials/Starbase/M_ServiceRubber.uasset"
+    },
+    {
+      "bytes": 8850,
+      "sha256": "be776ca50bab7bba2e3af8d8a34f739c31d5d4f4fb861aa27aa15d95abac421d",
+      "path": "Content/Starbase/Materials/Starbase/M_ServiceShoulder.uasset"
+    },
+    {
+      "bytes": 8601,
+      "sha256": "fdde617e3f92f46631f8510d81e0922c10a530056279e8cd05fa468cebf5ed78",
+      "path": "Content/Starbase/Materials/Starbase/M_WindFlag.uasset"
+    },
+    {
+      "bytes": 2359021,
+      "sha256": "3448b061d1011f748defacb3cb75637d22fe05310af992ecdb80e1fd3f0df1db",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_0_0.uasset"
+    },
+    {
+      "bytes": 2276438,
+      "sha256": "0f69d71e9e019b3a7f16968a34428a1b5f4e67a567dd453b4565d4843bb0f28b",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_0_1.uasset"
+    },
+    {
+      "bytes": 2227368,
+      "sha256": "1d649971e86ef237365a6f70e9c34f1afab8416a7bdb303eb85cbbc7d9f3cc83",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_0_2.uasset"
+    },
+    {
+      "bytes": 2311689,
+      "sha256": "3007b5ab1653a3843105c430bbb1c3fa36d49dc23e6ac1f44ab763d64ed72e0e",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_0_3.uasset"
+    },
+    {
+      "bytes": 2377737,
+      "sha256": "d13c8c82f2a960d572a54e0cd9d0f6e430ca63301bbb508403ba879eb935d487",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_1_0.uasset"
+    },
+    {
+      "bytes": 9036339,
+      "sha256": "8cc16bcfb5a3afa6f9aa6137b8b0609d150139646032cd1a1800c3cd539bfe20",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_1_1.uasset"
+    },
+    {
+      "bytes": 9083183,
+      "sha256": "44ad57c3681fbcb82e9d2e206d3d73cb941ea19f6bc54e557871501dab0a61ef",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_1_2.uasset"
+    },
+    {
+      "bytes": 2407445,
+      "sha256": "f2ab360471ac2be01d12368b6719dfc384e4c277bac362787454521b6434edac",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_1_3.uasset"
+    },
+    {
+      "bytes": 2294627,
+      "sha256": "dacd7095a65dd3505e30557f5ccf26de67c93a6871a7e34e9bd8954b1e42d69a",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_2_0.uasset"
+    },
+    {
+      "bytes": 8935911,
+      "sha256": "425dc70fdbe8a578a25c08d28b71bb96561ba0089821c81bd33c0dabbc9d6c5e",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_2_1.uasset"
+    },
+    {
+      "bytes": 8684463,
+      "sha256": "e6d7859f781999f9b8a2fffe5192b7bcb7e496c9ecedc0e7af77e19f3b426134",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_2_2.uasset"
+    },
+    {
+      "bytes": 2223694,
+      "sha256": "d13f379ce4a55c429d15153f03879f7adf70a25571f1736f1b62f08335eda722",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_2_3.uasset"
+    },
+    {
+      "bytes": 2115060,
+      "sha256": "b038d9cdba8aadd4ef1063a65915a41da4b6e8ba5a7b9e74473937daf65eb77d",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_3_0.uasset"
+    },
+    {
+      "bytes": 2144644,
+      "sha256": "695655afb1cdb3da6a1772001cb488d7fc909f62c2709fc243ca5abdbbdd65a8",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_3_1.uasset"
+    },
+    {
+      "bytes": 2087930,
+      "sha256": "0a9a95bb243f3dd3e8f3c04b176be9d579787d9bd6160f265f33954d23f636b8",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_3_2.uasset"
+    },
+    {
+      "bytes": 2086797,
+      "sha256": "ca1c7840f2b353cd35a68b059f8eaa4c60188156d27945015af303ef85a69aa0",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaChica_3_3.uasset"
+    },
+    {
+      "bytes": 2030300,
+      "sha256": "8495d1d19eea68ad22956948ba16c38331e478931597d22ee436dc5e1d8c33eb",
+      "path": "Content/Starbase/Meshes/Earth/SM_BocaRegion.uasset"
+    },
+    {
+      "bytes": 19266748,
+      "sha256": "57c312dad6730389eae4cada1caeceacc72cfb1a076c796cbe9e367dda8f041c",
+      "path": "Content/Starbase/Meshes/Earth/SM_EarthGlobe.uasset"
+    },
+    {
+      "bytes": 4869096,
+      "sha256": "30077a1d105d04b1324ede068fc50ce0b9389db4b89336aedaf58714a69a3843",
+      "path": "Content/Starbase/Meshes/Earth/SM_GulfRegion.uasset"
+    },
+    {
+      "bytes": 85191,
+      "sha256": "a23a99479b40ca516fb8053f5f8cd77b42bfde86c860d3e9c5efd230cf540ee4",
+      "path": "Content/Starbase/Meshes/SM_CaptureArm.uasset"
+    },
+    {
+      "bytes": 146054,
+      "sha256": "fe05576e6529f39be59567bf4dbe2ac1e7ef75bbdd74553393286d0da3c7a08e",
+      "path": "Content/Starbase/Meshes/SM_ExhaustEnvelope.uasset"
+    },
+    {
+      "bytes": 122900,
+      "sha256": "2a4c4b55de370cdb274041ffdc387a1278cf36e5eaa4cf632a2f7d89db3896bf",
+      "path": "Content/Starbase/Meshes/SM_LaunchMount.uasset"
+    },
+    {
+      "bytes": 99763,
+      "sha256": "23c3c815f2fda47388ecc48b460539b1cf9cac063605669c67e173983fe85c46",
+      "path": "Content/Starbase/Meshes/SM_RCSBlock.uasset"
+    },
+    {
+      "bytes": 1321862,
+      "sha256": "4a9c2d85bac2c7372d4b83e40c9a0013202def484a90ce6ce0b0b77aa6c8907a",
+      "path": "Content/Starbase/Meshes/SM_StarshipDetailed.uasset"
+    },
+    {
+      "bytes": 155434,
+      "sha256": "96d8abe5f9d69398425e6721e153e42902c20329b088082d9bc401bf6a6a5921",
+      "path": "Content/Starbase/Meshes/SM_TowerServiceCore.uasset"
+    },
+    {
+      "bytes": 573685,
+      "sha256": "b4ef9f08d2f6d0bf85f35c9d027ba1c9f00007167125ff31c52a97eab0061ed2",
+      "path": "Content/Starbase/Meshes/Starbase/SM_ServicePickup.uasset"
+    },
+    {
+      "bytes": 69101,
+      "sha256": "5ca4725ee7f93c43f8ee64e630c809dd4bc80253708defbcf490dde95978c9c4",
+      "path": "Content/Starbase/Meshes/Starbase/SM_ServiceRoadNetwork.uasset"
+    },
+    {
+      "bytes": 69201,
+      "sha256": "01dd9dbdcb4e83b7af29769a1023594c2dece59da77880de54c4b7ab99160c9f",
+      "path": "Content/Starbase/Meshes/Starbase/SM_ServiceRoadShoulder.uasset"
+    },
+    {
+      "bytes": 187228,
+      "sha256": "9399be922bfd9a08e96577f785afe305e397230606cada30cd1c74c5d7db1cf9",
+      "path": "Content/Starbase/Meshes/Starbase/SM_TowableGenerator.uasset"
+    },
+    {
+      "bytes": 79447,
+      "sha256": "8a3b6641900b94aca72ee1cb3ef91a4c3311501b098a163163761a690d81a78c",
+      "path": "Content/Starbase/Meshes/Starbase/SM_WindFlag.uasset"
+    },
+    {
+      "bytes": 17724257,
+      "sha256": "bbe62f240cfd0dbfd52a875c3d8b828152334dd644ede2ede7ad73db520b9c5b",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_0_0.uasset"
+    },
+    {
+      "bytes": 14251802,
+      "sha256": "8afe1c15a7389dbcf6edc51e55f7bf19e4d008d2d1b40488a5518fce44cb6daf",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_0_1.uasset"
+    },
+    {
+      "bytes": 15852536,
+      "sha256": "246b076e3b2fc64e7d029aaa691328e42d4af91b856daf216bbf6533e0548b88",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_0_2.uasset"
+    },
+    {
+      "bytes": 16253851,
+      "sha256": "c7166fb7c0fbc638addc890f6a9b94d14bd2d463f7b071815a108c6683011675",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_0_3.uasset"
+    },
+    {
+      "bytes": 16978088,
+      "sha256": "9798e8768509638d16d783da26db5c38170ebd5a857d4ada3188c4944ccf0bac",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_1_0.uasset"
+    },
+    {
+      "bytes": 16451343,
+      "sha256": "5df8ccf34d7a4e2070fd6d7b703b73e53b573557e1554b8c924ad676c704ca64",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_1_1.uasset"
+    },
+    {
+      "bytes": 16827313,
+      "sha256": "94d8df0fcf0112822dc1c203335f02b5663ca7bea3abb8209084b2652283331a",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_1_2.uasset"
+    },
+    {
+      "bytes": 16099504,
+      "sha256": "5ddd82b77280f1cf6cc3bec160db8fd1a882c9b65270a8b5f27303825028c4a7",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_1_3.uasset"
+    },
+    {
+      "bytes": 19729887,
+      "sha256": "e46838b5f77745753756f5dc7f324bcdd3d68dc19d19e47c19f5b5b4c3797c02",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_2_0.uasset"
+    },
+    {
+      "bytes": 20532895,
+      "sha256": "ec80755fb71b83aeea8a4dd197e7c6b1d57858e78ca4ce1140fd19b8805942e9",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_2_1.uasset"
+    },
+    {
+      "bytes": 20931263,
+      "sha256": "8af08de32da1cfa0b6a00c45d2776495a9d0035908fa81a68f7954809f5e3bce",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_2_2.uasset"
+    },
+    {
+      "bytes": 21664855,
+      "sha256": "548ea2c0b4d854c7e7406c1507a84804ead6aa4a2eb13366a4312f2bb99ea7a5",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_2_3.uasset"
+    },
+    {
+      "bytes": 3469168,
+      "sha256": "521a71f5d5f79fe909dd3d494d0180d5c20fb48ff9937e570831d3c84aa3c523",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_3_0.uasset"
+    },
+    {
+      "bytes": 3705979,
+      "sha256": "30de75b2aca00327b5a76c2cb9f5ad9cc0ba5b7a8be636555438ec5031377480",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_3_1.uasset"
+    },
+    {
+      "bytes": 3482269,
+      "sha256": "3310eabbce7d4bf6e20ea92fcb7259cfdb7b8ed01ce8fa013e1297f53a2674bc",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_3_2.uasset"
+    },
+    {
+      "bytes": 3797468,
+      "sha256": "6ffc039f5f23f427edaf7e480eca6c76c120198bdc8ea40e5d1cd8b508e7ba47",
+      "path": "Content/Starbase/Textures/Earth/T_BocaChica_3_3.uasset"
+    },
+    {
+      "bytes": 17294890,
+      "sha256": "ce8a785306e9bb2ea24d1037b38cd7c0d5a701dda6202f147a5d90768614e6bc",
+      "path": "Content/Starbase/Textures/Earth/T_BocaRegion.uasset"
+    },
+    {
+      "bytes": 579015,
+      "sha256": "590df7fdef9dbddf673e7ca46865b1cdef196ba90368c204794144b61681223e",
+      "path": "Content/Starbase/Textures/Earth/T_CoastalWaterMask.uasset"
+    },
+    {
+      "bytes": 53479256,
+      "sha256": "5408c3fa207b04f7de21b96a7684c7fc66e4bc8c6194642ed08c3b75c1f3af95",
+      "path": "Content/Starbase/Textures/Earth/T_CoastContinuous.uasset"
+    },
+    {
+      "bytes": 28347141,
+      "sha256": "e2f7f0ef354b9c6a8c7fe46d6e1f1e072bdf49c5503d446c41e9f1726fb41c7d",
+      "path": "Content/Starbase/Textures/Earth/T_EarthSeptember.uasset"
+    },
+    {
+      "bytes": 72331196,
+      "sha256": "3c2a6610f32b83575552f33760753edd52fea92d46b9a7ffe9599f270b705e5f",
+      "path": "Content/Starbase/Textures/Earth/T_GulfContinuous.uasset"
+    },
+    {
+      "bytes": 1776820,
+      "sha256": "bc96456bbb3b431b2c18510d3258e553f6e1f419662c3837277f4881deb07dfc",
+      "path": "Content/Starbase/Textures/Earth/T_GulfRegion.uasset"
+    },
+    {
+      "bytes": 4976546,
+      "sha256": "14d5911eef439035852533897555f6b432e6bf52693ba3b6cd32c1729b5206b4",
+      "path": "Content/Starbase/Textures/Effects/T_FlowNoise128.uasset"
+    },
+    {
+      "bytes": 4903688,
+      "sha256": "97981c456a2e7ab3176ea604ae2ae7ebcd37960b0e630a6bb85865519d4da211",
+      "path": "Content/Starbase/Textures/Effects/T_FlowNoiseAtlas.uasset"
+    },
+    {
+      "bytes": 269939,
+      "sha256": "1ef17f0b7aa435d14d8cca8954c231be6bc199187f9ab0bf463c79e98b8185e9",
+      "path": "Content/Starbase/Textures/T_BoosterMetalLinear.uasset"
+    },
+    {
+      "bytes": 530543,
+      "sha256": "bc1825f62d2ae3eafd65bab5924f5bf5e672a6c45bb755d511b65df0ceb70f51",
+      "path": "Content/Starbase/Textures/T_BoosterRoughLinear.uasset"
+    },
+    {
+      "bytes": 981766,
+      "sha256": "5cb130b9d8c18933f510384d461692dc8852955be4a5f35bc429f19f81fe6cb3",
+      "path": "Content/Starbase/Textures/T_RecoveryVaporAtlas.uasset"
+    },
+    {
+      "bytes": 34607,
+      "sha256": "9ebded9d0f806fd62c6c07faa597fede96bc558c0b233a5fb6f0f2e74a715b59",
+      "path": "Content/Starbase/Vehicle/Assets/DA_SuperHeavyMission_Main.uasset"
+    },
+    {
+      "bytes": 100611,
+      "sha256": "b0bbae680249d9d6cf86ba3bc51329f6a5c60901599297d401f7283dad31dce1",
+      "path": "Content/Starbase/Vehicle/Blueprints/BP_GridFin.uasset"
+    },
+    {
+      "bytes": 225511,
+      "sha256": "26578a9eeb1df694b8f11b22109540dceafc722f3f4b0e261cfe9b6b3cd8bed2",
+      "path": "Content/Starbase/Vehicle/Blueprints/BP_RaptorEngine.uasset"
+    },
+    {
+      "bytes": 532777,
+      "sha256": "e8e024fc56c5839008957444d5bf5bd7912d1214e677603b574ca44d97404c9a",
+      "path": "Content/Starbase/Vehicle/Blueprints/BP_SuperHeavy.uasset"
+    },
+    {
+      "bytes": 239829,
+      "sha256": "b2caa0c9fec7f286e6d257287e3efded405d22e146dc6e7f3c7e0cac6fcb98c6",
+      "path": "Content/Starbase/Vehicle/Blueprints/WBP_SuperHeavyHUD.uasset"
+    },
+    {
+      "bytes": 12117,
+      "sha256": "205660f28d4d34217b8f7167f9af6c6909e1c10345c8b2d4f1dfa62c4cce40a0",
+      "path": "Content/Starbase/Vehicle/Materials/M_RaptorExhaustSprite.uasset"
+    },
+    {
+      "bytes": 18910,
+      "sha256": "27bc690359af09085aaffcec3ddffc06113e2c757b9add83a33b05057f9fc337",
+      "path": "Content/Starbase/Vehicle/Materials/RaptorsV3.uasset"
+    },
+    {
+      "bytes": 21971,
+      "sha256": "8fdaea8bbe3748ea27c520f62381ba6b20d9067c4f7d9ec20f5af58f193dfb32",
+      "path": "Content/Starbase/Vehicle/Materials/SuperheavyBody.uasset"
+    },
+    {
+      "bytes": 549160,
+      "sha256": "b61788df18291f710e89893b8d89efd5e5ab54fe63d0e5b2e8f3c5fba8e835ef",
+      "path": "Content/Starbase/Vehicle/Meshes/Imported_Clean/GF_XM_Mesh.uasset"
+    },
+    {
+      "bytes": 3375917,
+      "sha256": "a738e55d97ca63d6b9aa684d772a768334320d4142f05df574c8c6239d122348",
+      "path": "Content/Starbase/Vehicle/Meshes/Imported_Clean/RGC03_Mesh.uasset"
+    },
+    {
+      "bytes": 5719487,
+      "sha256": "f6e421cb0856f4bbc5ed5585bbeae47d51381903a9083eddfdaa04e8a5ac6eb9",
+      "path": "Content/Starbase/Vehicle/Meshes/Imported_Clean/SH_Body_Mesh.uasset"
+    },
+    {
+      "bytes": 60544,
+      "sha256": "1a64edcd856d2b1338ef658a05e4c0cfffa0eca559fce25eafc1f6a7ff32baed",
+      "path": "Content/Starbase/Vehicle/Meshes/Imported/RAPTOR_-_inner_3.uasset"
+    },
+    {
+      "bytes": 61225,
+      "sha256": "b53767ad3cb295314f284029228563e356fca35ef5a84e0ded372f7cc6591070",
+      "path": "Content/Starbase/Vehicle/Meshes/Imported/Superheavy-V3.uasset"
+    },
+    {
+      "bytes": 15004261,
+      "sha256": "0b3388a07c5c8e13113706f8a70ad66ca8bc27f5ea69f7827f03bd17b3ebc2a3",
+      "path": "Content/Starbase/Vehicle/Textures/RAPTOR-3-SL_BaseColor_ice.uasset"
+    },
+    {
+      "bytes": 809394,
+      "sha256": "b5fde5c9353dba724c143b303e1e374455605ed0ba320254f156be74547286c2",
+      "path": "Content/Starbase/Vehicle/Textures/RAPTOR-3-SL_Emission.uasset"
+    },
+    {
+      "bytes": 209213,
+      "sha256": "64682567e8af5818007c6043bb3634687dd0909b17558b63befa48c3d50a8745",
+      "path": "Content/Starbase/Vehicle/Textures/RAPTOR-3-SL_Metallic-RAPTOR-3-SL_Roughness_channels_B.uasset"
+    },
+    {
+      "bytes": 1920364,
+      "sha256": "eed18e956d9b72ec031312d56dafad57f24414ade89d8be27d5871be5dd16120",
+      "path": "Content/Starbase/Vehicle/Textures/RAPTOR-3-SL_Metallic-RAPTOR-3-SL_Roughness_channels_G.uasset"
+    },
+    {
+      "bytes": 8366759,
+      "sha256": "d2960d0e47919569566dfda9a51e4aa6f597a33c710183cd90b84b1f4f1677fc",
+      "path": "Content/Starbase/Vehicle/Textures/RAPTOR-3-SL_Normal.uasset"
+    },
+    {
+      "bytes": 10956503,
+      "sha256": "7b2b65ea3fe26faa445f1589168afff9e543712b447d52893431522d480c284e",
+      "path": "Content/Starbase/Vehicle/Textures/Superheavy-V3_BaseColor.uasset"
+    },
+    {
+      "bytes": 280433,
+      "sha256": "bd3f1f14701500d455f9d88f7c2a3828ee4a0e617555e7e11bb2b01897edfc2f",
+      "path": "Content/Starbase/Vehicle/Textures/Superheavy-V3_Metallic-Superheavy-V3_Roughness_channels_B.uasset"
+    },
+    {
+      "bytes": 535380,
+      "sha256": "4fb51a9897b249b5fba6e9c36094e92e3b9a08967493b71383e3c750d52e9671",
+      "path": "Content/Starbase/Vehicle/Textures/Superheavy-V3_Metallic-Superheavy-V3_Roughness_channels_G.uasset"
+    },
+    {
+      "bytes": 9847527,
+      "sha256": "178785fc017afd6aefc46bda457d026c4410cbde3816c4065102afd83a412bb6",
+      "path": "Content/Starbase/Vehicle/Textures/Superheavy-V3_Normal.uasset"
+    },
+    {
+      "bytes": 320768,
+      "sha256": "eefd8826b798f73bd00a8456c3d514733267a6001142529c1c20775449661e8d",
+      "path": "Content/Starbase/Vehicle/VFX/NS_RaptorExhaust.uasset"
+    },
+    {
+      "bytes": 16194,
+      "sha256": "34daa57142f78316edad97b81d6a246a776bc949c9590a6bd8788cf9147906b0",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Materials/MASTER/Func/MF_MWAM_Opacity.uasset"
+    },
+    {
+      "bytes": 11886,
+      "sha256": "258003fb2e1e07a3706fa7c7a6e870b6c142759889d527f482b54cbb233516e1",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Materials/MASTER/Func/MF_MWAM_PivotMask.uasset"
+    },
+    {
+      "bytes": 79514,
+      "sha256": "f3716b03aceaaa0e82202d5bb9e99f94987424df1a814dde2ffaf7c0917bc146",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Materials/MASTER/Func/MF_MWAM_Roughness.uasset"
+    },
+    {
+      "bytes": 82155,
+      "sha256": "23fba6bb1e0333a8987d627fca548905649dabcb6e39d028e7feae326513e21c",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Materials/MASTER/Func/MF_MWAM_SubSurface.uasset"
+    },
+    {
+      "bytes": 43527,
+      "sha256": "bbe75447f4ee11f4aac429dd472a0290252785576a3048b20373722bda77d85d",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Materials/MASTER/MTL_MWAM_CoverFoliage_MASTER.uasset"
+    },
+    {
+      "bytes": 14714,
+      "sha256": "049cb69540abdc3b0a673a01cd102fa4e6fc0d93a610ecc5036a5d7cb9bf1c89",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Materials/Plants/MTL_MWAM_PlantsGrass.uasset"
+    },
+    {
+      "bytes": 42955,
+      "sha256": "8162117261f034f005546e44451ec274ce071922f58cedd2274feb2077b60e0a",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Meshes/Plants/SM_MWAM_GrassB.uasset"
+    },
+    {
+      "bytes": 43402811,
+      "sha256": "8329291d368e7663988656a13736507eeccd019613b9231738ba4fce3d7cdbd2",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Textures/Ground/TEX_MWAM_SandA_col.uasset"
+    },
+    {
+      "bytes": 12161491,
+      "sha256": "c8a44405097472f0af6fca6955d5ae39cb65255cbe043ee79e52f14307a20f7b",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Textures/Ground/TEX_MWAM_SandA_nrm.uasset"
+    },
+    {
+      "bytes": 6667753,
+      "sha256": "8475dc2f551597b8d27e7c8900991ababebc237ad32016f499b3c03ed5f08e21",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Textures/Plants/TEX_MWAM_Grass_col.uasset"
+    },
+    {
+      "bytes": 7758105,
+      "sha256": "a4819fa10f21955565edc214e04c52a973ac0f7926b9890b2e84ff4c069f81f2",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Textures/Plants/TEX_MWAM_Grass_nrm.uasset"
+    },
+    {
+      "bytes": 16497,
+      "sha256": "eabea4fb5823bd67a395044a61e9ade6a68bceb2f0f66601aeda6d10f16067fb",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Textures/TEX_MW_Temp_col.uasset"
+    },
+    {
+      "bytes": 18060,
+      "sha256": "96a42e3483838cf0e1063690ab9d231f276264c41a2d8ce9f76c93cf0fa7585a",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Textures/TEX_MW_Temp_msk.uasset"
+    },
+    {
+      "bytes": 30470,
+      "sha256": "0996f1d34a36e797d9658d3f6a28b99a04f8723206c06261c2043ceee44aeaa8",
+      "path": "Content/ThirdParty/MWLandscapeAutoMaterial/Textures/TEX_MW_Temp_nrm.uasset"
+    },
+    {
+      "bytes": 122011,
+      "sha256": "9e0a8547dab08333cd225f9a559a7db99cc9102237eb8a9747be98b74b292ba8",
+      "path": "Content/ThirdParty/WaterMaterials/Materials/M_River_Rock.uasset"
+    },
+    {
+      "bytes": 108833,
+      "sha256": "1e64cadcc24c905cd8495472ca83168c29920d0f80ad571a49452e3adb423bb7",
+      "path": "Content/ThirdParty/WaterMaterials/Meshes/SM_River_Rock.uasset"
+    },
+    {
+      "bytes": 131701,
+      "sha256": "4f73d2dc9618340ba10e00f07d3a1dadab4f60b75c0876142e919fd08f9d7994",
+      "path": "Content/ThirdParty/WaterMaterials/Textures/T_Ocean_Waves01_Normals.uasset"
+    },
+    {
+      "bytes": 756211,
+      "sha256": "9f7c654eafcb5c44ca91d7ecfdab49a7c776c5ca20cf79ac719ba559e0449b5d",
+      "path": "Content/ThirdParty/WaterMaterials/Textures/T_Stone_N.uasset"
+    },
+    {
+      "bytes": 586260,
+      "sha256": "483c088275a73d07d3ba444155d4abf479a9f1e6b949b4baa72b25a9fbe9be7e",
+      "path": "Content/ThirdParty/WaterMaterials/Textures/T_Stone.uasset"
+    },
+    {
+      "bytes": 445,
+      "sha256": "a594e47b72ab35ef88965cd03f7903ab5bad1cf3619c786a5cc241b7627a2f8d",
+      "path": "Source/SuperHeavySim.Target.cs"
+    },
+    {
+      "bytes": 27282,
+      "sha256": "a827890ea1528c8aecf63f23e94b8766a23f2fad0c4e00788c7f49aea7385358",
+      "path": "Source/SuperHeavySim/Private/Autopilot/SuperHeavyAutopilotComponent.cpp"
+    },
+    {
+      "bytes": 3995,
+      "sha256": "a46360a28ed839d9ac0a0944681248d549871e6e277b51529f60384ff9d3bad5",
+      "path": "Source/SuperHeavySim/Private/Autopilot/SuperHeavyMissionProfile.cpp"
+    },
+    {
+      "bytes": 3326,
+      "sha256": "e01807c3d21698518edc962cc7ba0346398b39eb9865cea26fe05cc93692b35b",
+      "path": "Source/SuperHeavySim/Private/Control/SuperHeavyActuatorCommandUtils.cpp"
+    },
+    {
+      "bytes": 549,
+      "sha256": "b472a2bf0669005f63ae7485a5cd8bdf9150f13abee4d7ec36b761ceb23a850e",
+      "path": "Source/SuperHeavySim/Private/Control/SuperHeavyActuatorCommandUtils.h"
+    },
+    {
+      "bytes": 2557,
+      "sha256": "240608b37d69e104a6d1b9b70794eac0917dfff1bda444243d8b6ae9aa1f588f",
+      "path": "Source/SuperHeavySim/Private/Control/SuperHeavyControlMath.cpp"
+    },
+    {
+      "bytes": 808,
+      "sha256": "267c3e0cbdd3c6433f9a9fa470dcbf32fa2b63e6f2af68b73000221cbae874ad",
+      "path": "Source/SuperHeavySim/Private/Control/SuperHeavyControlMath.h"
+    },
+    {
+      "bytes": 78,
+      "sha256": "77240db8224b9a62e85224b6551b2f0d732865a5084c48b431a60c4225821790",
+      "path": "Source/SuperHeavySim/Private/Logging/SuperHeavyLog.cpp"
+    },
+    {
+      "bytes": 3949,
+      "sha256": "b50161c4948d143ae1f944a88d99d2b950a251f6480541d8b035f4b96161adb6",
+      "path": "Source/SuperHeavySim/Private/Navigation/SuperHeavyNavigationComponent.cpp"
+    },
+    {
+      "bytes": 3945,
+      "sha256": "cdece247c09ac3cfb2882fd6bda0f9a70eabdec8f43853fdae6989c114412a72",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryContacts.cpp"
+    },
+    {
+      "bytes": 4412,
+      "sha256": "8165d3791ec41cf535a1bd207befe3fbcaba224a6d73ad6974ab0b9912c4499f",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryDynamicsBridge.cpp"
+    },
+    {
+      "bytes": 11858,
+      "sha256": "00d057306aced441fba268405dfaeb6cf6901646dd491b2e413484768957c001",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryDynamicsModel.cpp"
+    },
+    {
+      "bytes": 1659,
+      "sha256": "af1c1fd5e377ac0277fc2e9dfcbd7ec697911eada9cdc9a3a0505caf93ddd5ab",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryFlightInspection.cpp"
+    },
+    {
+      "bytes": 1865,
+      "sha256": "e0391a07e5a52bd0b1e7aa97ee238facbf52bc573c69d40e4864ad3e60823aa9",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryGroundSystems.cpp"
+    },
+    {
+      "bytes": 3461,
+      "sha256": "e2459473d8c208a06ac46c5c898f98678472642f569bbfdee8d8dcac6ffe24c5",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryGuidance.cpp"
+    },
+    {
+      "bytes": 8639,
+      "sha256": "3026f3f0a1710b6b4d407b558b93c7a1dce936fc73e867b47dd7aee9c42020e1",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryGuidanceModel.cpp"
+    },
+    {
+      "bytes": 6059,
+      "sha256": "74b162a099f7c706673b2fa39abff918a0a2f3d04be6b52531d3c2eb702c4593",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryGuidanceState.cpp"
+    },
+    {
+      "bytes": 14893,
+      "sha256": "8dc84ce59a0527004410f25782c1cc2b197e362190bec35a7067f0e4299ff825",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryLandingGuidance.cpp"
+    },
+    {
+      "bytes": 4051,
+      "sha256": "199ce0abf2f745445ddf94bb4426fa65eb9e4495b9abae605f437af453b8e8bd",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryLandingPrediction.cpp"
+    },
+    {
+      "bytes": 1814,
+      "sha256": "ca1f0d5a52a04310e6a0fc1544debe421d98aea63fa6f18be0e3577bfd16c657",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryLaunchSequence.cpp"
+    },
+    {
+      "bytes": 974,
+      "sha256": "e15a70cc88aff9858fc484c7712da0dd72989548d45bce859de0b0c6a0cd873b",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryMassProperties.cpp"
+    },
+    {
+      "bytes": 2558,
+      "sha256": "658eeefee5970f909863925e54e21cf6874639511cca043a819310ab0c5f3885",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryNavigation.cpp"
+    },
+    {
+      "bytes": 17141,
+      "sha256": "d15237ba9e0672f4f66172cba2a006f20afe5206c453cca699881102629d34c0",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryPhysicsComponent.cpp"
+    },
+    {
+      "bytes": 1930,
+      "sha256": "fb169481fbcadb7301ac3e2d2493505df895f08fa2f4aa766845c0fb857af181",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryPropulsion.cpp"
+    },
+    {
+      "bytes": 4837,
+      "sha256": "4c8c5facd68a9a6e4be8189f65e46cb3d6527bf73ed6ec777f533760ca3372d2",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryPropulsionModel.cpp"
+    },
+    {
+      "bytes": 5046,
+      "sha256": "91c76dd9967d59da1c337b0e97d81dfb5ec1047445850133d362ffb6ae420bd6",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryStageDynamics.cpp"
+    },
+    {
+      "bytes": 15894,
+      "sha256": "a3d3629fe46b9a2b3775bfbb73f2bcbb83e7a4d978722a5029b18179e7bb595c",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryTelemetry.cpp"
+    },
+    {
+      "bytes": 10551,
+      "sha256": "43a9bc613fba22a07cbf545052a208ad339aec9eda9474f8da81e575ff95df4a",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryTerminalGuidance.cpp"
+    },
+    {
+      "bytes": 2716,
+      "sha256": "d01c743ae29a8ed5b70ed56436d349e9ab848f79b2197ebbe86c01caa7c6d706",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/RecoveryUpperStageModel.cpp"
+    },
+    {
+      "bytes": 5788,
+      "sha256": "9851a196c405713568d3159daaf3fe0685a23da26bfaa0a95b7b7ee6fba77c0a",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/SuperHeavyLaunchTower.cpp"
+    },
+    {
+      "bytes": 16934,
+      "sha256": "b699f4d9c52db6073ff95b45e8a0f46456017a90e6fa0fb65941909dbe9480e6",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/SuperHeavyRecoveryDirector.cpp"
+    },
+    {
+      "bytes": 2834,
+      "sha256": "fce390fc83c8b008bc6b28d027a7a3b520112561110580b520a1dafc1ede1631",
+      "path": "Source/SuperHeavySim/Private/Recovery/Flight/SuperHeavyRecoveryProfile.cpp"
+    },
+    {
+      "bytes": 3892,
+      "sha256": "bdf5fcd7ecca9dd996a8664a02920def08f2623b23e5318b17a23a616d59c967",
+      "path": "Source/SuperHeavySim/Private/Recovery/Interface/RecoveryIcon.h"
+    },
+    {
+      "bytes": 25681,
+      "sha256": "d5e3152d65d166e8dea5c7d5394e7e361462dee4e049bb947cc0744c64baeda3",
+      "path": "Source/SuperHeavySim/Private/Recovery/Interface/RecoveryMenu.cpp"
+    },
+    {
+      "bytes": 1997,
+      "sha256": "817981ea04bead020f10adfec7a2bbd9d1fa67c3e6dde33f1c08281413aef95b",
+      "path": "Source/SuperHeavySim/Private/Recovery/Interface/RecoveryMenu.h"
+    },
+    {
+      "bytes": 3141,
+      "sha256": "3148adf2d64aba1188c877b98696025dedb478cb2c65f8bcfa3c0036032677c2",
+      "path": "Source/SuperHeavySim/Private/Recovery/Interface/RecoveryPhotoControls.cpp"
+    },
+    {
+      "bytes": 5085,
+      "sha256": "a33a0fa464053bdca90f01caca4b39ccbd829e7b8eea4ccc6bd18a86a555e92b",
+      "path": "Source/SuperHeavySim/Private/Recovery/Interface/RecoveryPhotoMenu.cpp"
+    },
+    {
+      "bytes": 15867,
+      "sha256": "e3292eb74440cc62298d0e38d1be43e559b1eb18f903830a31144edf325f2d94",
+      "path": "Source/SuperHeavySim/Private/Recovery/Interface/RecoveryPlayerController.cpp"
+    },
+    {
+      "bytes": 9454,
+      "sha256": "48f9d12c991831a0fd6fbe6596e60cc67dc571c1f4869f9ad903b122b3b6b678",
+      "path": "Source/SuperHeavySim/Private/Recovery/Interface/SuperHeavyRecoveryHUD.cpp"
+    },
+    {
+      "bytes": 3483,
+      "sha256": "5284adc34fe803af1a197657086ff905dd938a902e4a1e609effaa7d2f7e3276",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoveryAudioComponent.cpp"
+    },
+    {
+      "bytes": 11038,
+      "sha256": "11b8c8b593ca172601389b6dc4a838f659026dac6ca9304f8cf77105a6f7f15a",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoveryCameras.cpp"
+    },
+    {
+      "bytes": 4142,
+      "sha256": "010135bb1397f6ddd49bf4186d258c1dd64451aedceb3af93c885fa66e06cd0f",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoveryCryogenicVapor.cpp"
+    },
+    {
+      "bytes": 2629,
+      "sha256": "4a726f3831afdb4062497a60cf439d6bc092640ae556f25243504fe672d02ccc",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoveryFacilityVents.cpp"
+    },
+    {
+      "bytes": 2533,
+      "sha256": "5076b171b155aba5c17f6eb01f979b14fbd915701559b219f0a45697ccc863e6",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoveryForceDisplayComponent.cpp"
+    },
+    {
+      "bytes": 3728,
+      "sha256": "8faf645d2f4c7bcd681cd65218c1d13db92d0a62a0e7ea50b1abc8a9cf980a66",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoveryPhotography.cpp"
+    },
+    {
+      "bytes": 17375,
+      "sha256": "26192d05df2da95777177037fe3c4e4a4f87788e1002c6bbb8625eae4dc8d4cf",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoveryPresentationComponent.cpp"
+    },
+    {
+      "bytes": 4059,
+      "sha256": "5db1eb8a6ca4c1dcef6eab54b54a8498323c4c2b9de1bf787c9570db3581cca0",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoveryRenderSettings.cpp"
+    },
+    {
+      "bytes": 2834,
+      "sha256": "829d4e1c6fd7413877895755a4b6964f2355b205d16fef6b1c8d69fc7d038cf5",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoveryServiceFacilities.cpp"
+    },
+    {
+      "bytes": 6835,
+      "sha256": "314451a81fc6143a9957eeb7a11402673d83740c7258f1bbec2825f9170996fb",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoverySiteActivityComponent.cpp"
+    },
+    {
+      "bytes": 7532,
+      "sha256": "caef8e6ee0b8e5f1deda4528556c1264e8c97fc6ee968e7a62e286fe3aebc87f",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoverySiteDetailsComponent.cpp"
+    },
+    {
+      "bytes": 5130,
+      "sha256": "fc689d5617abd46bd05d855315628a6e9f2e48d81c543f86f2c69da3c24fb8c7",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoverySiteLighting.cpp"
+    },
+    {
+      "bytes": 9662,
+      "sha256": "786da35f0d6396719017f4817913ddffbcd5d5cd285409ceb86bc149ad826bb1",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoverySkyComponent.cpp"
+    },
+    {
+      "bytes": 6646,
+      "sha256": "70da28b25157db7fb2ee23d433bae987667336d7deffcf08f113d45d27e040f6",
+      "path": "Source/SuperHeavySim/Private/Recovery/Presentation/RecoveryVaporComponent.cpp"
+    },
+    {
+      "bytes": 76,
+      "sha256": "f188d228eaf48e626d421299cf33082cfa43a6e75cd3a6205850a55d5b9288a9",
+      "path": "Source/SuperHeavySim/Private/Recovery/Shared/RecoveryLog.cpp"
+    },
+    {
+      "bytes": 2660,
+      "sha256": "55959d659180c0f55fbcdd13053e5c8be377b01ea426e780c2c921325bad8a3d",
+      "path": "Source/SuperHeavySim/Private/Recovery/Shared/RecoveryUIStyle.cpp"
+    },
+    {
+      "bytes": 5223,
+      "sha256": "ef2c70772e433a71423eb06522f2ff3e5d550677e346dfc00879614854068009",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryActuatorTests.cpp"
+    },
+    {
+      "bytes": 1218,
+      "sha256": "33737f22c2cf946bd63b2eba50a7a3d2c3c7fef1f5be6a2e2175122d5ed7f7b9",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryContactGeometryTests.cpp"
+    },
+    {
+      "bytes": 7952,
+      "sha256": "cd72ce989f7a05bb42ea40d137672ca20d1ee463343d28a1e52a88c3c26be811",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryControlsAudit.cpp"
+    },
+    {
+      "bytes": 8284,
+      "sha256": "fbe69ed42441d7c8eb759df29ffca9c3913700555ef297e066c876658f472c2f",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryDiagnosticsComponent.cpp"
+    },
+    {
+      "bytes": 6656,
+      "sha256": "522de82786bbc8afe9d8446547983ad58d93fa1e2b6a8a8a03a805436ed7cd97",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryDynamicsModelTests.cpp"
+    },
+    {
+      "bytes": 3752,
+      "sha256": "665a4eae6b0beb24c18110c270fc5381114bb377460a56bbd0d2c05c2347167e",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryEnvironmentAudit.cpp"
+    },
+    {
+      "bytes": 6904,
+      "sha256": "4f7603fbdf2e3f93489ac3d4f3bbfee1448a3926802f2577d9cf0fb49c7f56a9",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryGroundAudit.cpp"
+    },
+    {
+      "bytes": 6229,
+      "sha256": "d60fdb798285b7d25df2940aa5fd2fd5a839a78ebd788641db488c9b41a46460",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryGuidanceModelTests.cpp"
+    },
+    {
+      "bytes": 6542,
+      "sha256": "55492d1cf0204c8ebb0efd116cd77825820a0eb009d41eaf666a4ac941d03986",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryInterfaceAudit.cpp"
+    },
+    {
+      "bytes": 2781,
+      "sha256": "49f63c5699edae6a7fcbb99bee2de47a8c7955f2da46f7d2654f220a0f7de4f6",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryLandingPredictionTests.cpp"
+    },
+    {
+      "bytes": 2912,
+      "sha256": "6e0bdd6f184f83b1238634947433e9edae08f3552668cb5db4c6c05aba30254b",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryLaunchSequenceTests.cpp"
+    },
+    {
+      "bytes": 5902,
+      "sha256": "754227145b03d9b3a106e8d1cdc0d78d9e5d3bf8db79bbc69b399abe42bbec60",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryOverhaulAudit.cpp"
+    },
+    {
+      "bytes": 1458,
+      "sha256": "fd6e510e4f4e2c83584e441672da15fd357046df223e25266013cb993d1a572a",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryPerformanceAudit.cpp"
+    },
+    {
+      "bytes": 8067,
+      "sha256": "ffe9b7964c0c94bfef2e1f0cfeda9f390e0f1f5aff3ae8f53491a62565d4d8d1",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryPhotographyAudit.cpp"
+    },
+    {
+      "bytes": 6858,
+      "sha256": "e28830e8159f3a7cf51523fad9c9f9a65054c66d5c8f869b34ec7c15ef6f5228",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryPhysicsAuditComponent.cpp"
+    },
+    {
+      "bytes": 6011,
+      "sha256": "d0386d2ac5e0559885c4948f08d28968d07cd2ce5c16422fe7851b4e9e1c390d",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryPropulsionModelTests.cpp"
+    },
+    {
+      "bytes": 1426,
+      "sha256": "fc72093ae3f1e813073314ee942cb60350c4deae030e4c456b426f4027792284",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoverySolarTests.cpp"
+    },
+    {
+      "bytes": 9274,
+      "sha256": "39014422cca2be3e01fe09a4c7a1ac4e5e83217e9f030690f4c5c97c6c92c133",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryTerminalGuidanceTests.cpp"
+    },
+    {
+      "bytes": 5528,
+      "sha256": "175fa285f6926f7019783c7bb6fbab78bde57c1b69d267f1c459c9feda385682",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryUpperStageModelTests.cpp"
+    },
+    {
+      "bytes": 4089,
+      "sha256": "7cbf29c208f3af7f874f0629abc0ef47a3435e6734e7393d78a47f1a27bd8728",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryVisualReview.cpp"
+    },
+    {
+      "bytes": 5469,
+      "sha256": "00292736c880f825f9bccc551fa05c2753374bb15d1e282d8cb9f499ced1bfe4",
+      "path": "Source/SuperHeavySim/Private/Recovery/Tests/RecoveryWorldAudit.cpp"
+    },
+    {
+      "bytes": 2607,
+      "sha256": "85a2a29c423ff897737a81c516981a20eb90efb821e53e04fb29abea077f10a0",
+      "path": "Source/SuperHeavySim/Private/Vehicle/SuperHeavyVehicleActor.cpp"
+    },
+    {
+      "bytes": 6089,
+      "sha256": "c0745954275b0534e5c2a6ed5659902c9d8ad7c45601af58444d6ee77fe04099",
+      "path": "Source/SuperHeavySim/Public/Autopilot/SuperHeavyAutopilotComponent.h"
+    },
+    {
+      "bytes": 7538,
+      "sha256": "1708b48355168db55c3caf4762eeb527e5b2b43672a295504567a76c50120af9",
+      "path": "Source/SuperHeavySim/Public/Autopilot/SuperHeavyAutopilotTypes.h"
+    },
+    {
+      "bytes": 2004,
+      "sha256": "144978eec17fb3c1b95147a1b9105868c56dce5d470fb21188ce113f344aa061",
+      "path": "Source/SuperHeavySim/Public/Autopilot/SuperHeavyMissionProfile.h"
+    },
+    {
+      "bytes": 4499,
+      "sha256": "02a9cf9eaee47ad217050b0040c8837967c359e54b1f3f9d6fa9ff71d22f39e6",
+      "path": "Source/SuperHeavySim/Public/Control/SuperHeavyControlTypes.h"
+    },
+    {
+      "bytes": 2184,
+      "sha256": "88c866f99426818fc8106d3a5f12cb99062b9ab5f6a421ada1ec936eddd06ef0",
+      "path": "Source/SuperHeavySim/Public/Control/SuperHeavyPidController.h"
+    },
+    {
+      "bytes": 102,
+      "sha256": "88c36372703e208707ee3536a16a57dae51c7dd41bf88b811b04fb8ef671a41d",
+      "path": "Source/SuperHeavySim/Public/Logging/SuperHeavyLog.h"
+    },
+    {
+      "bytes": 1732,
+      "sha256": "b09248d2cf62121c7f9c1b7e219ea5535b4f6a389196b27bc81166fd073983ee",
+      "path": "Source/SuperHeavySim/Public/Navigation/SuperHeavyNavigationComponent.h"
+    },
+    {
+      "bytes": 2248,
+      "sha256": "4e05e7d1ac192663b192e8f0f4e3c00af26b719cef9afaf73c834dcf83f0729b",
+      "path": "Source/SuperHeavySim/Public/Navigation/SuperHeavyNavigationState.h"
+    },
+    {
+      "bytes": 1750,
+      "sha256": "f2f971b64ea31802a6d0747f6db6b77b0951ac3309834931adbb85cc354078d9",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryActuators.h"
+    },
+    {
+      "bytes": 1346,
+      "sha256": "2893cb4397f7e9f4ef9c7e447216ccfcf45c334506b230f209eb178e69180fbf",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryApproachGeometry.h"
+    },
+    {
+      "bytes": 1555,
+      "sha256": "4fc9420b8082d0f30e9fd66a435535fac4a5aa4d355ed7abced4a4cef592b079",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryAtmosphere.h"
+    },
+    {
+      "bytes": 4370,
+      "sha256": "5f82573c2cc8bef7221c0bec8f8c9b5efa9284abeb816def5910f77d387d8826",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryDynamicsModel.h"
+    },
+    {
+      "bytes": 657,
+      "sha256": "bb04e170b9a97274880aaf9aa42223872b4fb09546aac2331227869231fe099c",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryFlightInspection.h"
+    },
+    {
+      "bytes": 245,
+      "sha256": "67e1598df9c4f41cb7fb02d75978b171f3af9534037ec4d87f19ca5cdee1a8d8",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryFlightPhase.h"
+    },
+    {
+      "bytes": 5690,
+      "sha256": "f0c0a006aa1d6fe66634f5e66cd0a0dfcba8a4bdb47c88458601cc30481ac740",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryGuidanceModel.h"
+    },
+    {
+      "bytes": 927,
+      "sha256": "95efb991e2c6fe918d2635610012d470f2c4f852ec54ea5e54af1072b295c434",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryLandingPrediction.h"
+    },
+    {
+      "bytes": 734,
+      "sha256": "6af2d913ef367c7d84fa3c55dc8f6ad7c6d1517af87e18f41059514f74e75de8",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryLaunchSequence.h"
+    },
+    {
+      "bytes": 2298,
+      "sha256": "557d64eef6808aafee41afcc070ce377d9389c60378ec58d1dc9bbd63a2c4465",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryMassProperties.h"
+    },
+    {
+      "bytes": 1753,
+      "sha256": "f8107680ce2e56430d3ace959a4539e651f855c44b84a55e32f24ee7539fe7c0",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryPhysicsComponent.h"
+    },
+    {
+      "bytes": 1723,
+      "sha256": "4ed24b105341907a7ed18323b50696a53d163099bfbc09a751e704348bb91fb9",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryPropulsionModel.h"
+    },
+    {
+      "bytes": 1003,
+      "sha256": "6987515a5e29f3831c68be0bd95e70d8d3942ce6bd977b965f596cefcaff928e",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryRailSupport.h"
+    },
+    {
+      "bytes": 2180,
+      "sha256": "f779a4c292e631a1eb607e1d9a85189dced860185a8026f04f15462b4564f6a5",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoverySeparationModel.h"
+    },
+    {
+      "bytes": 2369,
+      "sha256": "a485476e68968dd969c017bcc38e691a6cde9a9b0d6fb3976b0e5d000772eabe",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryTerminalGuidance.h"
+    },
+    {
+      "bytes": 1671,
+      "sha256": "a58253f84204948ace036d4b0a1bbf6bd6447b5fedeee4a9d2bd975fc589627e",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/RecoveryUpperStageModel.h"
+    },
+    {
+      "bytes": 2451,
+      "sha256": "4efac5f8d256914fc099df82330f91586ba293299f36cb873f8ef550ec7f2bba",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/SuperHeavyLaunchTower.h"
+    },
+    {
+      "bytes": 13402,
+      "sha256": "5cbc7f1ed698ea8553dae2f8c623ec4f6c79515921f49df11036720af43f4af7",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/SuperHeavyRecoveryDirector.h"
+    },
+    {
+      "bytes": 7847,
+      "sha256": "5d23b5b95a58c7727eaacdc441c3b0b646e26714126720356a412c04fc8f8158",
+      "path": "Source/SuperHeavySim/Public/Recovery/Flight/SuperHeavyRecoveryProfile.h"
+    },
+    {
+      "bytes": 1107,
+      "sha256": "254f1005827e6ac56c88d6604837890fa1f86b5a9135ad9a920d4f4bd2d94c22",
+      "path": "Source/SuperHeavySim/Public/Recovery/Interface/RecoveryInput.h"
+    },
+    {
+      "bytes": 3432,
+      "sha256": "ab24dbb714b16bc2d8976ba39c8ba3ce05605354775ab79d7c38a3f20ffb756d",
+      "path": "Source/SuperHeavySim/Public/Recovery/Interface/RecoveryPlayerController.h"
+    },
+    {
+      "bytes": 610,
+      "sha256": "49cc998ebc2d5e900d8de14754a0248e0773ab17e93fbfb507c4985ec0c2ceeb",
+      "path": "Source/SuperHeavySim/Public/Recovery/Interface/SuperHeavyRecoveryHUD.h"
+    },
+    {
+      "bytes": 832,
+      "sha256": "123b4ff45d53a4b75422bafdc9a59e16b030d514144b95296f17fc1da49cb20b",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoveryAudioComponent.h"
+    },
+    {
+      "bytes": 902,
+      "sha256": "0b48a33fd2a16df8ccb1c259dd7da4551ffe0562051d43ac7097de11f878fe51",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoveryCameraTracking.h"
+    },
+    {
+      "bytes": 934,
+      "sha256": "229370cb6ef6aada6af844f3ffc0e1a9c0859bd67428f2ece42e82072b85266b",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoveryEnvironmentProfile.h"
+    },
+    {
+      "bytes": 486,
+      "sha256": "07908b39b1fa9dacd3ff286d487ff82e335b5006971b4df4e56026f79f10a859",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoveryForceDisplayComponent.h"
+    },
+    {
+      "bytes": 1021,
+      "sha256": "e4be4a2255e65e5ce105b2d524f441edcf5a156b08a8d833e80c7b8f5afdbc10",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoveryPhotography.h"
+    },
+    {
+      "bytes": 1801,
+      "sha256": "cbb7e2a3b382aff730ea17a6126bf9a1cb1c4b4b7a68c1b1d398fa01541699cd",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoveryPresentationComponent.h"
+    },
+    {
+      "bytes": 452,
+      "sha256": "88f602cddc340548f94f1f40f20db6fb48d5642a2ced4633a14b437f8fdf56bb",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoveryRenderSettings.h"
+    },
+    {
+      "bytes": 1514,
+      "sha256": "fc6240745a4337ab1065cf188cfb6156735e5a9d15621016abcbe04550e16047",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoverySiteActivityComponent.h"
+    },
+    {
+      "bytes": 1406,
+      "sha256": "f09d6ffa5a0c3e0f38f02bc0a4179f78a541f1ab4d8145a9a22e5aa09866f29f",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoverySiteDetailsComponent.h"
+    },
+    {
+      "bytes": 1829,
+      "sha256": "75a7eb4eed917eb8012c4119ac6d44b0c4cb24bbe872361ea5fd8bff4ed0c646",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoverySkyComponent.h"
+    },
+    {
+      "bytes": 1289,
+      "sha256": "13c370711ca2d12fb80e299878922021e1c76b2e86076a6868d3d4c5b2070308",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoverySolarPosition.h"
+    },
+    {
+      "bytes": 2148,
+      "sha256": "079cd55273b637ac9840671e3d48b6f0fc806eb5f946c00ab4435e5f144cd80e",
+      "path": "Source/SuperHeavySim/Public/Recovery/Presentation/RecoveryVaporComponent.h"
+    },
+    {
+      "bytes": 1983,
+      "sha256": "c979fdf033a873eacd9556dbd9fd2077bc52c27bfd1ea539302f796aab267699",
+      "path": "Source/SuperHeavySim/Public/Recovery/Shared/FlightGeometry.h"
+    },
+    {
+      "bytes": 2986,
+      "sha256": "c9563db6b31e6eba2c681050cf8b8fe2a8c6b745e03ae249d8f27988db65b9bd",
+      "path": "Source/SuperHeavySim/Public/Recovery/Shared/RecoveryAssets.h"
+    },
+    {
+      "bytes": 97,
+      "sha256": "0dde5f9bfd0aae871799d7b3d85fdae9a1ea388516173a0434996b924c51e33e",
+      "path": "Source/SuperHeavySim/Public/Recovery/Shared/RecoveryLog.h"
+    },
+    {
+      "bytes": 367,
+      "sha256": "0b700c07fc5d6af0db8c4196a44c5325fbad9f26e6f5650c094c0ab5942b1c8f",
+      "path": "Source/SuperHeavySim/Public/Recovery/Shared/RecoveryUIStyle.h"
+    },
+    {
+      "bytes": 1818,
+      "sha256": "fa14bd1d43cf6860976e80c1830887df97b5cc113abe87852b12eead6f48f343",
+      "path": "Source/SuperHeavySim/Public/Recovery/Tests/RecoveryDiagnosticsComponent.h"
+    },
+    {
+      "bytes": 1365,
+      "sha256": "287d8365b129f33677f88becd705cab207c4eabb1907eb674a5195fd98f0e53b",
+      "path": "Source/SuperHeavySim/Public/Recovery/Tests/RecoveryPhysicsAuditComponent.h"
+    },
+    {
+      "bytes": 2390,
+      "sha256": "b485786c4ec6d18ab06afad3df4711f77014fbde292fcc1f82b9550cdb99ad82",
+      "path": "Source/SuperHeavySim/Public/Telemetry/SuperHeavyTelemetryTypes.h"
+    },
+    {
+      "bytes": 2440,
+      "sha256": "71dff8b3f53fd183d5f786581b1853faac8c876472f2e7e9e706c705fbbce4e9",
+      "path": "Source/SuperHeavySim/Public/Vehicle/SuperHeavyVehicleActor.h"
+    },
+    {
+      "bytes": 552,
+      "sha256": "cba0507541067e89fce544b49e2d6901b9382c3dd1261e1b5c515fb8890c5edf",
+      "path": "Source/SuperHeavySim/Public/Vehicle/SuperHeavyVehicleControlInterface.h"
+    },
+    {
+      "bytes": 826,
+      "sha256": "48149e336e4fa19905774511df9d968e20aa16eb8a2978b68ec0f26c2d11b1b2",
+      "path": "Source/SuperHeavySim/SuperHeavySim.Build.cs"
+    },
+    {
+      "bytes": 210,
+      "sha256": "def0da35fafe8a0fe3c5984777f5dd904f372dd61bf971aa41429a27d9649644",
+      "path": "Source/SuperHeavySim/SuperHeavySim.cpp"
+    },
+    {
+      "bytes": 98,
+      "sha256": "4694b655856b269fc41b195971214f8e629857c7e5d6f34002a066cd4af3037c",
+      "path": "Source/SuperHeavySim/SuperHeavySim.h"
+    },
+    {
+      "bytes": 481,
+      "sha256": "8cdabc0283b6675b443a101ba19304d40b1d59bf1ad1a8d76702cabb59f31eeb",
+      "path": "Source/SuperHeavySimEditor.Target.cs"
+    },
+    {
+      "bytes": 953,
+      "sha256": "f42784a2e60dee417271da91d919c91c3c1e98d1b5f88fbd24814c25b9a59fec",
+      "path": "Source/SuperHeavySimEditor/Private/RecoveryAssetMaintenance.cpp"
+    },
+    {
+      "bytes": 570,
+      "sha256": "301d8f7049802d8b20636e7075bcd187737c60ea713865ceeab36e6e72b9c998",
+      "path": "Source/SuperHeavySimEditor/Public/RecoveryAssetMaintenance.h"
+    },
+    {
+      "bytes": 391,
+      "sha256": "264249c7d45f39dbb042f7d0cfb73f920a4bf927a10e02432585d34e7cbb32a3",
+      "path": "Source/SuperHeavySimEditor/SuperHeavySimEditor.Build.cs"
+    },
+    {
+      "bytes": 1320,
+      "sha256": "ad31cb9a800a082ce470393716358cbc4ac4ea4d79df9863db36903d46f2cac9",
+      "path": "SuperHeavySim.uproject"
+    },
+    {
+      "bytes": 3399,
+      "sha256": "b8186c9354f8e9dc7dfe40009ab5f3647cdfcf0131c37483dd96a1a124bc5b5f",
+      "path": "Tools/Art/bake_vapor_atlas.py"
+    },
+    {
+      "bytes": 2260,
+      "sha256": "c4a5c670cc85a627591d7bde5204e84eb51cdf9767ba2575d529786fa7f06e71",
+      "path": "Tools/Art/build_earth_art.py"
+    },
+    {
+      "bytes": 5297,
+      "sha256": "1a12a7cd9ee6ca1617ed12df85f1629115535d87c427886e25a64648584c25ef",
+      "path": "Tools/Art/build_flight_art.py"
+    },
+    {
+      "bytes": 1527,
+      "sha256": "d6eed00ce10937bfb933bd7d1b07e8434ab7d764b1e8ca8ec2d90d6c24d5d542",
+      "path": "Tools/Art/build_flow_noise.py"
+    },
+    {
+      "bytes": 5872,
+      "sha256": "ab1e583075e0178f8864e7215b81c86077100fb67267d0db481150ad30602a76",
+      "path": "Tools/Art/build_overhaul_art.py"
+    },
+    {
+      "bytes": 3915,
+      "sha256": "8afcc07a1b66469b3d62b42146694e728db2dc7c4bee5efa776c06b6dafbccbd",
+      "path": "Tools/Art/build_site_landscape.py"
+    },
+    {
+      "bytes": 5503,
+      "sha256": "4f55aa998a1dea0b246f3a65a996f81ef522ad274a82a25ff991a9c8748a5bef",
+      "path": "Tools/Art/build_site_service_props.py"
+    },
+    {
+      "bytes": 4374,
+      "sha256": "54b3d1449f3968f6ac40cf35202e2f12e7f39de223569183ab8b00bd6093b59a",
+      "path": "Tools/Art/build_tower_meshes.py"
+    },
+    {
+      "bytes": 1240,
+      "sha256": "b1d703d68c59335f9f3bc66e221d8411793c7cd14fbcf44db25352f55041f95f",
+      "path": "Tools/Art/build_wind_flag.py"
+    },
+    {
+      "bytes": 2792,
+      "sha256": "27fdf8c23ae1189e47d447602cb196b9fbd694dbdf601347f21f48086f6ac21d",
+      "path": "Tools/Art/prepare_scene_audio.py"
+    },
+    {
+      "bytes": 1249,
+      "sha256": "4ddc6afab9693c1574a542e359f8eb400ef6bdd38d93314c14a0a71e3aac69af",
+      "path": "Tools/Art/review_site_service_props.py"
+    },
+    {
+      "bytes": 2736,
+      "sha256": "deef7bdfce70c1eaaf948c9eeb41ee67c9b9144c8bbbc50d4fc4736878a0fbdf",
+      "path": "Tools/Data/fetch_coastal_elevation.py"
+    },
+    {
+      "bytes": 3551,
+      "sha256": "27d8c80a9a238c3c6e032c900fb962dd245e518f81e2760d445803f9d1e71fca",
+      "path": "Tools/Data/fetch_earth_data.py"
+    },
+    {
+      "bytes": 3025,
+      "sha256": "151e3a8d7f4ded86a820b7993ac175ab204ce8d8fdc2ff31d4d90ba45bfb7328",
+      "path": "Tools/Data/fetch_earth_detail.py"
+    },
+    {
+      "bytes": 1986,
+      "sha256": "52884549358bf9544c652e260613b1cd609174ecbcdb7e7f14ec10cb01d6abb1",
+      "path": "Tools/Data/fetch_overhaul_textures.py"
+    },
+    {
+      "bytes": 3502,
+      "sha256": "3100d80e3d9dffa79973a13785b27b8ae624c92fb964bb8ec1f0308889d8af1e",
+      "path": "Tools/Data/fetch_world_continuity.py"
+    },
+    {
+      "bytes": 1718,
+      "sha256": "1d76596d952f6271aa9b6006451620ef4619374a77286ad086d65a066dd5002c",
+      "path": "Tools/Data/prepare_earth_scenery.py"
+    },
+    {
+      "bytes": 775,
+      "sha256": "42ee282c1e76eed31c432594b5997cc1c5b72a6e809b048f6bfc8ba39152b31b",
+      "path": "Tools/Data/prepare_earth_water_mask.py"
+    },
+    {
+      "bytes": 754,
+      "sha256": "53182f19ebad6f0f7be29b63d16e9eaa306ae705b9e74018fb6cf57759e2505c",
+      "path": "Tools/Editor/align_editor_sun.py"
+    },
+    {
+      "bytes": 1485,
+      "sha256": "2be957b46b1498785e5c4f60fb5bc6af4442e0d2d279b05e94e097c0c01a2e90",
+      "path": "Tools/Editor/apply_physical_site.py"
+    },
+    {
+      "bytes": 549,
+      "sha256": "d6d8c3774e7981a954993e2b1f98b8e0f9a9022b464998bac95eac9833ce3ec6",
+      "path": "Tools/Editor/build_cloud_performance.py"
+    },
+    {
+      "bytes": 376,
+      "sha256": "d66a5c36c28e3214b306bccd4509b0b9296d542d345353a343cfc1da4a0d1f60",
+      "path": "Tools/Editor/build_control_cleanup_assets.py"
+    },
+    {
+      "bytes": 2851,
+      "sha256": "31f2066799df00a651ba049cae19bf8eb287597fba4db4afecf377d43cd1f3c5",
+      "path": "Tools/Editor/build_cryogenic_vapor.py"
+    },
+    {
+      "bytes": 13654,
+      "sha256": "2d8c2a5a8171980243147e937009b81edd232772e73e8c156ed1b711cf763123",
+      "path": "Tools/Editor/build_earth_environment.py"
+    },
+    {
+      "bytes": 5494,
+      "sha256": "84896fece3d7323979578b4c0b1991abf5945a0840745d0e9a30c648b5585e63",
+      "path": "Tools/Editor/build_experience_assets.py"
+    },
+    {
+      "bytes": 11814,
+      "sha256": "2b23b1c19b1f4e80eb6b349c566effeb87c39b6cc0208c1ac5c321c6df220014",
+      "path": "Tools/Editor/build_flight_presentation.py"
+    },
+    {
+      "bytes": 8613,
+      "sha256": "3054f04e3f5debac6a37337ada1ca0037da867dcebc1fbf915c43993f2a52b6a",
+      "path": "Tools/Editor/build_overhaul_presentation.py"
+    },
+    {
+      "bytes": 12654,
+      "sha256": "d2da5b9d0a030ae7d9231cc3343ccff242f13f479d39ceec8db80672fd6e7272",
+      "path": "Tools/Editor/build_recovery_scene.py"
+    },
+    {
+      "bytes": 6152,
+      "sha256": "3bed1b63c1cbd218cf91872ebbda4ec4f80ae36dc0e750abe3f0a323fcbf9e42",
+      "path": "Tools/Editor/build_recovery_vfx.py"
+    },
+    {
+      "bytes": 1326,
+      "sha256": "c46f7d88157f8ad1fa7a6828e31d2058694643265a9f7de6f1f2dfa464ba3908",
+      "path": "Tools/Editor/build_site_activity_assets.py"
+    },
+    {
+      "bytes": 4171,
+      "sha256": "98e27fe990d1cec872a08b34352943a1aceb19e5513ba511df20fa3a116b9fe1",
+      "path": "Tools/Editor/build_site_landscape_assets.py"
+    },
+    {
+      "bytes": 1084,
+      "sha256": "0556225425b8133f1f92a4e02b5247f3316843dd9c02bab3918d6f715edf00e6",
+      "path": "Tools/Editor/build_site_photography.py"
+    },
+    {
+      "bytes": 3648,
+      "sha256": "c1cbca2edc161a9b2e4a3dd78119fcf3a02587e49d4177434148102677dca9bc",
+      "path": "Tools/Editor/build_volumetric_vapor.py"
+    },
+    {
+      "bytes": 9724,
+      "sha256": "0f7384b1b22ee99666fa773e05416e89b0fe5e65ce66b625844041a7d5c69637",
+      "path": "Tools/Editor/build_world_continuity.py"
+    },
+    {
+      "bytes": 721,
+      "sha256": "e64edaebbc8cb14cd16eeae4c7a4062edff0b830c59d6e3562397a2b670d63c8",
+      "path": "Tools/Editor/clean_vehicle_blueprint.py"
+    },
+    {
+      "bytes": 858,
+      "sha256": "ae051208af51dc468681b643aa70e64ee3f45479eb7cebbe85b23be1570128e3",
+      "path": "Tools/Editor/configure_dynamic_return.py"
+    },
+    {
+      "bytes": 987,
+      "sha256": "4c50b987bafbec224ef022a4e3b01683dedd3d6a7aca5c77434a21211830aeb3",
+      "path": "Tools/Editor/finalize_earth_scene.py"
+    },
+    {
+      "bytes": 691,
+      "sha256": "9cf94e4d9e6685d6bda2426ad0ef4317c6398cd6ff0242c2fc6d96bcc0a3907a",
+      "path": "Tools/Editor/finalize_site_coast.py"
+    },
+    {
+      "bytes": 883,
+      "sha256": "a6f644213572862a1b8ece2beb55f317e38174c97addc04446e935f227cb2710",
+      "path": "Tools/Editor/finalize_site_materials.py"
+    },
+    {
+      "bytes": 2464,
+      "sha256": "eeb9ae81e42539f1c0b1e368878865f721e0fe97386ad2f48c19897e3c62deb8",
+      "path": "Tools/Editor/import_earth_detail.py"
+    },
+    {
+      "bytes": 2839,
+      "sha256": "c7141e856dae4e4d0cb5b43c482201c057c865ee38db95fe604f647c843dad7a",
+      "path": "Tools/Editor/import_site_service_props.py"
+    },
+    {
+      "bytes": 1585,
+      "sha256": "a281cf942094af57a96461db9934861974b235c4e4752f7da56c3f5c7528a988",
+      "path": "Tools/Editor/import_terrain_relief.py"
+    },
+    {
+      "bytes": 2824,
+      "sha256": "deb0cd9316ba4f039c9b695fda0cec9947baf133b91957b5ea54977fc1760b66",
+      "path": "Tools/Editor/inspect_cloud_material.py"
+    },
+    {
+      "bytes": 1918,
+      "sha256": "26f531afaa22d34d3e7927374e16d74cd60f2dba0df64a2330641557f730da84",
+      "path": "Tools/Editor/polish_earth_transitions.py"
+    },
+    {
+      "bytes": 1993,
+      "sha256": "a689c8cd04bc55e21e31c7e278414e7efa3632845981267eb0f61a0eac243629",
+      "path": "Tools/Editor/polish_overhaul_materials.py"
+    },
+    {
+      "bytes": 20561,
+      "sha256": "c458d568551a85e0e5404a6e918074e7be311749b45555a721c1f8b683e9d9ad",
+      "path": "Tools/Editor/recovery_niagara.json"
+    },
+    {
+      "bytes": 1638,
+      "sha256": "0eed55a3a8488734effca7859b962f28fe02a97fd2227e690c41e579a3f3446a",
+      "path": "Tools/Editor/repair_migrated_material_references.py"
+    },
+    {
+      "bytes": 990,
+      "sha256": "bd69082955c0a6c2d8895e79105a9fed66a610356fad49e53859b18e827d022d",
+      "path": "Tools/Migrations/backup_restructure.py"
+    },
+    {
+      "bytes": 2759,
+      "sha256": "94f403cdeff8f4065165b1db33c277c6228aee7568de93a07a9f57d592aa8571",
+      "path": "Tools/Migrations/consolidate_authoring.py"
+    },
+    {
+      "bytes": 1657,
+      "sha256": "ab064f0ea2858b2719aee5b528f811687f18ad0ffaeed3ec3bb7ebf086c48e8c",
+      "path": "Tools/Migrations/consolidate_migrated_materials.py"
+    },
+    {
+      "bytes": 2057,
+      "sha256": "3b82631c3cfd7e4b9ad42050d6e949a81513beb8b6c03fa7ad89849b7dec6be8",
+      "path": "Tools/Migrations/migrate_flight_profile_v2.py"
+    },
+    {
+      "bytes": 2404,
+      "sha256": "205a37e7e23ade34b2213a66f495038628d94d733e4695df43c70df095281799",
+      "path": "Tools/Migrations/quarantine_unused_assets.ps1"
+    },
+    {
+      "bytes": 4736,
+      "sha256": "a1a712cc0995e57133beb27915c3f9c5c3f01ceb6447861c44e9aa9ee10a48c7",
+      "path": "Tools/Migrations/refactor_experience_sources.py"
+    },
+    {
+      "bytes": 3379,
+      "sha256": "8d20a81a250b112c02234fc8efe2291b55565d0994437963d40e74e6f9491555",
+      "path": "Tools/Migrations/restructure_content.py"
+    },
+    {
+      "bytes": 9060,
+      "sha256": "375a94d039b3bae81077df3446484edfce0b7551a0dea061c68b5b75c020fe45",
+      "path": "Tools/Migrations/restructure_sources.py"
+    },
+    {
+      "bytes": 4041,
+      "sha256": "196e0d62d6ea7c3d1dcdbf07856ea293933292ac006a57a9277f47d389241a87",
+      "path": "Tools/Migrations/separate_actuator_rendering.py"
+    },
+    {
+      "bytes": 881,
+      "sha256": "531b054aa85eb64bd5213861475a680c1529903369ed2322d6a304f8622e3a1e",
+      "path": "Tools/Migrations/split_flight_director.py"
+    },
+    {
+      "bytes": 7350,
+      "sha256": "100ad2c520f13707d260447f551cb8e52e8e6579dc89bddcd427c9914926be43",
+      "path": "Tools/Migrations/strict_actuator_dynamics.py"
+    },
+    {
+      "bytes": 15595,
+      "sha256": "b3532d642236b9b31279408bcb31560d007e9e7945357347b34436285f64be3d",
+      "path": "Tools/Migrations/translate_and_nest_ui.py"
+    },
+    {
+      "bytes": 1040,
+      "sha256": "07fed494e096b184b74e7415ef5b3b2cee98b7aa703533f85bb59bff8ac3aa3c",
+      "path": "Tools/Migrations/update_config_references.py"
+    },
+    {
+      "bytes": 2788,
+      "sha256": "53285213346a08100eda664aa40b7b8def9e2fdeb98cd28c9dc5ea3807c47203",
+      "path": "Tools/Runtime/archive_alpha.py"
+    },
+    {
+      "bytes": 448,
+      "sha256": "c3be98aefa827afa5c98198a9dc8edaf6ebf06176a4b7946fbbe2950661391a1",
+      "path": "Tools/Runtime/build_simulator.ps1"
+    },
+    {
+      "bytes": 2224,
+      "sha256": "5ecdf85c8cd868b3c00a4b5482362457093f108c0d7dd839962fd26e8d8e7b3e",
+      "path": "Tools/Runtime/install_dlss.py"
+    },
+    {
+      "bytes": 1001,
+      "sha256": "8d826454905a328b29a4adfbc712e1fcfd6e9f759d514754d2408f18916506a9",
+      "path": "Tools/Runtime/launch_recovery.ps1"
+    },
+    {
+      "bytes": 3250,
+      "sha256": "72f5ef251c3df47108f5b537546cc1b6a93dbeeba0a9fad6f2a4eb6d27f4b22b",
+      "path": "Tools/Runtime/package_alpha.ps1"
+    },
+    {
+      "bytes": 1711,
+      "sha256": "3a3f394aa22a49e1b49893c262bc93cfd582b4aa130ccf6444dbc6ff00e43aae",
+      "path": "Tools/Shared/earth_geography.py"
+    },
+    {
+      "bytes": 276,
+      "sha256": "84c98fa8a4bc2e39338ed82e11ab202b4e671e088854805c109a3a265f8e7bbb",
+      "path": "Tools/Shared/project_paths.py"
+    },
+    {
+      "bytes": 881,
+      "sha256": "af4c7393e11644b6e8892ef41800b9f80a7c0450cca55992185f2a4ab9b6c0a1",
+      "path": "Tools/Shared/site_landscape.py"
+    },
+    {
+      "bytes": 2716,
+      "sha256": "50b60e2e70a77949d2f0d9d28bd9492da2b7be5dd39693421eacc6f22877d47e",
+      "path": "Tools/Shared/unreal_clouds.py"
+    },
+    {
+      "bytes": 1032,
+      "sha256": "af265f56aa31fdf3ed69b5f1cf3c6a5e27f30cb1e4246792a65fb5244ae022e5",
+      "path": "Tools/Shared/unreal_imports.py"
+    },
+    {
+      "bytes": 2822,
+      "sha256": "daf95c4b3dd15e3f045264b9c17845dcee45ecd58d8bc7d6be2dd20b612a4287",
+      "path": "Tools/Shared/unreal_materials.py"
+    },
+    {
+      "bytes": 1980,
+      "sha256": "0520b3fc5aa85cde5da4fde8090142661a3671f4209c5b6cb17c4fcf05f37a7a",
+      "path": "Tools/Shared/validation_evidence.ps1"
+    },
+    {
+      "bytes": 2971,
+      "sha256": "6cc94f2b03bf41dac07ebffb408be5380977046734df132739bad04be47749b8",
+      "path": "Tools/Tests/analyze_dynamic_return.py"
+    },
+    {
+      "bytes": 6859,
+      "sha256": "9c468bd22aa4f33c09176e7e8e21bf1d6449f074bb46c9d8d86968bcf6e902f7",
+      "path": "Tools/Tests/analyze_performance.py"
+    },
+    {
+      "bytes": 4940,
+      "sha256": "5eff3398f2bde1d0f5e198972d0ee9141608feb1197440cdbc9e76f68f4b651a",
+      "path": "Tools/Tests/analyze_physics_convergence.py"
+    },
+    {
+      "bytes": 2453,
+      "sha256": "194b3df7524a9e08a9bc8e1697c4d4b6b96d378f1b6ab21cc374163309534d07",
+      "path": "Tools/Tests/audit_earth_assets.py"
+    },
+    {
+      "bytes": 4098,
+      "sha256": "41673e5f31f8a9f01f22e2079ffaaf0a8a6d9b52deb83010118854d273259f37",
+      "path": "Tools/Tests/audit_experience_assets.py"
+    },
+    {
+      "bytes": 3317,
+      "sha256": "2f87b62b06443cb293acae66ea324668a86be1b471145cd77c94b0a0b22ad8d7",
+      "path": "Tools/Tests/audit_recovery_assets.py"
+    },
+    {
+      "bytes": 1839,
+      "sha256": "50647f755994c9bb33781de371a873821bd310c9e537eb3c211d5d7580e23895",
+      "path": "Tools/Tests/audit_recovery_vfx.py"
+    },
+    {
+      "bytes": 3397,
+      "sha256": "f39e897874080166f63ccc9ffad2545ef5a2ad3e311bed36ac2862de18252441",
+      "path": "Tools/Tests/collect_overhaul_validation.py"
+    },
+    {
+      "bytes": 3204,
+      "sha256": "09015c2d6eabbef20effc607dca881ae04fdcc9d5dc98f1afc0f73360e7df2bf",
+      "path": "Tools/Tests/collect_presentation_validation.py"
+    },
+    {
+      "bytes": 2420,
+      "sha256": "ecc745b70a99d51d2376f4e5479665f87ced213035252415000dad037c3dce14",
+      "path": "Tools/Tests/collect_world_validation.py"
+    },
+    {
+      "bytes": 3309,
+      "sha256": "782e0f5d82c8fca656802361bde8c41a136d250a932db2b06fc62a1fdf7d985e",
+      "path": "Tools/Tests/compare_visual_reviews.py"
+    },
+    {
+      "bytes": 1496,
+      "sha256": "aa457968578d195675cb29039307c81a27bab715cdd59c393a80a9f09d28956f",
+      "path": "Tools/Tests/inspect_booster_geometry.py"
+    },
+    {
+      "bytes": 1595,
+      "sha256": "34171faceb5219fa94789a8347a43f095559d61ebfbd697f37f23c89bd414805",
+      "path": "Tools/Tests/inspect_earth_lighting.py"
+    },
+    {
+      "bytes": 754,
+      "sha256": "8dc0c22fdb5241595c6139f46cfc530262029cb3532d7cf04d5d2a20fc64ef99",
+      "path": "Tools/Tests/inspect_migration_references.py"
+    },
+    {
+      "bytes": 1042,
+      "sha256": "fc455c360c58e1aa16ccddcf13b0a8b2fd0431bb023bcbe93bb01c4a29c6fbb3",
+      "path": "Tools/Tests/inspect_site_presentation.py"
+    },
+    {
+      "bytes": 1707,
+      "sha256": "b7315f2def67be6a41d08da07d1d285d68d6c80efab138fa85b91a2da6d30877",
+      "path": "Tools/Tests/inspect_unreal_assembly.py"
+    },
+    {
+      "bytes": 2942,
+      "sha256": "c27416b8dbc0d6afdc5b801fb82f723b517d9bac2c68e11ca4abde9b8aa397b9",
+      "path": "Tools/Tests/inventory_unused_assets.py"
+    },
+    {
+      "bytes": 4104,
+      "sha256": "311fb4533a14ffed3d03d5eec7ad75fb41e9eb4b8c30141557b0587c23ee6dd3",
+      "path": "Tools/Tests/measure_experience.ps1"
+    },
+    {
+      "bytes": 2458,
+      "sha256": "db9d78d08762c89a9cfcb9fbd1cce7cb8ee548604678be8f9cfedb7b3d679aae",
+      "path": "Tools/Tests/probe_experience_assets.py"
+    },
+    {
+      "bytes": 1561,
+      "sha256": "e059c28eb20f760c9b39be2be6ecfe85e70978cf0b495ca99e88da10cc4c6040",
+      "path": "Tools/Tests/probe_overhaul_assets.py"
+    },
+    {
+      "bytes": 2736,
+      "sha256": "b9beaae33fb5336dde28a0499511c8d1edd0f1dc377bcaec1bacdaaddeb458b1",
+      "path": "Tools/Tests/review_clouds.ps1"
+    },
+    {
+      "bytes": 1809,
+      "sha256": "ab9fbcfcb9f6ecaed9bb81b5bf696d08d9d2b798d048993ff93ead3de85d3a7c",
+      "path": "Tools/Tests/test_contact_fixtures.ps1"
+    },
+    {
+      "bytes": 3904,
+      "sha256": "d90017ed14231a65dc4e38d2102ccd49a18af8c191337c537f95ce1843fbb617",
+      "path": "Tools/Tests/test_experience.ps1"
+    },
+    {
+      "bytes": 2650,
+      "sha256": "c683ecfcc3dcb01df4e9f6989cc7f2d37c18c60c2c6a534a2c354c9ee8fdfee0",
+      "path": "Tools/Tests/test_ground_sequence.ps1"
+    },
+    {
+      "bytes": 2049,
+      "sha256": "fdf211490862d6ff271ff5cb5128d9552bade4e8d8850ec7343e5f3280445ab8",
+      "path": "Tools/Tests/test_overhaul_presentation.ps1"
+    },
+    {
+      "bytes": 4826,
+      "sha256": "c3460d6df7985ca2b160c70431e3f0b9be3ef98af93775da5d171618a0be27cb",
+      "path": "Tools/Tests/test_packaged_alpha.ps1"
+    },
+    {
+      "bytes": 2419,
+      "sha256": "0e5bbc842247faf06fa33de0b5c78cf621c6c1881a3808d2ffb9db701733d74a",
+      "path": "Tools/Tests/test_performance_analysis.py"
+    },
+    {
+      "bytes": 5356,
+      "sha256": "356ee9b4e12b586d66cba32b1ffe4f5987386362cbecf837bb93826876133e83",
+      "path": "Tools/Tests/test_physical_recovery.ps1"
+    },
+    {
+      "bytes": 1702,
+      "sha256": "c9b7ecce75971815586716f5aee744e6e3da68217be521e7ecc16bcb6e5cd3f0",
+      "path": "Tools/Tests/test_physics_convergence_analysis.py"
+    },
+    {
+      "bytes": 1757,
+      "sha256": "395d3cafd49ac4ae3d504f79fac39b04592ce663101bd09d451f8968d6193e1a",
+      "path": "Tools/Tests/test_physics_models.ps1"
+    },
+    {
+      "bytes": 2220,
+      "sha256": "f2157f1ad1417e6dd8e70d239f6413cce7b207aa14b3bcbb574c1f18389d350d",
+      "path": "Tools/Tests/test_recovery_earth.ps1"
+    },
+    {
+      "bytes": 1054,
+      "sha256": "ec9f3ce2e00da918c25401550995ef7dbe8f6860a325d167e7dc21a7954c945d",
+      "path": "Tools/Tests/test_recovery_interface.ps1"
+    },
+    {
+      "bytes": 3512,
+      "sha256": "eb701b2562b2fd081e149fdcf34a1be4fa97d973718d6d142f91d05c43a4c3eb",
+      "path": "Tools/Tests/test_recovery.ps1"
+    },
+    {
+      "bytes": 2542,
+      "sha256": "ad9373e60c20cf0d60c45c74ed235ea3546d24c1a16c63455263bf10e7b2da49",
+      "path": "Tools/Tests/test_site_photography.ps1"
+    },
+    {
+      "bytes": 2423,
+      "sha256": "97a636acdc232de470ed2ebe30d24a74dd6e27480448a5ae7efc760fb9d8eda9",
+      "path": "Tools/Tests/test_visual_comparison.py"
+    },
+    {
+      "bytes": 759,
+      "sha256": "bee933959157ad2bad0f3f9a8436d28f0b55ea5a1950da6a43a1b37c31487fd1",
+      "path": "Tools/Tests/validate_tool_sources.py"
+    },
+    {
+      "bytes": 1756,
+      "sha256": "218986c0197ae9ff8de639ed4fc5a77cc648f6a2ab68e91467691e13b1418134",
+      "path": "Tools/Tests/verify_site_geography.py"
+    }
+  ]
+}

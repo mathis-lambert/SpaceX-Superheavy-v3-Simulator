@@ -1,6 +1,7 @@
 #pragma once
 #include "Recovery/Flight/RecoveryDynamicsModel.h"
 #include "Recovery/Flight/RecoveryTerminalGuidance.h"
+#include "Recovery/Flight/RecoveryLandingPrediction.h"
 
 /** Authored mission and site values copied before simulation begins. */
 struct FRecoveryGuidanceConfiguration : FRecoveryDynamicsConfiguration
@@ -11,10 +12,11 @@ struct FRecoveryGuidanceConfiguration : FRecoveryDynamicsConfiguration
     double TowerHeightM=0,CaptureHeadingDeg=0;
     double ApogeeM=0,AscentDurationS=0,AscentPitchDeg=0,AscentMaxAccelerationMps2=0;
     double LandingReserveKg=0,BoostbackReserveKg=0,LandingDriftCorrectionS=0;
-    double FrontReturnOffsetM=1400;
-    double LandingWindLeadS=18;
-    double LandingIgnitionCeilingM=0,LandingBurnMarginM=0,LandingDecelerationMps2=0;
+    double FrontReturnOffsetM=1100;
+    double LandingWindLeadS=8;
+    double ReturnWindReferenceAltitudeM=0,LandingBurnMarginM=0,LandingDecelerationMps2=0;
     double MaxEntryAngleDeg=0,MaxTiltDeg=0,TimeoutSeconds=0;
+    double ContactDescentSpeedMps=.6;
 };
 
 enum class ERecoveryGuidanceReason : uint8
@@ -56,6 +58,7 @@ struct FRecoveryGuidanceState
     FRecoveryTerminalPlan TerminalPlan;
     FRecoveryTerminalPlan TerminalCandidate;
     FRecoveryTerminalInput TerminalInput;
+    FRecoveryLandingPrediction LandingPrediction;
     FVector TerminalReferenceM=FVector::ZeroVector,TerminalReferenceVelocityMps=FVector::ZeroVector;
     double TerminalPlannedSeconds=0,TerminalBrakingSeconds=0,TerminalPeakTrackingErrorM=0;
     uint64 TerminalReplans=0,TerminalRejectedPlans=0;
@@ -70,6 +73,10 @@ struct FRecoveryGuidanceState
     FVector PredictedImpactM=FVector::ZeroVector,TargetPositionM=FVector::ZeroVector;
     double BoostbackIgnitionAltitudeM=0,BoostbackDownrangeM=0,BoostbackSeconds=0;
     double LandingIgnitionAltitudeM=0,LandingBurnSeconds=0,UnpoweredSeconds=0;
+    double LandingIgnitionTimeS=0,LandingIgnitionSpeedMps=0,LandingIgnitionMassKg=0;
+    double LandingIgnitionDistanceM=0,LandingIgnitionFuelKg=0,LandingIgnitionThrustN=0;
+    double FirstContactTimeS=-1,FirstContactSpeedMps=0,FirstContactVerticalSpeedMps=0;
+    double FirstContactTiltDeg=0,LowSlowApproachSeconds=0;
     double SettledContactSeconds=0,CaptureErrorAtLatch=0,CaptureSpeedAtLatch=0,CaptureTiltAtLatch=0;
     double CaptureHeadingAtLatch=0,CaptureLugAtLatch=0;
     FVector LatchPositionM=FVector::ZeroVector;
@@ -92,6 +99,7 @@ private:
     FRecoveryGuidanceState State;
     double PredictorClock=0;
     double TerminalClock=0;
+    double LandingPredictionClock=0;
     int32 LandingEngineGroup=13;
     FRecoveryBodyKinematics Body;
     FRecoveryFlightExperiment Experiment;
