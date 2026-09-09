@@ -1,3 +1,5 @@
+#include "Recovery/Presentation/RecoveryAudioComponent.h"
+#include "Recovery/Presentation/RecoveryStartupSubsystem.h"
 #include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Presentation/RecoveryVaporComponent.h"
@@ -15,6 +17,8 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonSerializer.h"
 #include "HAL/IConsoleManager.h"
+#include "ShaderPipelineCache.h"
+#include "AudioMixerBlueprintLibrary.h"
 
 URecoveryDiagnosticsComponent::URecoveryDiagnosticsComponent()
 {
@@ -25,6 +29,7 @@ void URecoveryDiagnosticsComponent::BeginPlay()
 {
     Super::BeginPlay();
     bEnabled=FParse::Param(FCommandLine::Get(),TEXT("RecoveryExperienceAudit"));
+    bRecordAudio=FParse::Param(FCommandLine::Get(),TEXT("RecoveryAudioAudit"));
     bGroundAudit=FParse::Param(FCommandLine::Get(),TEXT("RecoveryGroundAudit"));
     bPerformanceAudit=FParse::Param(FCommandLine::Get(),TEXT("RecoveryPerformanceAudit"));
     bEndProfileOnResult=FParse::Param(FCommandLine::Get(),TEXT("RecoveryEndProfileOnResult"));
@@ -41,6 +46,7 @@ void URecoveryDiagnosticsComponent::BeginPlay()
 void URecoveryDiagnosticsComponent::TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn)
 {
     Super::TickComponent(Dt,Type,Fn);
+    if(!URecoveryStartupSubsystem::IsReady(GetWorld()))return;
     if(bPerformanceAudit)RecordPerformanceFrame();
     if(bVisualReview)TickVisualReview();
     if(bGroundAudit){TickGroundAudit(Dt);if(!bEnabled)return;}
@@ -48,6 +54,26 @@ void URecoveryDiagnosticsComponent::TickComponent(float Dt,ELevelTick Type,FActo
     const auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());
     const auto* PC=GetWorld()->GetFirstPlayerController();
     if(!D || !PC || !PC->PlayerCameraManager || !PC->GetViewTarget() || !D->GetBody())return;
+    if(bRecordAudio && !bAudioRecorded)
+    {
+        if(!bAudioRecording && D->Phase==ERecoveryPhase::Countdown && D->MissionTime>-10)
+        {UAudioMixerBlueprintLibrary::StartRecordingOutput(this,40);bAudioRecording=true;}
+        if(bAudioRecording && D->MissionTime>=20)
+        {
+            UAudioMixerBlueprintLibrary::StopRecordingOutput(this,EAudioRecordingExportType::WavFile,
+                TEXT("LaunchMix"),FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir()/TEXT("Recovery/Audio")));
+            bAudioRecording=false;bAudioRecorded=true;
+        }
+    }
+    const double WallNow=FPlatformTime::Seconds();
+    if(D->Phase==ERecoveryPhase::Ascent && D->MissionTime<20 && LastWallFrame>0)
+    {
+        FirstLaunchFrameMs.Add((WallNow-LastWallFrame)*1000);
+        FirstLaunchPSOPeak=FMath::Max(FirstLaunchPSOPeak,int(FShaderPipelineCache::NumPrecompilesRemaining()));
+    }
+    LastWallFrame=WallNow;
+    if(const auto* Acoustics=D->FindComponentByClass<URecoveryAudioComponent>())
+        if(Acoustics->GetHeardPower()>.001)MaxAcousticDelayS=FMath::Max(MaxAcousticDelayS,Acoustics->GetDelayS());
     ++Samples;PeakAltitude=FMath::Max(PeakAltitude,D->AltitudeM);PeakSpeed=FMath::Max(PeakSpeed,D->VelocityMps.Size());
     if(D->AltitudeM>80000)++HighAltitudeSamples;
     if(Samples>5)
@@ -100,9 +126,25 @@ void URecoveryDiagnosticsComponent::EndPlay(const EEndPlayReason::Type Reason)
     if(bEnabled)
     {
         auto R=MakeShared<FJsonObject>();
+        const auto* Director=Cast<ASuperHeavyRecoveryDirector>(GetOwner());
+        const auto* Acoustics=Director?Director->FindComponentByClass<URecoveryAudioComponent>():nullptr;
+        const bool AudioReady=Acoustics && Acoustics->IsReady() && Acoustics->GetHistorySamples()>100;
+        R->SetBoolField(TEXT("acoustics_ready"),AudioReady);
+        R->SetNumberField(TEXT("mechanical_events_played"),Acoustics?Acoustics->GetPlayedMechanicalEvents():0);
+        R->SetNumberField(TEXT("acoustic_history_samples"),Acoustics?Acoustics->GetHistorySamples():0);
+        R->SetNumberField(TEXT("max_audible_propagation_delay_s"),MaxAcousticDelayS);
+        FirstLaunchFrameMs.Sort();
+        if(FirstLaunchFrameMs.Num())
+        {
+            R->SetNumberField(TEXT("first_launch_frame_p50_ms"),FirstLaunchFrameMs[FirstLaunchFrameMs.Num()/2]);
+            R->SetNumberField(TEXT("first_launch_frame_p95_ms"),FirstLaunchFrameMs[FMath::Min(FirstLaunchFrameMs.Num()-1,int(FirstLaunchFrameMs.Num()*.95))]);
+            R->SetNumberField(TEXT("first_launch_frame_max_ms"),FirstLaunchFrameMs.Last());
+            R->SetNumberField(TEXT("first_launch_frames"),FirstLaunchFrameMs.Num());
+            R->SetNumberField(TEXT("first_launch_pending_pso_peak"),FirstLaunchPSOPeak);
+        }
         const auto* Fog=IConsoleManager::Get().FindConsoleVariable(TEXT("r.VolumetricFog"));
         const bool LitVolume=Fog && Fog->GetInt()==1;
-        R->SetBoolField(TEXT("success"),bCaptured && HighAltitudeSamples>10 && MaxCameraErrorCm<.1 && MaxAngleErrorDeg<.01 && PeakVolumes>10 && PlumeLights==3 && SiteLights>=8 && PlayingAudio==2 && bVaporLit && LitVolume && bVaporHasDensity && StarshipFrames>10 && MaxStarshipErrorCm<.1 && StarshipPlumes==6 && SiteDetailInstances>1000);
+        R->SetBoolField(TEXT("success"),bCaptured && HighAltitudeSamples>10 && MaxCameraErrorCm<.1 && MaxAngleErrorDeg<.01 && PeakVolumes>10 && PlumeLights==3 && SiteLights>=8 && PlayingAudio>=7 && PlayingAudio<=11 && AudioReady && Acoustics->GetPlayedMechanicalEvents()>=1 && bVaporLit && LitVolume && bVaporHasDensity && StarshipFrames>10 && MaxStarshipErrorCm<.1 && StarshipPlumes==6 && SiteDetailInstances>1000);
         R->SetNumberField(TEXT("frames"),Samples);R->SetNumberField(TEXT("frames_above_80_km"),HighAltitudeSamples);
         R->SetNumberField(TEXT("peak_altitude_m"),PeakAltitude);R->SetNumberField(TEXT("peak_speed_mps"),PeakSpeed);
         R->SetNumberField(TEXT("max_cached_camera_error_cm"),MaxCameraErrorCm);R->SetNumberField(TEXT("max_cached_camera_angle_error_deg"),MaxAngleErrorDeg);

@@ -1,6 +1,6 @@
 # Starbase Flight Simulator — Alpha 0.1.0
 
-Version: `0.1.0-alpha.4`. Windows x64, Unreal Engine 5.8.
+Version: `0.1.0-alpha.5`. Windows x64, Unreal Engine 5.8.
 
 ## Start
 
@@ -45,6 +45,13 @@ current mass, velocity, available thrust and engine response. The three referenc
 scenarios now take approximately 30–32 seconds of landing thrust, with a soft
 physical fitting contact and immediate weight transfer onto the rails. See
 `FLIGHT.md` for the measured comparison and model limitations.
+
+The startup screen waits for scene assets, shaders and texture streaming, then
+fades into Starbase. The first run may take longer while the renderer prepares
+resources. Propulsion combines individually driven flame envelopes, locally lit
+vapor, distance-delayed layered sound and restrained camera motion. Tower release
+and contact sounds follow actual mechanism events. See `PROPULSION.md` for the
+audio sources and loading behavior.
 
 ## Known alpha limitations
 

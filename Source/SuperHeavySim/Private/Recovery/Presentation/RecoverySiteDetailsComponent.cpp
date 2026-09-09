@@ -1,3 +1,4 @@
+#include "Recovery/Presentation/RecoveryStartupSubsystem.h"
 #include "Recovery/Presentation/RecoverySiteDetailsComponent.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Flight/SuperHeavyLaunchTower.h"
@@ -14,6 +15,7 @@ URecoverySiteDetailsComponent::URecoverySiteDetailsComponent()
 void URecoverySiteDetailsComponent::TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn)
 {
     Super::TickComponent(Dt,Type,Fn);
+    if(!URecoveryStartupSubsystem::AssetsLoaded(GetWorld()))return;
     if(!FApp::CanEverRender() || !bEnabled){SetComponentTickEnabled(false);return;}
     const auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());
     if(!D || !D->Tower)return;

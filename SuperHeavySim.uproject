@@ -5,6 +5,11 @@
   "Description": "Starbase Flight Simulator - Windows Alpha 0.1.0",
   "Modules": [
     {
+      "Name": "RecoveryLoading",
+      "Type": "Runtime",
+      "LoadingPhase": "PreLoadingScreen"
+    },
+    {
       "Name": "SuperHeavySim",
       "Type": "Runtime",
       "LoadingPhase": "Default"
@@ -19,7 +24,9 @@
     {
       "Name": "ModelingToolsEditorMode",
       "Enabled": true,
-      "TargetAllowList": ["Editor"]
+      "TargetAllowList": [
+        "Editor"
+      ]
     },
     {
       "Name": "SunPosition",
@@ -40,12 +47,16 @@
     {
       "Name": "ModelContextProtocol",
       "Enabled": true,
-      "TargetAllowList": ["Editor"]
+      "TargetAllowList": [
+        "Editor"
+      ]
     },
     {
       "Name": "AllToolsets",
       "Enabled": true,
-      "TargetAllowList": ["Editor"]
+      "TargetAllowList": [
+        "Editor"
+      ]
     },
     {
       "Name": "DLSS",

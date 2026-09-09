@@ -1,3 +1,5 @@
+#include "Recovery/Presentation/RecoveryAudioComponent.h"
+#include "Recovery/Presentation/RecoveryPropulsionVisuals.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Flight/SuperHeavyLaunchTower.h"
 #include "Recovery/Interface/RecoveryPlayerController.h"
@@ -197,7 +199,11 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
     if(Settings && Phase!=ERecoveryPhase::Captured)
     {
         const double T=GetWorld()->GetRealTimeSeconds();
-        const double Power=Settings->Photography.MotionStrength*(.015+.045*Throttle);
+        const auto* Acoustics=FindComponentByClass<URecoveryAudioComponent>();
+        const double Delivered=RecoveryPropulsionVisuals::DeliveredFraction(Engines,RuntimeProfile->EngineThrustN);
+        const double Power=Settings->Photography.MotionStrength*RecoveryAcoustics::VibrationDegrees(
+            Acoustics?Acoustics->GetHeardPower():0,Acoustics?Acoustics->GetHeardDistanceM():0,
+            Delivered,DynamicPressurePa,CameraMode==5);
         ViewRotation.Pitch+=Power*(FMath::Sin(T*8.7)+.35*FMath::Sin(T*21.1));
         ViewRotation.Yaw+=Power*.6*FMath::Sin(T*6.3);
     }

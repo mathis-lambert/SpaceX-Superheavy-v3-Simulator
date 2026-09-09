@@ -18,6 +18,7 @@ class SUPERHEAVYSIM_API URecoverySkyComponent : public UActorComponent
     GENERATED_BODY()
 public:
     URecoverySkyComponent();
+    bool IsReady() const { return bFound && Sun.IsValid() && Exposure.IsValid(); }
     UFUNCTION(BlueprintPure,Category="Environment|Sun")
     static FVector CalculateSunDirection(double LatitudeDeg,double LongitudeDeg,double LocalHour,double UtcOffsetHours,int32 DayOfYear);
     virtual void TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn) override;

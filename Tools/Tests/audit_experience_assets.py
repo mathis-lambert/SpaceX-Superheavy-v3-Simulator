@@ -29,9 +29,13 @@ actors=u.get_editor_subsystem(u.EditorActorSubsystem).get_all_level_actors()
 assert not any(a.get_actor_label() in ['Recovery_LaunchPad','Recovery_CatchPad'] for a in actors)
 cloud=next(a for a in actors if a.get_actor_label()=='Recovery_Clouds').get_component_by_class(u.VolumetricCloudComponent)
 assert cloud.get_editor_property('material').get_path_name()==root+'/Materials/MI_CloudFlight.MI_CloudFlight'
-for name in ['S_EngineRoar','S_CoastalWind']:
+for name in ['S_EngineRoar','S_CoastalWind','S_EngineRumble','S_EngineCrackle','S_CryogenicHiss','S_Deluge','S_TowerDrive']:
     sound=u.load_asset(root+'/Audio/'+name);assert sound and sound.get_editor_property('looping'),name
     assert sound.get_editor_property('virtualization_mode')==u.VirtualizationMode.PLAY_WHEN_SILENT,name
+for name in ['S_TowerContact','S_MountRelease']:
+    sound=u.load_asset(root+'/Audio/'+name);assert sound and not sound.get_editor_property('looping'),name
+    assert sound.get_editor_property('duration')>1,name
+    assert sound.get_editor_property('loading_behavior')==u.SoundWaveLoadingBehavior.FORCE_INLINE,name
 for name in ('M_Cladding','M_Graphite','M_Concrete','M_SafetyAmber'):
     mat=u.load_asset(root+'/Materials/'+name)
     assert mat.get_editor_property('used_with_instanced_static_meshes'),f'{name}: site details would use the fallback material'

@@ -13,6 +13,7 @@ class SUPERHEAVYSIM_API URecoverySiteDetailsComponent : public UActorComponent
     GENERATED_BODY()
 public:
     URecoverySiteDetailsComponent();
+    bool IsReady() const { return !bEnabled || bBuilt; }
     virtual void TickComponent(float Dt,ELevelTick TickType,FActorComponentTickFunction* TickFunction) override;
     UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Site details") bool bEnabled=true;
     UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Site details",meta=(ClampMin="100",ClampMax="10000")) double DrawDistanceM=1800;

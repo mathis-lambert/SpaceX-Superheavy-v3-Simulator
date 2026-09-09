@@ -1,5 +1,6 @@
 param(
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.4'
+    [string]$EngineRoot='D:/Engines/UE_5.8',
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.5'
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -32,20 +33,32 @@ function Invoke-Alpha([string[]]$Arguments,[string]$LogName){
     if($process.ExitCode -ne 0){throw "Packaged $LogName executable failed with $($process.ExitCode)"}
 }
 $start=Get-Date
+Invoke-Alpha -LogName 'startup' -Arguments @("-UserDir=$userDir/",'-windowed','-ForceRes','-ResX=1920','-ResY=1080','-RecoveryStartupAudit','-RecoveryReconstruction=3','-nosplash','-unattended',"-abslog=$audit/startup.log")
+$startupFile=Get-Item -LiteralPath "$saved/startup-report.json"
+$startup=Get-Content -Raw -LiteralPath $startupFile.FullName | ConvertFrom-Json
+if($startupFile.LastWriteTime -lt $start -or !$startup.ready -or $startup.failed -or $startup.assets_loaded -ne $startup.assets_requested -or $startup.pending_psos_at_reveal -ne 0 -or $startup.pending_textures_at_reveal -ne 0 -or $startup.pending_shaders_at_reveal -ne 0){throw 'Packaged startup revealed before scene readiness'}
+Copy-Item -LiteralPath $startupFile.FullName -Destination "$audit/startup.json"
+foreach($shot in 'Loading','Home'){if((Get-Item -LiteralPath "$saved/Startup/$shot.png").LastWriteTime -lt $start){throw "No fresh startup $shot capture"}}
+Write-Host 'Packaged startup PASS'
+$start=Get-Date
 Invoke-Alpha -LogName 'controls' -Arguments @("-UserDir=$userDir/",'-windowed','-ForceRes','-ResX=1920','-ResY=1080','-RecoveryControlsAudit','-RecoveryReconstruction=3','-nosplash','-unattended',"-abslog=$audit/controls.log")
 $controls=Read-FreshAlphaReport 'ControlsAudit/result.json' $start
 Write-Host 'Packaged controls PASS'
 $start=Get-Date
-Invoke-Alpha -LogName 'flight' -Arguments @("-UserDir=$userDir/",'-windowed','-ForceRes','-ResX=1920','-ResY=1080','-UseFixedTimeStep','-FPS=15','-RecoveryPhysicsAudit','-RecoveryExperienceAudit','-RecoveryReview','-RecoveryChaseReview','-RecoveryAutoExit','-RecoveryScenario=Crosswind','-RecoveryReportName=AlphaFlight','-RecoveryReconstruction=3','-nosplash','-unattended',"-abslog=$audit/flight.log")
+Invoke-Alpha -LogName 'flight' -Arguments @("-UserDir=$userDir/",'-windowed','-ForceRes','-ResX=1920','-ResY=1080','-UseFixedTimeStep','-FPS=15','-RecoveryPhysicsAudit','-ini:Engine:[Audio]:UnfocusedVolumeMultiplier=1','-RecoveryExperienceAudit','-RecoveryAudioAudit','-RecoveryReview','-RecoveryChaseReview','-RecoveryAutoExit','-RecoveryScenario=Crosswind','-RecoveryReportName=AlphaFlight','-RecoveryReconstruction=3','-nosplash','-unattended',"-abslog=$audit/flight.log")
 $flight=Read-FreshAlphaReport 'AlphaFlight.json' $start
 $render=Read-FreshAlphaReport 'experience-flight-audit.json' $start
+$audio=Get-Item -LiteralPath "$saved/Audio/LaunchMix.wav"
+if($audio.LastWriteTime -lt $start){throw 'No fresh packaged audio recording'}
+& (Join-Path $EngineRoot 'Engine/Binaries/ThirdParty/Python3/Win64/python.exe') "$root/Tools/Tests/audit_audio_capture.py" $audio.FullName
+if($LASTEXITCODE -ne 0){throw 'Packaged launch audio is silent or clipped'}
 if(!(Test-RecoveryFrontApproach -Report $flight) -or $flight.solver_support_mask -ne 3 -or !$flight.contact_engine_shutdown -or $flight.unpowered_thrust_violation -or $flight.structural_contacts -ne 0){throw 'Packaged physical capture contract failed'}
 if($flight.landing_burn_seconds -ge 45 -or $flight.first_contact_speed_mps -ge 1.5 -or $flight.low_slow_approach_seconds -ge 8){throw 'Packaged return exceeds the landing thrust, contact speed or slow-approach limits'}
 if($render.chase_contact_frames -lt 50 -or $render.chase_contact_max_offset_step_cm -gt .01 -or $render.chase_contact_max_angle_step_deg -gt .001){throw 'Packaged Chase camera is unstable after capture'}
-foreach($log in @("$audit/controls.log","$audit/flight.log")){
+foreach($log in @("$audit/startup.log","$audit/controls.log","$audit/flight.log")){
     if(Select-String -Quiet -LiteralPath $log -Pattern 'Fatal error:|Handled ensure|Ensure condition failed|LogDLSSBlueprint: Error:|Failed to compile Material|Couldn.t find file for package|Failed to find object.*(/Game/|/Starbase/)'){throw "Packaged content failure: $log"}
 }
 if($render.reconstruction -notmatch 'NVIDIA'){throw 'This DLSS-capable validation machine did not activate DLSS in the packaged game'}
-@{success=$true;version=$Version;source_commit=$manifest.source_commit;executable_sha256=(Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant();controls_checks=$controls.checks.Count;rendered_frames=$render.frames;capture=$flight.success;front_ingress=$flight.front_ingress_verified;support_mask=$flight.solver_support_mask;support_drift_m=$flight.restraint_drift_m;chase_offset_step_cm=$render.chase_contact_max_offset_step_cm;reconstruction=$render.reconstruction;evidence_directory=$audit;visual_review_required=$true} |
+@{success=$true;version=$Version;source_commit=$manifest.source_commit;executable_sha256=(Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant();startup_seconds=$startup.engine_elapsed_seconds;startup_assets=$startup.assets_loaded;controls_checks=$controls.checks.Count;rendered_frames=$render.frames;capture=$flight.success;front_ingress=$flight.front_ingress_verified;support_mask=$flight.solver_support_mask;support_drift_m=$flight.restraint_drift_m;chase_offset_step_cm=$render.chase_contact_max_offset_step_cm;reconstruction=$render.reconstruction;evidence_directory=$audit;visual_review_required=$true} |
     ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 -LiteralPath "$audit/result.json"
 Write-Host "Packaged alpha PASS. Inspect screenshots in $saved. Result: $audit/result.json"

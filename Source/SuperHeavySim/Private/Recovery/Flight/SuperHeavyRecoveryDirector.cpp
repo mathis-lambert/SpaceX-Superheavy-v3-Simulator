@@ -1,3 +1,4 @@
+#include "Recovery/Presentation/RecoveryStartupSubsystem.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Shared/RecoveryAssets.h"
 #include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
@@ -157,6 +158,7 @@ void ASuperHeavyRecoveryDirector::InitializeVehicle()
 
 void ASuperHeavyRecoveryDirector::SelectScenario(int32 Index)
 {
+    bStartWhenReady=false;
     if(!bInitialized) return;
     ScenarioIndex=FMath::Clamp(Index,0,2);
     ReleaseLaunchHoldDown();
@@ -202,6 +204,8 @@ void ASuperHeavyRecoveryDirector::SelectScenario(int32 Index)
 void ASuperHeavyRecoveryDirector::StartMission()
 {
     if(!bInitialized || Phase!=ERecoveryPhase::Ready) return;
+    if(!URecoveryStartupSubsystem::IsReady(GetWorld())){bStartWhenReady=true;return;}
+    bStartWhenReady=false;
     FString Reason;
     if(!RuntimeProfile->Validate(Reason)) { SetPhase(ERecoveryPhase::Aborted,Reason); WriteResult(false,Reason); return; }
     if(!Tower->GetActorScale3D().Equals(FVector::OneVector,0.001) || Tower->GetActorUpVector().Z<0.9999 ||
@@ -215,6 +219,7 @@ void ASuperHeavyRecoveryDirector::StartMission()
 void ASuperHeavyRecoveryDirector::RestartMission() { SelectScenario(ScenarioIndex); StartMission(); }
 void ASuperHeavyRecoveryDirector::AbortMission()
 {
+    bStartWhenReady=false;
     if(Phase==ERecoveryPhase::Captured || Phase==ERecoveryPhase::Aborted) return;
     LaunchSequence.Abort();
     SetPhase(ERecoveryPhase::Aborted,TEXT("Operator abort / engines shut down"));
@@ -243,6 +248,7 @@ void ASuperHeavyRecoveryDirector::RecordPhase(ERecoveryPhase NewPhase,const FStr
 void ASuperHeavyRecoveryDirector::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if(bStartWhenReady && URecoveryStartupSubsystem::IsReady(GetWorld()))StartMission();
     if(!bInitialized) return;
     // Match FChaosScene::SetUpForFrame: the solver caps long frames, notably when
     // the editor is throttled in the background. Mission time and actuator lag

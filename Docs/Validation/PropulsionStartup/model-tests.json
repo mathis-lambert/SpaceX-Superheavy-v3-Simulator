@@ -1,0 +1,417 @@
+﻿{
+	"devices": [
+		{
+			"deviceName": "PC_MATHIS",
+			"instance": "E099D0304F1730D67A309E8B8203BEB6",
+			"instanceName": "PC_MATHIS-5872",
+			"platform": "WindowsEditor",
+			"oSVersion": "Windows 11 (25H2) [10.0.26200.9445] ",
+			"model": "Default",
+			"gPU": "NVIDIA GeForce RTX 4070 SUPER",
+			"cPUModel": "AMD Ryzen 5 9600X 6-Core Processor             ",
+			"rAMInGB": 32,
+			"renderMode": "SM6",
+			"rHI": "",
+			"appInstanceLog": ""
+		}
+	],
+	"reportCreatedOn": "2026.09.09-16.32.31",
+	"succeeded": 25,
+	"succeededWithWarnings": 0,
+	"failed": 0,
+	"notRun": 0,
+	"inProcess": 0,
+	"totalDuration": 0.20605301856994629,
+	"comparisonExported": false,
+	"comparisonExportDirectory": "",
+	"tests": [
+		{
+			"testDisplayName": "TerminalSequence",
+			"fullTestPath": "Recovery.Ground.TerminalSequence",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0080753006041049957,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "AngularRateActuation",
+			"fullTestPath": "Recovery.Physics.AngularRateActuation",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0082824006676673889,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "CrossrangeReference",
+			"fullTestPath": "Recovery.Physics.CrossrangeReference",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0082562007009983063,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "DynamicsCoastLoads",
+			"fullTestPath": "Recovery.Physics.DynamicsCoastLoads",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0082625001668930054,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "DynamicsImpulseLedger",
+			"fullTestPath": "Recovery.Physics.DynamicsImpulseLedger",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0082510001957416534,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "EngineBankFuelBudget",
+			"fullTestPath": "Recovery.Physics.EngineBankFuelBudget",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0081716030836105347,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "EngineBankRealizableForces",
+			"fullTestPath": "Recovery.Physics.EngineBankRealizableForces",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0085052996873855591,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "EngineMomentAllocation",
+			"fullTestPath": "Recovery.Physics.EngineMomentAllocation",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0083617009222507477,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "FrontApproachGeometry",
+			"fullTestPath": "Recovery.Physics.FrontApproachGeometry",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0083209984004497528,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "FuelImpulseBudget",
+			"fullTestPath": "Recovery.Physics.FuelImpulseBudget",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0082967989146709442,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "GuidanceMechanicalAcknowledgement",
+			"fullTestPath": "Recovery.Physics.GuidanceMechanicalAcknowledgement",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0083031021058559418,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "GuidancePhysicalClock",
+			"fullTestPath": "Recovery.Physics.GuidancePhysicalClock",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0082713998854160309,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "LandingReachability",
+			"fullTestPath": "Recovery.Physics.LandingReachability",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0083659999072551727,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "MeasuredTerminalApproach",
+			"fullTestPath": "Recovery.Physics.MeasuredTerminalApproach",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0081906020641326904,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "RailFootprint",
+			"fullTestPath": "Recovery.Physics.RailFootprint",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0082975998520851135,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "SeparationVelocityField",
+			"fullTestPath": "Recovery.Physics.SeparationVelocityField",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0081229992210865021,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "StageMassConservation",
+			"fullTestPath": "Recovery.Physics.StageMassConservation",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0081440024077892303,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "TerminalTransfer",
+			"fullTestPath": "Recovery.Physics.TerminalTransfer",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0085107013583183289,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [
+				{
+					"event":
+					{
+						"type": "Info",
+						"message": "candidates=112 thrust=43 attitude=68 clearance=0 fuel=0 horizon=19.50",
+						"context": "",
+						"artifact": "00000000000000000000000000000000"
+					},
+					"filename": "",
+					"lineNumber": -1,
+					"timestamp": "2026.09.09-16.32.31"
+				}
+			],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "UpperStageCoastLoads",
+			"fullTestPath": "Recovery.Physics.UpperStageCoastLoads",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0079858005046844482,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "UpperStageImpulseLedger",
+			"fullTestPath": "Recovery.Physics.UpperStageImpulseLedger",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0077906996011734009,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "ValveImpulseConvergence",
+			"fullTestPath": "Recovery.Physics.ValveImpulseConvergence",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0081185996532440186,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "AcousticArrival",
+			"fullTestPath": "Recovery.Presentation.AcousticArrival",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0081604011356830597,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "AcousticMixAndExhaust",
+			"fullTestPath": "Recovery.Presentation.AcousticMixAndExhaust",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.008458700031042099,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "ChaseContactStability",
+			"fullTestPath": "Recovery.Presentation.ChaseContactStability",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0083196014165878296,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "SolarGeography",
+			"fullTestPath": "Recovery.Presentation.SolarGeography",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"E099D0304F1730D67A309E8B8203BEB6"
+			],
+			"duration": 0.0082290023565292358,
+			"dateTime": "2026.09.09-16.32.31",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		}
+	]
+}

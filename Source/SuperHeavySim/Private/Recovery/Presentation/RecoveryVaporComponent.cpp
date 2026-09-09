@@ -1,3 +1,5 @@
+#include "Recovery/Presentation/RecoveryPropulsionVisuals.h"
+#include "Recovery/Presentation/RecoveryStartupSubsystem.h"
 #include "Recovery/Presentation/RecoveryVaporComponent.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Shared/FlightGeometry.h"
@@ -64,6 +66,7 @@ bool URecoveryVaporComponent::HasRenderableDensity() const
 void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn)
 {
     Super::TickComponent(Dt,Type,Fn);
+    if(!URecoveryStartupSubsystem::AssetsLoaded(GetWorld()))return;
     if(!FApp::CanEverRender()){SetComponentTickEnabled(false);return;}
     const auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());
     if(!D || !D->GetBody())return;
@@ -72,6 +75,7 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
     if(D->GetMissionGeneration()!=LastMissionGeneration)
         for(int I=0;I<Billows.Num();++I){Billows[I].Age=100;Volumes[I]->SetVisibility(false);}
     LastMissionGeneration=D->GetMissionGeneration();
+    const double Delivered=RecoveryPropulsionVisuals::DeliveredFraction(D->GetEngines(),D->GetProfile()->EngineThrustN);
     const FVector Base=FlightGeometry::BoosterBaseCm(*D->GetBody());
     const FVector Up=D->GetBody()->GetUpVector();
     const FVector Wind=D->GetWindVelocityMps(30)*100;
@@ -83,8 +87,8 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
     if(D->GetDelugeFlow()>.05 && D->AltitudeM<220 && DelugeSpawnClock>.25)
     {
         DelugeSpawnClock=FMath::Fmod(DelugeSpawnClock,.25);
-        const bool Hot=D->ActiveEngines>0 && D->Throttle>.05;
-        const int32 Count=Hot && D->ActiveEngines>=13?5:3;
+        const bool Hot=Delivered>.003;
+        const int32 Count=Delivered>.1?5:3;
         for(int32 J=0;J<Count;++J)
         {
             const double Angle=Next*2.399963;
@@ -92,7 +96,7 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
             Spawn(FVector(Base.X,Base.Y,250)+Radial*(650+J*130),Radial*((Hot?2100:600)+J*140)+Wind+FVector(0,0,Hot?110+J*55:30),Hot?22:9,Hot?3+J*.6f:1.1,Hot?2.2f:.8f,(Hot?3.f:.6f)*D->GetDelugeFlow(),EVaporKind::Deluge);
         }
     }
-    else if(D->Phase==ERecoveryPhase::Ascent && D->AltitudeM>170 && D->AltitudeM<12000 && (Base-LastTrailPosition).Size()>6500)
+    else if(Delivered>.01 && D->Phase==ERecoveryPhase::Ascent && D->AltitudeM>170 && D->AltitudeM<12000 && (Base-LastTrailPosition).Size()>6500)
     {
         LastTrailPosition=Base;
         Spawn(Base-Up*5500,Wind-Up*600,22,11,2.f,1.2f*FMath::Sqrt(D->PressurePa/101325.),EVaporKind::Trail);

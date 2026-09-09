@@ -12,11 +12,14 @@ class SUPERHEAVYSIM_API URecoveryPresentationComponent : public UActorComponent
     GENERATED_BODY()
 public:
     URecoveryPresentationComponent();
+    bool IsReady() const { return bBuilt && Plumes.Num()>0 && PlumeMaterials.Num()==Plumes.Num() && VaporTrail; }
     virtual void TickComponent(float DeltaTime,ELevelTick TickType,FActorComponentTickFunction* TickFunction) override;
 private:
     UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> Plumes;
+    UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> PlumeMaterials;
+    TArray<double> ExhaustEnvelopes;
+    uint32 LastGeneration=MAX_uint32;
     TArray<int32> EngineIndices;
-    UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> FlameMaterial;
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> MixingPlume;
     UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> MixingMaterial;
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> UpperStage;

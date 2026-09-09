@@ -82,6 +82,7 @@ public:
     UFUNCTION(BlueprintPure, Category="Recovery") FString GetCameraLabel() const;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Presentation") bool bShowTelemetry=true;
     bool bFrontendView=false;
+    bool bStartWhenReady=false;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Contacts") bool bContactShutdown=false;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Contacts") int32 SupportContactCount=0;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Contacts") FVector2D SupportImpulseNs=FVector2D::ZeroVector;

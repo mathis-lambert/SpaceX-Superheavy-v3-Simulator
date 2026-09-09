@@ -1,0 +1,44 @@
+[
+  {
+    "report": "Saved/Recovery/PropulsionStartup_Nominal_60.json",
+    "success": true,
+    "physics_hz": 119.99999374151263,
+    "scenario": "Nominal",
+    "fps": 60
+  },
+  {
+    "report": "Saved/Recovery/PropulsionStartup_Crosswind_60.json",
+    "success": true,
+    "physics_hz": 119.99999374151263,
+    "scenario": "Crosswind",
+    "fps": 60
+  },
+  {
+    "report": "Saved/Recovery/PropulsionStartup_Offset_60.json",
+    "success": true,
+    "physics_hz": 119.99999374151263,
+    "scenario": "Offset",
+    "fps": 60
+  },
+  {
+    "report": "Saved/Recovery/PropulsionStartup_Nominal_15.json",
+    "success": true,
+    "physics_hz": 119.99999374151263,
+    "scenario": "Nominal",
+    "fps": 15
+  },
+  {
+    "report": "Saved/Recovery/PropulsionStartup_Crosswind_15.json",
+    "success": true,
+    "physics_hz": 119.99999374151263,
+    "scenario": "Crosswind",
+    "fps": 15
+  },
+  {
+    "report": "Saved/Recovery/PropulsionStartup_Offset_15.json",
+    "success": true,
+    "physics_hz": 119.99999374151263,
+    "scenario": "Offset",
+    "fps": 15
+  }
+]

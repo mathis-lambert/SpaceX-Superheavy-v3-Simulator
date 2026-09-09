@@ -1,3 +1,4 @@
+#include "Recovery/Presentation/RecoveryStartupSubsystem.h"
 #include "Recovery/Presentation/RecoverySkyComponent.h"
 #include "Recovery/Presentation/RecoverySolarPosition.h"
 #include "Recovery/Presentation/RecoveryEnvironmentProfile.h"
@@ -75,7 +76,8 @@ void URecoverySkyComponent::FindScene()
 }
 void URecoverySkyComponent::TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn)
 {
-    Super::TickComponent(Dt,Type,Fn);if(!FApp::CanEverRender())return;
+    Super::TickComponent(Dt,Type,Fn);
+    if(!URecoveryStartupSubsystem::AssetsLoaded(GetWorld()))return;if(!FApp::CanEverRender())return;
     if(!bFound)FindScene();
     const auto* PC=Cast<ARecoveryPlayerController>(GetWorld()->GetFirstPlayerController());
     const double Hour=PC?PC->TimeOfDay:17.;

@@ -1,0 +1,63 @@
+{
+  "author": "Original simulator sound design",
+  "method": "Deterministic filtered noise, amplitude modulation and damped inharmonic resonances.",
+  "sample_rate": 48000,
+  "assets": {
+    "EngineRumble": {
+      "seconds": 12.666666666666666,
+      "peak": 0.719970703125,
+      "rms": 0.21327586911597116,
+      "loop": true,
+      "sha256": "f009c00212b8614ca57ff160b0f5b6ab591c91844291d8a7d23ccb49856d9d27",
+      "seam_delta": 0.0029296875
+    },
+    "EngineCrackle": {
+      "seconds": 12.666666666666666,
+      "peak": 0.719970703125,
+      "rms": 0.10689357974296121,
+      "loop": true,
+      "sha256": "d16be612630bfe7ec5fed1d6d49a73867414edec1802cd736313365245855a9e",
+      "seam_delta": 0.03082275390625
+    },
+    "CryogenicHiss": {
+      "seconds": 12.666666666666666,
+      "peak": 0.719970703125,
+      "rms": 0.20585975767079095,
+      "loop": true,
+      "sha256": "c2d9bb7a58bab637903badf210d15043e45bc5c4065f0279a6ec03930989d5fd",
+      "seam_delta": 0.0478515625
+    },
+    "Deluge": {
+      "seconds": 12.666666666666666,
+      "peak": 0.719970703125,
+      "rms": 0.22286731676965774,
+      "loop": true,
+      "sha256": "2943a4c4d446b052fcd7b508e0225ca91171a75f2ac0c07f7ae2f4cfb4fbf23f",
+      "seam_delta": 0.100982666015625
+    },
+    "TowerDrive": {
+      "seconds": 12.666666666666666,
+      "peak": 0.719970703125,
+      "rms": 0.16022608495065893,
+      "loop": true,
+      "sha256": "c116ed69d53545c7de78146d300fba20d3788c207c131a5bc322d1dd630983ea",
+      "seam_delta": 0.005126953125
+    },
+    "TowerContact": {
+      "seconds": 3.0,
+      "peak": 0.719970703125,
+      "rms": 0.05009177983715156,
+      "loop": false,
+      "sha256": "a16b61c46a8ddb254c47113ae40c6820ab69efb8dfc4616fd2c119d199bbbdac",
+      "seam_delta": 0.0
+    },
+    "MountRelease": {
+      "seconds": 3.0,
+      "peak": 0.719970703125,
+      "rms": 0.04188418777948407,
+      "loop": false,
+      "sha256": "fdf8a059789144f4828f687336718c10a71b278d6085e688f5bec7954b46bb56",
+      "seam_delta": 0.0
+    }
+  }
+}

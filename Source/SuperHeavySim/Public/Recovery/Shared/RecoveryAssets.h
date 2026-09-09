@@ -1,9 +1,17 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "UObject/SoftObjectPath.h"
 
 // Canonical runtime references; update here when moving authored content.
 namespace RecoveryAssets
 {
+    inline constexpr TCHAR S_EngineRumble[]=TEXT("/Game/Starbase/Audio/S_EngineRumble.S_EngineRumble");
+    inline constexpr TCHAR S_EngineCrackle[]=TEXT("/Game/Starbase/Audio/S_EngineCrackle.S_EngineCrackle");
+    inline constexpr TCHAR S_CryogenicHiss[]=TEXT("/Game/Starbase/Audio/S_CryogenicHiss.S_CryogenicHiss");
+    inline constexpr TCHAR S_Deluge[]=TEXT("/Game/Starbase/Audio/S_Deluge.S_Deluge");
+    inline constexpr TCHAR S_TowerDrive[]=TEXT("/Game/Starbase/Audio/S_TowerDrive.S_TowerDrive");
+    inline constexpr TCHAR S_TowerContact[]=TEXT("/Game/Starbase/Audio/S_TowerContact.S_TowerContact");
+    inline constexpr TCHAR S_MountRelease[]=TEXT("/Game/Starbase/Audio/S_MountRelease.S_MountRelease");
     inline constexpr TCHAR M_StarField[]=TEXT("/Game/Starbase/Materials/M_StarField.M_StarField");
     inline constexpr TCHAR BP_SuperHeavy[]=TEXT("/Game/Starbase/Vehicle/Blueprints/BP_SuperHeavy");
     inline constexpr TCHAR S_EngineRoar[]=TEXT("/Game/Starbase/Audio/S_EngineRoar.S_EngineRoar");
@@ -30,4 +38,41 @@ namespace RecoveryAssets
     inline constexpr TCHAR SM_ServicePickup[]=TEXT("/Game/Starbase/Meshes/Starbase/SM_ServicePickup.SM_ServicePickup");
     inline constexpr TCHAR SM_WindFlag[]=TEXT("/Game/Starbase/Meshes/Starbase/SM_WindFlag.SM_WindFlag");
     inline constexpr TCHAR M_WindFlag[]=TEXT("/Game/Starbase/Materials/Starbase/M_WindFlag.M_WindFlag");
+    inline TArray<FSoftObjectPath> StartupAssets()
+    {
+        return {
+            FSoftObjectPath(S_EngineRumble),
+            FSoftObjectPath(S_EngineCrackle),
+            FSoftObjectPath(S_CryogenicHiss),
+            FSoftObjectPath(S_Deluge),
+            FSoftObjectPath(S_TowerDrive),
+            FSoftObjectPath(S_TowerContact),
+            FSoftObjectPath(S_MountRelease),
+            FSoftObjectPath(M_StarField),
+            FSoftObjectPath(S_EngineRoar),
+            FSoftObjectPath(S_CoastalWind),
+            FSoftObjectPath(SM_ExhaustEnvelope),
+            FSoftObjectPath(M_RaptorPlume),
+            FSoftObjectPath(M_GridFinAlloy),
+            FSoftObjectPath(M_BoosterFlight),
+            FSoftObjectPath(SM_StarshipDetailed),
+            FSoftObjectPath(NS_RecoveryVaporTrail),
+            FSoftObjectPath(SM_RCSBlock),
+            FSoftObjectPath(M_AttitudeGas),
+            FSoftObjectPath(DA_RecoveryEnvironment),
+            FSoftObjectPath(SM_MWAM_GrassB),
+            FSoftObjectPath(SM_River_Rock),
+            FSoftObjectPath(M_RecoveryRock),
+            FSoftObjectPath(M_SiteLamp),
+            FSoftObjectPath(M_Graphite),
+            FSoftObjectPath(M_Cladding),
+            FSoftObjectPath(M_Concrete),
+            FSoftObjectPath(M_SafetyAmber),
+            FSoftObjectPath(M_VolumetricVapor),
+            FSoftObjectPath(M_CryogenicVapor),
+            FSoftObjectPath(SM_ServicePickup),
+            FSoftObjectPath(SM_WindFlag),
+            FSoftObjectPath(M_WindFlag),
+        };
+    }
 }

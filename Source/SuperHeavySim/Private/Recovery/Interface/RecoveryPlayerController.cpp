@@ -1,3 +1,4 @@
+#include "Recovery/Presentation/RecoveryStartupSubsystem.h"
 #include "Recovery/Interface/RecoveryPlayerController.h"
 #include "Recovery/Interface/RecoveryMenu.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
@@ -82,6 +83,7 @@ void ARecoveryPlayerController::SetupInputComponent()
 }
 void ARecoveryPlayerController::HandleViewerAction(RecoveryInput::EAction Action)
 {
+    if(!URecoveryStartupSubsystem::IsReady(GetWorld()))return;
     using namespace RecoveryInput;
     if(Action==EAction::Pause){TogglePauseMenu();return;}
     if(bMenuOpen || bAtHome || IsPaused())return;
@@ -109,6 +111,7 @@ void ARecoveryPlayerController::PlayerTick(float Dt)
         ReconstructionMode=RecoveryRenderSettings::ApplyReconstruction(ReconstructionMode);
         bReconstructionInitialized=true;
     }
+    if(!URecoveryStartupSubsystem::IsReady(GetWorld()))return;
     if(!IsPaused() && Dt>0)
     {
         // Increase simulated time without exceeding the 15 Hz control interval
@@ -172,6 +175,7 @@ void ARecoveryPlayerController::TogglePauseMenu()
 }
 void ARecoveryPlayerController::LaunchFlight()
 {
+    if(!URecoveryStartupSubsystem::IsReady(GetWorld()))return;
     if(auto* D=GetDirector())
     {
         SetPause(false);

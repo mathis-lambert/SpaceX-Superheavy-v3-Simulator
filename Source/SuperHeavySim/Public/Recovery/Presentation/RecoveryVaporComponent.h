@@ -16,6 +16,7 @@ class SUPERHEAVYSIM_API URecoveryVaporComponent : public UActorComponent
     GENERATED_BODY()
 public:
     URecoveryVaporComponent();
+    bool IsReady() const { return Volumes.Num()>0 && CryogenicVolumes.Num()==2; }
     virtual void TickComponent(float Dt, ELevelTick Type, FActorComponentTickFunction* Fn) override;
     int32 GetActiveVolumeCount() const;
     bool HasRenderableDensity() const;

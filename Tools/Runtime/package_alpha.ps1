@@ -1,6 +1,6 @@
 param(
     [string]$EngineRoot='D:/Engines/UE_5.8',
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.4'
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.5'
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -25,6 +25,10 @@ if(!(Test-Path -LiteralPath $executable) -or (Get-Item -LiteralPath $executable)
 Copy-Item -LiteralPath "$root/Docs/Releases/ALPHA_0.1.0.md" -Destination "$archive/README.md"
 Copy-Item -LiteralPath "$root/Docs/SITE_PHOTOGRAPHY.md" -Destination "$archive/PHOTOGRAPHY.md"
 Copy-Item -LiteralPath "$root/Docs/DYNAMIC_RETURN.md" -Destination "$archive/FLIGHT.md"
+Copy-Item -LiteralPath "$root/Docs/PROPULSION_AND_STARTUP.md" -Destination "$archive/PROPULSION.md"
+$null=New-Item -ItemType Directory -Path "$archive/ThirdParty" -Force
+Copy-Item -LiteralPath "$root/Docs/Audio/NASA-CREDITS.json" -Destination "$archive/ThirdParty/NASA-AUDIO.json"
+Copy-Item -LiteralPath "$root/Docs/Audio/PROPULSION-CREDITS.json" -Destination "$archive/ThirdParty/ORIGINAL-AUDIO.json"
 $nvidiaLicense=Join-Path $root '../ArtSource/ThirdParty/NVIDIA/LICENSE.txt'
 if(Test-Path -LiteralPath $nvidiaLicense){
     $null=New-Item -ItemType Directory -Path "$archive/ThirdParty" -Force

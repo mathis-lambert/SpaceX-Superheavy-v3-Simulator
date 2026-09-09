@@ -14,6 +14,7 @@ class SUPERHEAVYSIM_API URecoverySiteActivityComponent : public UActorComponent
     GENERATED_BODY()
 public:
     URecoverySiteActivityComponent();
+    bool IsReady() const { return bBuilt; }
     void TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn) override;
     int32 GetVehicleCount() const { return Trucks.Num(); }
     int32 GetVentCount() const { return Vents.Num(); }

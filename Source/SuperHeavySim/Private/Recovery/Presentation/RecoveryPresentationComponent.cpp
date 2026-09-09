@@ -1,3 +1,5 @@
+#include "Recovery/Presentation/RecoveryStartupSubsystem.h"
+#include "Recovery/Presentation/RecoveryPropulsionVisuals.h"
 #include "Recovery/Presentation/RecoveryPresentationComponent.h"
 #include "Recovery/Shared/RecoveryAssets.h"
 #include "Recovery/Presentation/RecoveryEnvironmentProfile.h"
@@ -30,7 +32,6 @@ void URecoveryPresentationComponent::Build()
     auto* Mesh=LoadObject<UStaticMesh>(nullptr,RecoveryAssets::SM_ExhaustEnvelope);
     auto* Material=LoadObject<UMaterialInterface>(nullptr,RecoveryAssets::M_RaptorPlume);
     if(!Mesh || !Material) return;
-    FlameMaterial=UMaterialInstanceDynamic::Create(Material,this);
     MixingPlume=NewObject<UStaticMeshComponent>(GetOwner());
     MixingMaterial=UMaterialInstanceDynamic::Create(Material,this);
     MixingMaterial->SetScalarParameterValue(TEXT("MixingLayer"),1);
@@ -62,7 +63,9 @@ void URecoveryPresentationComponent::Build()
         }
         if(!Socket) continue;
         auto* Plume=NewObject<UStaticMeshComponent>(GetOwner());
-        Plume->SetStaticMesh(Mesh);Plume->SetMaterial(0,FlameMaterial);
+        Plume->SetStaticMesh(Mesh);
+        auto* EngineMaterial=UMaterialInstanceDynamic::Create(Material,this);
+        Plume->SetMaterial(0,EngineMaterial);PlumeMaterials.Add(EngineMaterial);ExhaustEnvelopes.Add(0);
         Plume->SetCollisionEnabled(ECollisionEnabled::NoCollision);Plume->SetCastShadow(false);
         Plume->RegisterComponent();GetOwner()->AddInstanceComponent(Plume);
         Plumes.Add(Plume);
@@ -144,14 +147,14 @@ void URecoveryPresentationComponent::Build()
 void URecoveryPresentationComponent::TickComponent(float Dt,ELevelTick Type,FActorComponentTickFunction* Fn)
 {
     Super::TickComponent(Dt,Type,Fn);
+    if(!URecoveryStartupSubsystem::AssetsLoaded(GetWorld()))return;
     if(!FApp::CanEverRender()) { SetComponentTickEnabled(false); return; }
     auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());if(!D || !D->GetBody()) return;
     if(!bBuilt) Build();if(!bBuilt) return;
+    if(LastGeneration!=D->GetMissionGeneration()){for(double& E:ExhaustEnvelopes)E=0;LastGeneration=D->GetMissionGeneration();}
     SyncActuatorMeshes();
     Clock+=Dt;
     const auto* P=D->GetProfile(); const double Vacuum=1-FMath::Sqrt(FMath::Clamp(D->PressurePa/101325.,0.,1.));
-    FlameMaterial->SetScalarParameterValue(TEXT("Vacuum"),Vacuum);
-    FlameMaterial->SetScalarParameterValue(TEXT("FlightTime"),Clock);
     const auto* UI=Cast<ARecoveryPlayerController>(GetWorld()->GetFirstPlayerController());
     const double LightScale=UI?UI->EngineLightScale:1.;
     int LitEngines=0,BurningEngines=0;
@@ -160,7 +163,12 @@ void URecoveryPresentationComponent::TickComponent(float Dt,ELevelTick Type,FAct
     {
         if(!D->GetEngines().IsValidIndex(EngineIndices[I]))continue;
         const auto& Engine=D->GetEngines()[EngineIndices[I]];
-        const double Power=FMath::Clamp(Engine.ThrustN/(P->EngineThrustN*D->EngineIspS/P->SpecificImpulseSeaLevelS),0.,1.);
+        const double Delivered=FMath::Clamp(Engine.ThrustN/(P->EngineThrustN*D->EngineIspS/P->SpecificImpulseSeaLevelS),0.,1.);
+        ExhaustEnvelopes[I]=RecoveryPropulsionVisuals::ExhaustEnvelope(ExhaustEnvelopes[I],Delivered,Dt);
+        const double Power=ExhaustEnvelopes[I];
+        PlumeMaterials[I]->SetScalarParameterValue(TEXT("Throttle"),Power);
+        PlumeMaterials[I]->SetScalarParameterValue(TEXT("Vacuum"),Vacuum);
+        PlumeMaterials[I]->SetScalarParameterValue(TEXT("FlightTime"),Clock+I*.137);
         DeliveredPower+=Power;
         const bool On=Power>.01;
         if(On)++BurningEngines;
@@ -175,7 +183,7 @@ void URecoveryPresentationComponent::TickComponent(float Dt,ELevelTick Type,FAct
         EngineLights[I]->SetWorldLocation(Nozzle-Orientation.GetUpVector()*250);
         EngineLights[I]->SetLightColor(FMath::Lerp(FLinearColor(0.48f,0.67f,1.f),FLinearColor(1.f,0.48f,0.2f),float(Power*0.8)));
         EngineLights[I]->SetVisibility(On && LightScale>0);
-        EngineLights[I]->SetIntensity(On?25000.*Power*Flicker*LightScale:0.);
+        EngineLights[I]->SetIntensity(On?12000.*Power*Flicker*LightScale:0.);
         if(EngineLights[I]->IsVisible()) ++LitEngines;
     }
     if(LitEngines!=LastLitEngineCount)
@@ -188,11 +196,10 @@ void URecoveryPresentationComponent::TickComponent(float Dt,ELevelTick Type,FAct
     const FVector Up=D->GetBody()->GetUpVector();
     const FVector Base=FlightGeometry::BoosterBaseCm(*D->GetBody());
     const double MeanPower=FMath::Clamp(DeliveredPower/FMath::Max(1,BurningEngines),0.,1.);
-    FlameMaterial->SetScalarParameterValue(TEXT("Throttle"),MeanPower);
     for(int I=0;I<PlumeLights.Num();++I)
     {
         PlumeLights[I]->SetWorldLocation(Base-Up*(1000+I*1500));
-        PlumeLights[I]->SetIntensity(350000.*(DeliveredPower/13.)*FMath::Sqrt(MeanPower)*LightScale/(1+I*.5));
+        PlumeLights[I]->SetIntensity(120000.*(DeliveredPower/33.)*FMath::Sqrt(MeanPower)*LightScale/(1+I*.5));
         PlumeLights[I]->SetVisibility(DeliveredPower>.01 && LightScale>0);
     }
     MixingPlume->SetWorldLocationAndRotation(Base-Up*900,D->GetBody()->GetComponentQuat());
@@ -207,7 +214,7 @@ void URecoveryPresentationComponent::TickComponent(float Dt,ELevelTick Type,FAct
         const bool Reset=D->Phase==ERecoveryPhase::Ready || D->Phase==ERecoveryPhase::Countdown;
         if(Reset && bTrailWasRunning) { VaporTrail->ReinitializeSystem();bTrailWasRunning=false; }
         const double Air=FMath::Clamp((D->PressurePa/101325.-0.015)/0.985,0.,1.);
-        const double Power=FMath::Clamp(D->ActiveEngines/33.*D->Throttle,0.,1.);
+        const double Power=RecoveryPropulsionVisuals::DeliveredFraction(D->GetEngines(),P->EngineThrustN);
         // Interpolated GPU spawning fills the path between frames. Old particles
         // remain in world space and drift with wind after engine shutdown.
         const double Rate=D->Phase==ERecoveryPhase::Ascent?FMath::Clamp(70+D->VelocityMps.Size()*0.55,70.,330.)*FMath::Sqrt(Air)*Power:0;
