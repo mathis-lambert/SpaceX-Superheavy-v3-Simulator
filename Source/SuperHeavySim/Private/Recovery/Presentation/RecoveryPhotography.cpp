@@ -3,8 +3,8 @@
 
 namespace
 {
-    struct FField { const TCHAR* Name;float FRecoveryPhotography::*Value;float Min,Max; };
-    const FField Fields[]={
+    struct FPhotoConfigField { const TCHAR* Name;float FRecoveryPhotography::*Value;float Min,Max; };
+    const FPhotoConfigField Fields[]={
         {TEXT("FocalLengthMm"),&FRecoveryPhotography::FocalLengthMm,12,600},
         {TEXT("ExposureBiasEV"),&FRecoveryPhotography::ExposureBiasEV,-3,3},
         {TEXT("WhiteBalanceK"),&FRecoveryPhotography::WhiteBalanceK,2500,10000},

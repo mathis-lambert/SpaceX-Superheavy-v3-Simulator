@@ -13,13 +13,13 @@ import math
 
 ROOT='/Game/Starbase'
 tools=u.AssetToolsHelpers.get_asset_tools()
-def import_texture(name,path):
+def import_texture(name,path,srgb=True,compression=u.TextureCompressionSettings.TC_BC7):
     existing=u.load_asset(ROOT+'/Textures/Earth/'+name)
     if existing and '-WorldReimportTextures' not in u.SystemLibrary.get_command_line():return existing
     task=u.AssetImportTask();task.filename=str(path);task.destination_path=ROOT+'/Textures/Earth';task.destination_name=name
     task.automated=True;task.replace_existing=True;task.save=True
     tools.import_asset_tasks([task]);t=u.load_asset(task.destination_path+'/'+name);assert t,name
-    prop(t,'srgb',True);prop(t,'compression_settings',u.TextureCompressionSettings.TC_BC7)
+    prop(t,'srgb',srgb);prop(t,'compression_settings',compression)
     prop(t,'address_x',u.TextureAddress.TA_CLAMP);prop(t,'address_y',u.TextureAddress.TA_CLAMP)
     prop(t,'never_stream',False);prop(t,'lod_bias',0);prop(t,'max_texture_size',8192)
     prop(t,'mip_gen_settings',u.TextureMipGenSettings.TMGS_SHARPEN1);assert A.save_loaded_asset(t,False)
@@ -28,6 +28,7 @@ def import_texture(name,path):
 coast=import_texture('T_CoastContinuous',ART_ROOT/'Earth/Continuity/Coast8192.png')
 gulf=import_texture('T_GulfContinuous',ART_ROOT/'Earth/Continuity/Gulf8192.png')
 globe=u.load_asset(ROOT+'/Textures/Earth/T_EarthSeptember')
+coast_mask=import_texture('T_CoastalWaterMask',ART_ROOT/'Earth/Continuity/CoastalWaterMask.png',False,u.TextureCompressionSettings.TC_MASKS)
 GEO='''float3 q=normalize(float3(P.xy,P.z+637100000.0));
 float3 e=float3(.992208696,-.124586893,0),n=float3(.054610022,.434913642,.898814703),up=float3(-.111980532,-.891811774,.438328791);
 float3 p=e*q.x+n*q.y+up*q.z;
@@ -53,10 +54,12 @@ def build_surface(name,tile=None):
         lo=-97.1569-half_lon+i*half_lon/2;hi=25.9973-half_lat+(j+1)*half_lat/2
         tileuv=custom(m,{'G':geo},f'return float2((G.x-({lo:.12f}))/{half_lon/2:.12f},({hi:.12f}-G.y)/{half_lat/2:.12f});',u.CustomMaterialOutputType.CMOT_FLOAT2)
         aerial=sample(m,ROOT+f'/Textures/Earth/T_BocaChica_{i}_{j}',tileuv)
-        water=custom(m,{'W':water,'P':p},'float h=(P.z+dot(P.xy,P.xy)/1274200000.)*.01;float local=1-smoothstep(-4.45,-3.85,h);return lerp(W,local,smoothstep(0,60000,600000-max(abs(P.x),abs(P.y))));',u.CustomMaterialOutputType.CMOT_FLOAT1)
+        maskuv=custom(m,{'G':geo},f'return float2((G.x-({-97.1569-half_lon:.12f}))/{half_lon*2:.12f},({25.9973+half_lat:.12f}-G.y)/{half_lat*2:.12f});',u.CustomMaterialOutputType.CMOT_FLOAT2)
+        mask=sample(m,coast_mask,maskuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
+        water=custom(m,{'W':water,'P':p,'Mask':(mask,'R')},'return lerp(W,Mask,smoothstep(0,60000,600000-max(abs(P.x),abs(P.y))));',u.CustomMaterialOutputType.CMOT_FLOAT1)
         base=custom(m,{'B':base,'C':(aerial,'RGB'),'A':(aerial,'A'),'UV':tileuv,'P':p,'Camera':camera},'''
 float edge=600000-max(abs(P.x),abs(P.y));
-float near=1-smoothstep(180000,1000000,length(Camera-P));
+float near=1-smoothstep(1200000,5000000,length(Camera-P));
 return lerp(B,C,A*smoothstep(0,60000,edge)*near);''')
     # Water comes from a BRDF, not a lit photograph of an old ocean surface.
     base=custom(m,{'C':base,'W':water},'float3 sea=lerp(float3(.003,.013,.024),float3(.009,.035,.041),saturate(C.g*4));return lerp(C,sea,W);')

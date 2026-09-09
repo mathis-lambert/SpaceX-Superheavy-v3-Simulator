@@ -8,6 +8,12 @@ import json, numpy as np
 from PIL import Image
 from earth_geography import *
 from site_landscape import dune_height
+
+# Classify water in a geographic raster, never from the current simplified
+# Nanite triangle height. Otherwise coastlines change shape with distance.
+water=np.clip((-3.85-(DEM-4.5))/.6,0,1)
+water=water*water*(3-2*water)
+Image.fromarray(np.uint8(np.round(water*255))).convert('RGB').save(ROOT/'Continuity/CoastalWaterMask.png')
 tiles={(i,j):np.asarray(Image.open(ROOT/'Registered4000'/f'BocaChica_{i}_{j}.png').convert('RGBA')) for i in (1,2) for j in (1,2)}
 rng=np.random.default_rng(2317);grass=[];rocks=[]
 for k in range(110000):

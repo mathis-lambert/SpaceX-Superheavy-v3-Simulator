@@ -15,6 +15,9 @@ neighbor by approximately 338 m. The corrected downloader explicitly disables
 aspect adjustment and verifies the extent returned by the service before accepting
 an image. All 16 tiles were fetched again. Internal tile-edge fallback bands were
 removed; imagery fades only at the outside of the regional coverage.
+Local orthoimagery remains fully weighted up to 12 km viewing distance, then
+transitions to regional imagery by 50 km. A geographic water-mask texture keeps
+shorelines independent of Nanite's distance-dependent triangle simplification.
 
 Source: [Esri exportImage parameter documentation](https://developers.arcgis.com/rest/services-reference/enterprise/export-image/).
 Imagery: USGS/USDA NAIP. Each source record includes its request, returned extent,
