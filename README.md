@@ -2,8 +2,8 @@
 
 An interactive Unreal Engine 5.8 simulator: launch, stage separation, boostback, ballistic coast, atmospheric control, landing burn and physical tower capture.
 
-The first Windows alpha is `0.1.0-alpha.1`. See [launch instructions and known
-limitations](Docs/Releases/ALPHA_0.1.0.md). Reproduce the standalone package with
+The first validated Windows alpha is `0.1.0-alpha.2`. See [launch instructions and known
+limitations](Docs/Releases/ALPHA_0.1.0.md) and [release validation](Docs/Releases/ALPHA_0.1.0_VALIDATION.md). Reproduce the standalone package with
 `./Tools/Runtime/package_alpha.ps1` from committed sources. Local release builds
 live in `Releases/`; generated binaries remain outside Git.
 
@@ -43,4 +43,4 @@ The flight coefficients are estimates. Capture is a rigid-body interaction betwe
 
 The propulsion model resolves individual engine forces, bounded gimbal actuators, reaction-valve response, propellant use and moving tank mass properties. Starship becomes an independent physical body at separation. Ground conditioning accounts for vented propellant and supply from the launch site. Presentation consumes these states without controlling flight poses.
 
-Settings → Display → Image reconstruction offers native TSR, TSR Quality and supported NVIDIA DLAA/DLSS modes. The optional official UE 5.8 DLSS plugin is project-local; source, license and SHA-256 provenance are retained in `Plugins/NVIDIA/provenance.json` and `../ArtSource/ThirdParty/NVIDIA`. Frame generation is not installed.
+Settings → Display → Image reconstruction offers native TSR, TSR Quality and supported NVIDIA DLAA/DLSS modes. The official UE 5.8 DLSS plugin is project-local and included in Windows builds; DLSS is optional at runtime according to GPU support and viewer preference. Source, license and SHA-256 provenance are retained in `Plugins/NVIDIA/provenance.json` and `../ArtSource/ThirdParty/NVIDIA`. Frame generation is not installed.

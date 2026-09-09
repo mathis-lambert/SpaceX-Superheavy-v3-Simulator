@@ -1,0 +1,11 @@
+{
+  "version": "0.1.0-alpha.2",
+  "source_commit": "31de1743d31e03644ab9d3eb76a541ed6c233f8d",
+  "archive": "Starbase-0.1.0-alpha.2.zip",
+  "archive_bytes": 1191406558,
+  "archive_sha256": "8e25ebe677792bef931fc8f99f7d1e8442ba24ba9ccf148eac3c067de410b28a",
+  "manifest_sha256": "a8f977bff5b3cabecaf99c501ba7dab788270c1ce62b24d2f67f59a97cf584af",
+  "game_executable_sha256": "5ffac4050a35ddfc9e394c997b732514779aa72946eaa1fd87fdae218b3cd0af",
+  "files": 48,
+  "zip_crc_verified": true
+}

@@ -23,6 +23,11 @@ if($LASTEXITCODE -ne 0){Get-Content -LiteralPath $log -Tail 50;throw "Alpha pack
 $executable=Join-Path $archive 'Windows/SuperHeavySim.exe'
 if(!(Test-Path -LiteralPath $executable) -or (Get-Item -LiteralPath $executable).LastWriteTime -lt $started){throw 'Packaging produced no fresh standalone executable'}
 Copy-Item -LiteralPath "$root/Docs/Releases/ALPHA_0.1.0.md" -Destination "$archive/README.md"
+$nvidiaLicense=Join-Path $root '../ArtSource/ThirdParty/NVIDIA/LICENSE.txt'
+if(Test-Path -LiteralPath $nvidiaLicense){
+    $null=New-Item -ItemType Directory -Path "$archive/ThirdParty" -Force
+    Copy-Item -LiteralPath $nvidiaLicense -Destination "$archive/ThirdParty/NVIDIA-LICENSE.txt"
+}
 $files=@(Get-ChildItem -LiteralPath $archive -File -Recurse | ForEach-Object {
     @{path=[IO.Path]::GetRelativePath($archive,$_.FullName).Replace('\','/');bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
 })
