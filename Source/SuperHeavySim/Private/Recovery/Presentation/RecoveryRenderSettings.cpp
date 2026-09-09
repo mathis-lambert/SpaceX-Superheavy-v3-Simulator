@@ -3,6 +3,7 @@
 #include "Engine/Engine.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Misc/App.h"
+#include "Modules/ModuleManager.h"
 #include "RenderUtils.h"
 #if RECOVERY_WITH_DLSS
 #include "DLSSLibrary.h"
@@ -10,6 +11,14 @@
 
 namespace RecoveryRenderSettings
 {
+    bool IsReconstructionReady()
+    {
+#if RECOVERY_WITH_DLSS
+        return !FApp::CanEverRender() || FModuleManager::Get().IsModuleLoaded(TEXT("DLSS"));
+#else
+        return true;
+#endif
+    }
     bool SupportsHardwareRayTracing()
     { return FApp::CanEverRender() && IsRayTracingEnabled(); }
     bool ApplyHardwareRayTracing(bool Requested)
@@ -22,7 +31,7 @@ namespace RecoveryRenderSettings
     bool SupportsDLSS()
     {
 #if RECOVERY_WITH_DLSS
-        return FApp::CanEverRender() && UDLSSLibrary::IsDLSSSupported();
+        return FApp::CanEverRender() && IsReconstructionReady() && UDLSSLibrary::IsDLSSSupported();
 #else
         return false;
 #endif
@@ -37,6 +46,9 @@ namespace RecoveryRenderSettings
     {
         if(!FApp::CanEverRender())return 0;
         int32 Mode=FMath::Clamp(RequestedMode,0,4);
+        // Packaged maps can begin play before PostEngineInit loads DLSS.
+        // Preserve the requested mode until the controller retries after startup.
+        if(!IsReconstructionReady())return Mode;
         if(Mode>=2 && !SupportsDLSS())Mode=0;
         float ScreenPercentage=Mode==1?75.f:100.f;
 #if RECOVERY_WITH_DLSS
@@ -66,7 +78,7 @@ namespace RecoveryRenderSettings
     FString ActiveReconstruction()
     {
 #if RECOVERY_WITH_DLSS
-        if(FApp::CanEverRender() && UDLSSLibrary::IsDLSSEnabled())return TEXT("NVIDIA DLSS / DLAA");
+        if(FApp::CanEverRender() && IsReconstructionReady() && UDLSSLibrary::IsDLSSEnabled())return TEXT("NVIDIA DLSS / DLAA");
 #endif
         return TEXT("Unreal TSR");
     }

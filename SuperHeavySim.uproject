@@ -50,7 +50,6 @@
     {
       "Name": "DLSS",
       "Enabled": true,
-      "Optional": true,
       "PlatformAllowList": [
         "Win64"
       ]

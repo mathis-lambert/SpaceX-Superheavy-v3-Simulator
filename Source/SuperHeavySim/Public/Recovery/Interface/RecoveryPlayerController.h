@@ -82,5 +82,6 @@ private:
     FIntPoint PreviousVideoResolution=FIntPoint(1920,1080);
     int32 PreviousVideoWindowMode=2;
     TSharedPtr<SRecoveryMenu> Menu;
+    bool bReconstructionInitialized=false;
     bool bMenuOpen=false,bAtHome=true,bFrontendInitialized=false;
 };

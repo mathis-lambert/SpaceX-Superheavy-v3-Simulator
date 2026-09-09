@@ -1,13 +1,13 @@
 # Starbase Flight Simulator — Alpha 0.1.0
 
-Version: `0.1.0-alpha.1`. Windows x64, Unreal Engine 5.8.
+Version: `0.1.0-alpha.2`. Windows x64, Unreal Engine 5.8.
 
 ## Start
 
 Open `Windows/SuperHeavySim.exe`. Keep the entire Windows folder together;
 the executable requires its adjacent Engine and SuperHeavySim directories.
 The Unreal Editor is not required. If Windows reports missing runtime libraries,
-run `Windows/Engine/Extras/Redist/en-us/UEPrereqSetup_x64.exe` once.
+run `Windows/Engine/Extras/Redist/en-us/vc_redist.x64.exe` once.
 
 Use a DirectX 12 / Shader Model 6 capable GPU with current drivers. The local
 validation machine has a GeForce RTX 4070 SUPER. Other hardware has not yet

@@ -1,6 +1,6 @@
 param(
     [string]$EngineRoot='D:/Engines/UE_5.8',
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.1'
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.2'
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -8,7 +8,7 @@ $project=Join-Path $root 'SuperHeavySim.uproject'
 $archive=Join-Path $root "Releases/Starbase-$Version"
 $evidence=Join-Path $root 'Saved/Recovery'
 $null=New-Item -ItemType Directory -Force -Path $evidence
-if(Test-Path -LiteralPath "$archive/build-manifest.json"){throw 'This alpha already exists. Use a new alpha version to preserve it.'}
+if(Test-Path -LiteralPath $archive){throw 'This alpha directory already exists. Use a new alpha version to preserve it.'}
 $configured=Select-String -LiteralPath "$root/Config/DefaultGame.ini" -Pattern '^ProjectVersion=(.+)$'
 if(!$configured -or $configured.Matches[0].Groups[1].Value -ne $Version){throw 'Package version must match ProjectVersion in DefaultGame.ini'}
 $sourceCommit=(& git -c "safe.directory=$($root.Replace('\','/'))" -C $root rev-parse HEAD).Trim()

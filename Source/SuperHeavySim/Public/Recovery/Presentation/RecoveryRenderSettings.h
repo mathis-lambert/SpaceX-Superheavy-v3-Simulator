@@ -5,6 +5,7 @@
 /** Presentation-only reconstruction controls. They never change world time or flight state. */
 namespace RecoveryRenderSettings
 {
+    bool IsReconstructionReady();
     TArray<FString> ReconstructionNames();
     bool SupportsDLSS();
     int32 ApplyReconstruction(int32 RequestedMode);

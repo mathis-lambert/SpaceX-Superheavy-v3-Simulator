@@ -54,6 +54,7 @@ void ARecoveryPlayerController::BeginPlay()
     // Resolution was applied during startup; preserve explicit launch flags.
     if(auto* Settings=GEngine->GetGameUserSettings()) Settings->ApplyNonResolutionSettings();
     ReconstructionMode=RecoveryRenderSettings::ApplyReconstruction(ReconstructionMode);
+    bReconstructionInitialized=RecoveryRenderSettings::IsReconstructionReady();
     bHardwareRayTracing=RecoveryRenderSettings::ApplyHardwareRayTracing(bHardwareRayTracing);
     if(!ShouldShowFrontend()) { bAtHome=false;return; }
     GConfig->GetInt(TEXT("Recovery.Interface"),TEXT("Scenario"),SelectedScenario,GGameUserSettingsIni);
@@ -98,6 +99,11 @@ void ARecoveryPlayerController::HandleViewerAction(RecoveryInput::EAction Action
 void ARecoveryPlayerController::PlayerTick(float Dt)
 {
     Super::PlayerTick(Dt);
+    if(!bReconstructionInitialized && RecoveryRenderSettings::IsReconstructionReady())
+    {
+        ReconstructionMode=RecoveryRenderSettings::ApplyReconstruction(ReconstructionMode);
+        bReconstructionInitialized=true;
+    }
     if(!IsPaused() && Dt>0)
     {
         // Increase simulated time without exceeding the 15 Hz control interval
@@ -195,6 +201,7 @@ void ARecoveryPlayerController::SetPlaybackRate(float Rate)
 {
     if(!FMath::IsFinite(Rate))return;
     PlaybackRate=FMath::Clamp(Rate,0.25f,4.f);
+    UE_LOG(LogTemp,Display,TEXT("RECOVERY_PLAYBACK requested=%.2f"),PlaybackRate);
     EffectivePlaybackRate=FMath::Min(PlaybackRate,EffectivePlaybackRate);
     UGameplayStatics::SetGlobalTimeDilation(this,EffectivePlaybackRate);
 }
@@ -232,6 +239,7 @@ void ARecoveryPlayerController::SavePreferences()
 void ARecoveryPlayerController::SetReconstruction(int32 Mode)
 {
     ReconstructionMode=RecoveryRenderSettings::ApplyReconstruction(Mode);
+    bReconstructionInitialized=RecoveryRenderSettings::IsReconstructionReady();
     SavePreferences();
 }
 void ARecoveryPlayerController::SetHardwareRayTracing(bool Enabled)
