@@ -1,0 +1,14 @@
+{
+	"ready": true,
+	"failed": false,
+	"engine_elapsed_seconds": 5.9402436017990112,
+	"scene_prepare_seconds": 2.4762848019599915,
+	"assets_loaded": 34,
+	"assets_requested": 34,
+	"pending_psos_at_reveal": 0,
+	"pending_textures_at_reveal": 0,
+	"pending_shaders_at_reveal": 0,
+	"peak_pending_psos": 979,
+	"peak_pending_textures": 0,
+	"rendered_frames": 109
+}

@@ -1,0 +1,35 @@
+{
+  "reviewed": true,
+  "method": "Inspected original packaged screenshots after the executable audit.",
+  "images": [
+    {
+      "path": "Saved/Recovery/Alpha-0.1.0-alpha.6-20260909-230941/User/Saved/Recovery/Startup/Loading.png",
+      "sha256": "ff607e0ffc76e24a020adf3a5d636dbfd27ee0433eb2363536779f9c65c8e770"
+    },
+    {
+      "path": "Saved/Recovery/Alpha-0.1.0-alpha.6-20260909-230941/User/Saved/Recovery/Startup/Home.png",
+      "sha256": "c14f41fbba7617cc3545fa19c0523825eab60e1ce001f8224af5954041ae4782"
+    },
+    {
+      "path": "Saved/Recovery/Alpha-0.1.0-alpha.6-20260909-230941/User/Saved/Recovery/Review/ASCENT.png",
+      "sha256": "5817a3c6a6ebcb46ef9dd1a36c76324d68b95c24e5749d9c10e5ff3c284f8967"
+    },
+    {
+      "path": "Saved/Recovery/Alpha-0.1.0-alpha.6-20260909-230941/User/Saved/Recovery/Review/RCS_WeakCorrection.png",
+      "sha256": "cb1608d36ea329e6f2efb6ea5185453681646f73c1588ad6240fb3d05bb7807f"
+    },
+    {
+      "path": "Saved/Recovery/Alpha-0.1.0-alpha.6-20260909-230941/User/Saved/Recovery/Review/Contact_020.png",
+      "sha256": "6974b3d600b49ba62bf0d9dc6a584d4cfabe49d8eeb64eed5779ea87b5ebc774"
+    },
+    {
+      "path": "Saved/Recovery/Alpha-0.1.0-alpha.6-20260909-230941/User/Saved/Recovery/Review/SECURED.png",
+      "sha256": "82cb6d07d33778ef4e9e80a5a0e8a6563294a89a13b060509bbaab46bd519756"
+    }
+  ],
+  "notes": [
+    "Loading and home show correctly; dense lit vapor surrounds the site at launch and catch.",
+    "Weak RCS pulse is visible; the contact view keeps a stable camera and free physical support.",
+    "Water and shoreline were additionally inspected in the source WorldAudit; detail remains an optical approximation."
+  ]
+}

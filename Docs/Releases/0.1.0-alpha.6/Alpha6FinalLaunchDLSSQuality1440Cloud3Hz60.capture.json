@@ -1,0 +1,15 @@
+{
+  "cloud_mode": 3,
+  "simulation_hz": 60,
+  "scene": "Launch",
+  "solar_hour": 17.9,
+  "output_height": 1440,
+  "packaged": true,
+  "reconstruction": 3,
+  "requested_frames": 6000,
+  "utc_started": "2026-09-09T21:14:06.5946943Z",
+  "output_width": 2560,
+  "schema_version": 2,
+  "hardware_ray_tracing": 0,
+  "executable": "C:\\Users\\lambe\\Documents\\Projets\\superheavy_landing\\SuperHeavySim\\Releases\\Starbase-0.1.0-alpha.6\\Windows\\SuperHeavySim.exe"
+}

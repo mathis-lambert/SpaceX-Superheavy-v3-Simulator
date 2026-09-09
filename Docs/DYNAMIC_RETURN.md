@@ -1,5 +1,10 @@
 # Dynamic landing ignition and front capture
 
+This is the historical alpha.4 ignition and guidance comparison. Alpha.6 adds
+dynamic tower suspension and a 0.25 m/s contact target; current measurements and
+limits are in [the alpha.6 validation](Releases/ALPHA_0.1.0_ALPHA6_VALIDATION.md)
+and [coast, volumes and tower](COAST_VOLUMES_TOWER.md).
+
 Alpha.4 replaces the early landing trigger and long powered approach with a
 predicted braking envelope. The reference is the pacing of the official
 [Starship Flight 5 broadcast](https://www.youtube.com/watch?v=hI9HQfCAw64): coast,
@@ -40,7 +45,7 @@ claiming to reproduce Flight 5's exact vehicle or guidance.
   during settling. Contact diagnostics use a consistent component transform so
   a delayed display frame cannot mix positions from two different samples.
 
-The guide targets 0.6 m/s descent at contact. Reported first-contact speed is the
+The alpha.4 guide targeted 0.6 m/s descent at contact. Reported first-contact speed is the
 incoming rigid-body sample preceding the first observed support impulse, rather
 than the nearly-zero velocity after settling. Fitting-point impact velocity and
 structural compliance remain separate future refinements.
@@ -81,8 +86,8 @@ not a proof of globally minimum ignition altitude. The terminal search is sample
 and receding-horizon, not a certified optimal controller. Atmospheric/aerodynamic
 coefficients, dry mass, engine transients and structural-load limits are estimated.
 Successful nominal, wind and mass-offset runs do not establish robustness to all
-failures or numerical convergence of every possible return. The tower's existing
-kinematic arm mechanism and passive contact model remain unchanged.
+failures or numerical convergence of every possible return. Alpha.4 retained the
+then-existing kinematic arm mechanism and passive contact model.
 
 Release records under `Docs/Releases/0.1.0-alpha.4` identify the tested executable
 and additional cadence/rendered checks. Site, sun, photographic controls and
