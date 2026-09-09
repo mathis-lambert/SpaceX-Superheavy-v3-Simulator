@@ -1,6 +1,6 @@
+#include "Recovery/Presentation/RecoveryVaporComponent.h"
 #include "Recovery/Presentation/RecoveryPropulsionVisuals.h"
 #include "Recovery/Presentation/RecoveryStartupSubsystem.h"
-#include "Recovery/Presentation/RecoveryVaporComponent.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Shared/FlightGeometry.h"
 #include "Recovery/Shared/RecoveryAssets.h"

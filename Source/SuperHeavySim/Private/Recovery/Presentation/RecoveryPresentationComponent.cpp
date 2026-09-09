@@ -1,5 +1,5 @@
-#include "Recovery/Presentation/RecoveryStartupSubsystem.h"
 #include "Recovery/Presentation/RecoveryPropulsionVisuals.h"
+#include "Recovery/Presentation/RecoveryStartupSubsystem.h"
 #include "Recovery/Presentation/RecoveryPresentationComponent.h"
 #include "Recovery/Shared/RecoveryAssets.h"
 #include "Recovery/Presentation/RecoveryEnvironmentProfile.h"

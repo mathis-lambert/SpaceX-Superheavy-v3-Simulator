@@ -1,6 +1,6 @@
+#include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
 #include "Recovery/Presentation/RecoveryAudioComponent.h"
 #include "Recovery/Presentation/RecoveryStartupSubsystem.h"
-#include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Presentation/RecoveryVaporComponent.h"
 #include "Recovery/Presentation/RecoverySiteDetailsComponent.h"
