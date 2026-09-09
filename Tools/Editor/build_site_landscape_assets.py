@@ -1,4 +1,4 @@
-"""Install registered terrain, service routes and a lit coastal water surface."""
+"""Install registered terrain and continuous service routes."""
 import sys,json
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'Shared'))
@@ -31,25 +31,6 @@ return lerp(float3(.035,.039,.043)*aggregate,float3(.58,.56,.49),max(lane*dash,e
     connect(m,constant(m,.93 if gravel else .84),u.MaterialProperty.MP_ROUGHNESS);save(m);return m
 
 road=surface('M_ServiceRoad');shoulder=surface('M_ServiceShoulder',True)
-ocean=material(ROOT+'/Materials/Starbase/M_CoastalWater');prop(ocean,'tangent_space_normal',False)
-p=ex(ocean,u.MaterialExpressionWorldPosition);t=ex(ocean,u.MaterialExpressionTime);uv=ex(ocean,u.MaterialExpressionTextureCoordinate)
-camera=ex(ocean,u.MaterialExpressionCameraPositionWS)
-wave='/Game/ThirdParty/WaterMaterials/Textures/T_Ocean_Waves01_Normals'
-a=sample(ocean,wave,custom(ocean,{'P':p,'T':t},'return P.xy/2400+float2(T*.009,T*.003);',u.CustomMaterialOutputType.CMOT_FLOAT2),sampler=u.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
-b=sample(ocean,wave,custom(ocean,{'P':p,'T':t},'return P.yx/7300+float2(-T*.004,T*.002);',u.CustomMaterialOutputType.CMOT_FLOAT2),sampler=u.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
-foam=custom(ocean,{'UV':uv,'T':t,'A':(a,'RGB')},'''
-float crest=sin(UV.x*.35+UV.y*.013+sin(UV.y*.028)*.9+T*1.4);
-return smoothstep(.8,.98,crest)*(1-smoothstep(5,65,UV.x))*smoothstep(.25,.7,A.r);
-''',u.CustomMaterialOutputType.CMOT_FLOAT1)
-connect(ocean,custom(ocean,{'UV':uv,'F':foam},'return lerp(lerp(float3(.009,.035,.041),float3(.005,.021,.032),smoothstep(0,400,UV.x)),float3(.38,.44,.43),F);'),u.MaterialProperty.MP_BASE_COLOR)
-connect(ocean,custom(ocean,{'P':p,'C':camera,'A':(a,'RGB'),'B':(b,'RGB')},'''
-float3 up=normalize(P+float3(0,0,637100000));
-float detail=1-smoothstep(250000,2000000,length(C-P));
-float2 slope=((A.xy*2-1)*.34+(B.xy*2-1)*.2)*detail;
-return normalize(up+float3(slope,0));'''),u.MaterialProperty.MP_NORMAL)
-connect(ocean,custom(ocean,{'P':p,'C':camera,'F':foam},'return lerp(lerp(.14,.28,smoothstep(100000,1500000,length(C-P))),.65,F);',u.CustomMaterialOutputType.CMOT_FLOAT1),u.MaterialProperty.MP_ROUGHNESS)
-connect(ocean,constant(ocean,.38),u.MaterialProperty.MP_SPECULAR);save(ocean)
-
 # Replace source meshes at their existing asset paths; no additional terrain layer.
 for j in (1,2):
     for i in (1,2):
@@ -59,7 +40,7 @@ for j in (1,2):
         nanite=mesh.get_editor_property('nanite_settings');prop(nanite,'enabled',True);prop(nanite,'position_precision',2);prop(mesh,'nanite_settings',nanite)
         u.EditorAssetLibrary.save_loaded_asset(mesh,False)
 
-names={'SM_ServiceRoadNetwork':road,'SM_ServiceRoadShoulder':shoulder,'SM_CoastalWater':ocean}
+names={'SM_ServiceRoadNetwork':road,'SM_ServiceRoadShoulder':shoulder}
 for actor in actors.get_all_level_actors():
     label=actor.get_actor_label()
     if label in ('Recovery_ServiceRoad',) or label.startswith('Recovery_RoadDash') or label.startswith('Recovery_Landscape_'):

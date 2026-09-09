@@ -17,16 +17,6 @@ def dune_height(x,y):
     detail=.5+.23*math.sin(x*.047+y*.022)+.16*math.sin(y*.075-x*.019)+.11*math.sin(x*.19+y*.043)
     return base+band*detail*.8
 
-def shoreline(y):
-    previous=450.
-    for x in range(455,1000,5):
-        h=height(x,y)
-        if h<-4.48:
-            ph=height(previous,y)
-            return previous+(x-previous)*max(0,min(1,(-4.48-ph)/(h-ph)))
-        previous=x
-    return 800.
-
 def road_height(x,y):
     # Existing zero-datum industrial apron and west access road.
     return .055

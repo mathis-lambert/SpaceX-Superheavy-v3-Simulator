@@ -13,11 +13,16 @@ $userDirectory="$run/User/"
 foreach($pass in @('Initial','Reload')){
     $reload=if($pass -eq 'Reload'){'-RecoveryPhotoReload'}else{'-RecoveryPhotoInitial'}
     $arguments=@('/Game/Starbase/Maps/L_RecoveryLab','-game','-windowed','-ForceRes','-ResX=1920','-ResY=1080','-RecoveryPhotoAudit',$reload,'-RecoveryReconstruction=3','-nosplash','-DisablePython','-SCCProvider=None',"-UserDir=$userDirectory","-abslog=$run/$pass.log")
-    if(!$GameExecutable){& $engine "$root/SuperHeavySim.uproject" @arguments *> "$run/$pass-console.log"}
-    else {& $GameExecutable @arguments *> "$run/$pass-console.log"}
-    if($LASTEXITCODE -ne 0){throw "Rendered $pass audit exited with $LASTEXITCODE"}
+    $started=Get-Date
+    if(!$GameExecutable){& $engine "$root/SuperHeavySim.uproject" @arguments *> "$run/$pass-console.log"; $code=$LASTEXITCODE}
+    else {
+        $quoted=@($arguments | ForEach-Object {'"'+$_.Replace('"','\"')+'"'})
+        $process=Start-Process -FilePath $GameExecutable -ArgumentList $quoted -Wait -PassThru -WindowStyle Hidden -RedirectStandardOutput "$run/$pass-console.log" -RedirectStandardError "$run/$pass-stderr.log"
+        $code=$process.ExitCode
+    }
+    if($code -ne 0){throw "Rendered $pass audit exited with $code"}
     $result=Get-ChildItem -LiteralPath "$run/User" -Recurse -Filter result.json | Where-Object { $_.Directory.Name -eq 'Photography' } | Select-Object -First 1
-    if(!$result){throw 'No photographic audit report'}
+    if(!$result -or $result.LastWriteTime -lt $started){throw 'No fresh photographic audit report'}
     Copy-Item -LiteralPath $result.FullName -Destination "$run/$pass-result.json"
     $report=Get-Content -Raw -LiteralPath $result.FullName | ConvertFrom-Json
     if(!$report.success){throw "Photographic $pass assertions failed"}

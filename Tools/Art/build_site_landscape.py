@@ -1,10 +1,10 @@
-"""Bake continuous service roads, drainage shoulders, dune relief and coastal water."""
+"""Bake continuous service roads, drainage shoulders and dune relief."""
 import sys,math,json
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'Shared'))
 from project_paths import ART_ROOT
 from earth_geography import point,geo,height
-from site_landscape import ROAD,dune_height,shoreline,road_height,smooth
+from site_landscape import ROAD,dune_height,road_height
 import bpy
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
 
@@ -68,12 +68,6 @@ def ribbon(name,half_width,offset):
 ribbon('SM_ServiceRoadNetwork',5.5,0)
 ribbon('SM_ServiceRoadShoulder',8.4,-.09)
 
-# A geodetic water surface follows the DEM shoreline rather than image tile edges.
-def water(u,v):
-    y=-1800+3600*v;x=shoreline(y)+3500*u
-    return point(*geo(x,y),-4.46),(u*3500,y)
-grid('SM_CoastalWater',80,360,water)
-
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'SiteLandscape.blend'))
-(OUT/'geometry.json').write_text(json.dumps(dict(meshes=reports,road=ROAD,source='USGS 3DEP + authored sub-metre dune detail and service layout',sea_datum_m=-4.46),indent=2))
+(OUT/'geometry.json').write_text(json.dumps(dict(meshes=reports,road=ROAD,source='USGS 3DEP + authored sub-metre dune detail and service layout',sea_datum_m=-4.5),indent=2))
 print('SITE_LANDSCAPE_READY',reports,flush=True)

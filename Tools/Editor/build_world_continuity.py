@@ -49,6 +49,7 @@ def build_surface(name,tile=None):
     base=blend((global_color,'RGB'),(region,'RGB'),gulfuv)
     base=blend(base,(local,'RGB'),coastuv)
     water=custom(m,{'C':base},'return smoothstep(.001,.012,C.b-C.r*1.13)*smoothstep(0,.009,C.g-C.r*.9);',u.CustomMaterialOutputType.CMOT_FLOAT1)
+    shore=None
     if tile is not None:
         i,j=tile;half_lat=math.degrees(6000/6371000);half_lon=half_lat/math.cos(math.radians(25.9973))
         lo=-97.1569-half_lon+i*half_lon/2;hi=25.9973-half_lat+(j+1)*half_lat/2
@@ -57,12 +58,14 @@ def build_surface(name,tile=None):
         maskuv=custom(m,{'G':geo},f'return float2((G.x-({-97.1569-half_lon:.12f}))/{half_lon*2:.12f},({25.9973+half_lat:.12f}-G.y)/{half_lat*2:.12f});',u.CustomMaterialOutputType.CMOT_FLOAT2)
         mask=sample(m,coast_mask,maskuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
         water=custom(m,{'W':water,'P':p,'Mask':(mask,'R')},'return lerp(W,Mask,smoothstep(0,60000,600000-max(abs(P.x),abs(P.y))));',u.CustomMaterialOutputType.CMOT_FLOAT1)
+        shoreuv=custom(m,{'UV':maskuv},'return UV-float2(80./12000.,0);',u.CustomMaterialOutputType.CMOT_FLOAT2)
+        shore=sample(m,coast_mask,shoreuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
         base=custom(m,{'B':base,'C':(aerial,'RGB'),'A':(aerial,'A'),'UV':tileuv,'P':p,'Camera':camera},'''
 float edge=600000-max(abs(P.x),abs(P.y));
 float near=1-smoothstep(1200000,5000000,length(Camera-P));
 return lerp(B,C,A*smoothstep(0,60000,edge)*near);''')
     # Water comes from a BRDF, not a lit photograph of an old ocean surface.
-    base=custom(m,{'C':base,'W':water},'float3 sea=lerp(float3(.003,.013,.024),float3(.009,.035,.041),saturate(C.g*4));return lerp(C,sea,W);')
+    base=custom(m,{'C':base,'W':water},'return lerp(C,float3(.006,.023,.032),W);')
     grounduv=custom(m,{'P':p},'return P.xy/430;',u.CustomMaterialOutputType.CMOT_FLOAT2)
     grain=sample(m,'/Game/ThirdParty/MWLandscapeAutoMaterial/Textures/Ground/TEX_MWAM_SandA_col',grounduv)
     ground=sample(m,'/Game/ThirdParty/MWLandscapeAutoMaterial/Textures/Ground/TEX_MWAM_SandA_nrm',grounduv,normal=True)
@@ -73,6 +76,12 @@ return lerp(B,C,A*smoothstep(0,60000,edge)*near);''')
     wavepath='/Game/ThirdParty/WaterMaterials/Textures/T_Ocean_Waves01_Normals'
     w1=sample(m,wavepath,uv1,sampler=u.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
     w2=sample(m,wavepath,uv2,sampler=u.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
+    if shore is not None:
+        surf=custom(m,{'C':base,'W':water,'Inland':(shore,'R'),'P':p,'T':time,'Wave':(w1,'RGB')},'''
+float crest=smoothstep(.72,.98,sin(P.x*.0035+P.y*.00013+T*1.4));
+float foam=W*(1-Inland)*smoothstep(35000,60000,P.x)*crest*smoothstep(.25,.7,Wave.r);
+return lerp(C,float3(.38,.44,.43),foam*.65);''')
+        connect(m,surf,u.MaterialProperty.MP_BASE_COLOR)
     vertex=ex(m,u.MaterialExpressionVertexNormalWS)
     normal=custom(m,{'P':p,'Camera':camera,'W':water,'A':(w1,'RGB'),'B':(w2,'RGB'),'Terrain':vertex,'Ground':(ground,'RGB')},'''
 float3 up=normalize(P+float3(0,0,637100000));

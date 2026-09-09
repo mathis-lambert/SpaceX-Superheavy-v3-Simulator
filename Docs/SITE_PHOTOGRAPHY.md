@@ -40,8 +40,9 @@ unchanged. Vegetation placements are resampled from the registered imagery and t
 - Two tank conditioning vents reuse the existing non-emissive heterogeneous
   condensation material. They fade beyond 550 m and disappear at 800 m.
 - Four additional bounded workshop/tank-farm light beams. They add no shadow maps.
-- A curved coastal water mesh follows the sampled shoreline, with two scales of
-  wave normals and a shallow surf band.
+- Water shares the curved Earth surface, with two scales of wave normals and
+  a surf band sampled against the geographic shoreline. There is no separate
+  rectangular ocean overlay, and aerial-image seams do not tint the water.
 
 The detailed facility parts share eight instanced mesh batches, totaling 4,281
 instances. The new service scenery has no flight collisions. Only the existing
