@@ -1,0 +1,271 @@
+{
+  "configuration": "Development",
+  "executable": "Windows/SuperHeavySim.exe",
+  "platform": "Windows x64",
+  "version": "0.1.0-alpha.5",
+  "files": [
+    {
+      "sha256": "c16f2bec502f68141874b40da9ee590ce632c39d2c3b162caf13b24600549121",
+      "path": "FLIGHT.md",
+      "bytes": 5654
+    },
+    {
+      "sha256": "9b7bf92fbbef212729c620830eca8cfdfd4854641eea5275400e2d4dd131a282",
+      "path": "PHOTOGRAPHY.md",
+      "bytes": 5704
+    },
+    {
+      "sha256": "97a6aba3c3a203bbb99cb261c33d4220b10b1f3d18a9981c02f06f34303226ad",
+      "path": "PROPULSION.md",
+      "bytes": 5574
+    },
+    {
+      "sha256": "d724e4cdf85f6ec99def4af81f494822c682b9a19b157aca046e6c4e859d33fb",
+      "path": "README.md",
+      "bytes": 3877
+    },
+    {
+      "sha256": "7f7c7765d077ad574ca5c02321c8777537ba02e0d8f0bb96cff6a81ef1ba174c",
+      "path": "ThirdParty/NASA-AUDIO.json",
+      "bytes": 684
+    },
+    {
+      "sha256": "1ff3cf7b0f3d77e1b61ef7dc5d8301b0d2651ef578924fdf2b46645f857ad1bc",
+      "path": "ThirdParty/NVIDIA-LICENSE.txt",
+      "bytes": 27476
+    },
+    {
+      "sha256": "d17b9eb9ca31237250044eb60b4f193d2ba7a1acef15539193c4762168781fc6",
+      "path": "ThirdParty/ORIGINAL-AUDIO.json",
+      "bytes": 2081
+    },
+    {
+      "sha256": "6a3870dd3ac6df29df03861392b1edb4848f18ba888a52779c0d17854887329b",
+      "path": "Windows/Manifest_NonUFSFiles_Win64.txt",
+      "bytes": 3276
+    },
+    {
+      "sha256": "e2b8808f9ae527bf301544e9ad67e0f3db6e19823d78b7178757fae5a95a45c7",
+      "path": "Windows/Manifest_UFSFiles_Win64.txt",
+      "bytes": 241542
+    },
+    {
+      "sha256": "ba49ae5586f817b36a2772269f71f899cb1f54b5f2720fad951319edd5e140b8",
+      "path": "Windows/NOTICES.txt",
+      "bytes": 111
+    },
+    {
+      "sha256": "279628e30c2848be967f930580b95f15500e73ee2cd7b881e7de0acf275ae300",
+      "path": "Windows/SuperHeavySim.exe",
+      "bytes": 171520
+    },
+    {
+      "sha256": "36795e47d9724ee68349efbbe64aba94db108b9cad1e3dfe8bc510f359136f53",
+      "path": "Windows/Engine/Binaries/ThirdParty/DbgHelp/dbghelp.dll",
+      "bytes": 2232688
+    },
+    {
+      "sha256": "5c6b07bf263dd8b85cb146b59468a22eb1fbd8635d4a6c56a8e41b67ce5eca2b",
+      "path": "Windows/Engine/Binaries/ThirdParty/MsQuic/v220/win64/msquic.dll",
+      "bytes": 2547080
+    },
+    {
+      "sha256": "82d7a3e50710d660927db2f318cbed471049c962b7c05de12c2b2b3e40a35af9",
+      "path": "Windows/Engine/Binaries/ThirdParty/NVIDIA/NVaftermath/Win64/GFSDK_Aftermath_Lib.x64.dll",
+      "bytes": 5799016
+    },
+    {
+      "sha256": "f23df1213c4bf23b5c666bafa7ec18743847a2e18192ae8e0d096a2fb7c28bf9",
+      "path": "Windows/Engine/Binaries/ThirdParty/Ogg/Win64/VS2015/libogg_64.dll",
+      "bytes": 59832
+    },
+    {
+      "sha256": "a56d43a98e197f5e73a1dadf5c1dc7a07ad40327b199faa4ff1247abd6eccd5b",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vorbis/Win64/VS2015/libvorbis_64.dll",
+      "bytes": 1724856
+    },
+    {
+      "sha256": "d64e67ca918716be8b6056a6f7a1f6256e910754425db8369d952943264b40eb",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vorbis/Win64/VS2015/libvorbisfile_64.dll",
+      "bytes": 48568
+    },
+    {
+      "sha256": "8c5af98e2d899d4aec744c63a8bc99b90124d8fc3bdc120d4c178e1df3a3e5e8",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_api_dump.dll",
+      "bytes": 8161680
+    },
+    {
+      "sha256": "9e55221c225dce4b5448bac7dadb7e39fd216f51354dde02e58f950f4a0dd80b",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_api_dump.json",
+      "bytes": 13848
+    },
+    {
+      "sha256": "7972fa60e084dc7da6c8a69ac1645b112f5e98a078fc27a7d3df469f2da4f811",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_crash_diagnostic.dll",
+      "bytes": 2890128
+    },
+    {
+      "sha256": "578bde354874789671dee1a96468c965619c9f3ba16cfa65f850e81a80674087",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_crash_diagnostic.json",
+      "bytes": 23055
+    },
+    {
+      "sha256": "dd72d28450db1b52bd6c5dc12228741b680940c5fb5eb6b6a0e26f0ee5c3fc3e",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_gfxreconstruct.dll",
+      "bytes": 8166288
+    },
+    {
+      "sha256": "71d4e243a2af74874f4f61378bdfe3753cb01ce5eb9b98400d83612bf882a815",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_gfxreconstruct.json",
+      "bytes": 28099
+    },
+    {
+      "sha256": "93227f57ddca0084e1655a65d2cc915d65b5191f6c645a17c0b36cfa2f714b38",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_khronos_profiles.dll",
+      "bytes": 1485200
+    },
+    {
+      "sha256": "6095c28691757e083a8c1bef3c69ca76a8b5017e21acaf55d1bc7e82221a0fbe",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_khronos_profiles.json",
+      "bytes": 66696
+    },
+    {
+      "sha256": "eebd555aab6df20b21520564d0eb2341ad0e9cdde6148ee1c71ef76805c5e7df",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_khronos_shader_object.dll",
+      "bytes": 415632
+    },
+    {
+      "sha256": "18ecafc9a65e1b7af8cd0e36dc936026cdb3aed333c4ea5a7c17d6d9465cfaf4",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_khronos_shader_object.json",
+      "bytes": 4455
+    },
+    {
+      "sha256": "341b6b5eedbf4b7aeb4439af85b23974b820b1413dfaf6356911476df44ed559",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_khronos_synchronization2.dll",
+      "bytes": 397200
+    },
+    {
+      "sha256": "a1e980a24be9a16a826b00c27d61b85ee0e2e17226dc9c4e8eec031879e5f26a",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_khronos_synchronization2.json",
+      "bytes": 1910
+    },
+    {
+      "sha256": "ea37bfda6749684d88a1944ae7103a87d9b38468579f397c3c82ede1ceaa40d6",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_khronos_validation.dll",
+      "bytes": 19509136
+    },
+    {
+      "sha256": "5c464b84457776d92a674de506f7b7a489294583a7d7609f78fcc52bc4406d09",
+      "path": "Windows/Engine/Binaries/ThirdParty/Vulkan/Win64/VkLayer_khronos_validation.json",
+      "bytes": 95917
+    },
+    {
+      "sha256": "ba40d206c6113ac1a35993a06390c93e55602713a902d7ba7b2f2f0ed13e3d3f",
+      "path": "Windows/Engine/Binaries/ThirdParty/Windows/WinPixEventRuntime/x64/WinPixEventRuntime.dll",
+      "bytes": 69056
+    },
+    {
+      "sha256": "0ca010abcabe52493fdb744d79c4c8132ae6756046b68aa7c88bdc03ec1effcd",
+      "path": "Windows/Engine/Binaries/ThirdParty/Windows/XAudio2_9/x64/xaudio2_9redist.dll",
+      "bytes": 858152
+    },
+    {
+      "sha256": "f1945cd6c19e56b3c1c78943ef5ec18116907a4ca1efc40a57d48ab1db7adfc5",
+      "path": "Windows/Engine/Config/StagedBuild_SuperHeavySim.ini",
+      "bytes": 3
+    },
+    {
+      "sha256": "edc4f3b628a139c5e185bbaeca661c95c1f427368d3b92892c5cff36c56dd941",
+      "path": "Windows/Engine/Content/Renderer/TessellationTable.bin",
+      "bytes": 259568
+    },
+    {
+      "sha256": "fef3980fa567e9c45d5d8dcaa432a2c1a3f3bb17fe67d7ab198164f56c142aa1",
+      "path": "Windows/Engine/Content/Slate/Cursor/invisible.cur",
+      "bytes": 326
+    },
+    {
+      "sha256": "9a4540c1ed0ac2a0755c0093a9c01e4b3dbe21b25805318ba495648fc890e14f",
+      "path": "Windows/Engine/Extras/Redist/en-us/vc_redist.arm64.exe",
+      "bytes": 11751688
+    },
+    {
+      "sha256": "c458c6841310561ef6fadef893092ed02d840da205ad0ae9843fb0d2579b3378",
+      "path": "Windows/Engine/Extras/Redist/en-us/vc_redist.x64.exe",
+      "bytes": 18569648
+    },
+    {
+      "sha256": "5df3d744b5cc4421181e9e2c97cadff4e9b1b2b25e80202160e80fc94ff948f2",
+      "path": "Windows/Engine/Plugins/NNE/NNERuntimeORT/Binaries/ThirdParty/Onnxruntime/Win64/onnxruntime.dll",
+      "bytes": 17339384
+    },
+    {
+      "sha256": "442cffbdb7dd782d5a2933aec4b7e53d630b252d71c5b7eaa853c24c19644cb0",
+      "path": "Windows/SuperHeavySim/Binaries/Win64/SuperHeavySim.exe",
+      "bytes": 337802752
+    },
+    {
+      "sha256": "de15a5f93bfd334d4fe32343a81d76f9de0824af8e31b2189637d12545af2673",
+      "path": "Windows/SuperHeavySim/Binaries/Win64/tbb12.dll",
+      "bytes": 342456
+    },
+    {
+      "sha256": "74edc04a8f5bc2593a5a555b675c1251d6d90e693ee6a67cfa11dd3b2d17a856",
+      "path": "Windows/SuperHeavySim/Binaries/Win64/tbbmalloc.dll",
+      "bytes": 117176
+    },
+    {
+      "sha256": "c41711499e13244fd07ca28a9b32ece29e4454ecc38fb50681f74254b333a9b3",
+      "path": "Windows/SuperHeavySim/Binaries/Win64/D3D12/x64/D3D12Core.dll",
+      "bytes": 4831768
+    },
+    {
+      "sha256": "e36f1ee4371798892529762368907d19b997493ad6f30aa8acbfd0132881804f",
+      "path": "Windows/SuperHeavySim/Binaries/Win64/D3D12/x64/d3d12SDKLayers.dll",
+      "bytes": 4943344
+    },
+    {
+      "sha256": "f97b69379ecbdbab7e1dcd2b6170e7f285d367c86ee6718bc401c4d7cef1275c",
+      "path": "Windows/SuperHeavySim/Binaries/Win64/DML/x64/DirectML.dll",
+      "bytes": 18538488
+    },
+    {
+      "sha256": "8059846ef01e9743dac9ea5f42e043a586c9bb6ea342944d43c7f80b6b4ea117",
+      "path": "Windows/SuperHeavySim/Content/Paks/global.ucas",
+      "bytes": 3345296
+    },
+    {
+      "sha256": "afcd335b74c1cd063c4976da1f2b244e9df3a842c6239f48f3a04c09a29d45a4",
+      "path": "Windows/SuperHeavySim/Content/Paks/global.utoc",
+      "bytes": 818
+    },
+    {
+      "sha256": "431822e708c71a9cea8a18b15940d478a60128f2ef4395d3d4fe51a81e5f84b4",
+      "path": "Windows/SuperHeavySim/Content/Paks/SuperHeavySim-Windows.pak",
+      "bytes": 12508929
+    },
+    {
+      "sha256": "b7d6aab8531e4dbb95b02632e7b4d357c221aa855836f6966c0ae5784919c750",
+      "path": "Windows/SuperHeavySim/Content/Paks/SuperHeavySim-Windows.ucas",
+      "bytes": 958336112
+    },
+    {
+      "sha256": "3f5066954af455d53ec87dabf3b502edfcecb9c361d01874121186a8da3947c9",
+      "path": "Windows/SuperHeavySim/Content/Paks/SuperHeavySim-Windows.utoc",
+      "bytes": 454438
+    },
+    {
+      "sha256": "099b3e1e3ad3f226de621fe570b26cc554cc775e2606be23eb222d6245674070",
+      "path": "Windows/SuperHeavySim/Plugins/NVIDIA/DLSS/Binaries/ThirdParty/Win64/nvngx_dlss.dll",
+      "bytes": 58830448
+    },
+    {
+      "sha256": "aca3d81f55ad3b709ec1f500578bbb114cf9d5a3cebc8c1a119162c4c4d4a361",
+      "path": "Windows/SuperHeavySim/Plugins/NVIDIA/DLSS/Binaries/ThirdParty/Win64/nvngx_dlssd.dll",
+      "bytes": 28593776
+    }
+  ],
+  "created_utc": "2026-09-09T16:42:22.9451013Z",
+  "engine": "Unreal Engine 5.8",
+  "source_commit": "e364e009c19b39b8330e1f8179723544b95de2c1"
+}

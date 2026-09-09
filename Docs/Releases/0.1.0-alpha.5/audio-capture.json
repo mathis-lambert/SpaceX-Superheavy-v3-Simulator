@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "source": "Actual Unreal master-submix capture",
+  "sample_rate": 48000,
+  "channels": 2,
+  "duration_s": 6.592,
+  "peak": 0.07623291015625,
+  "rms": 0.02561085716203717,
+  "clipped_samples": 0,
+  "sha256": "2a28a6871687f5c3f22212aa5de41309165796cb88f8aae1a29fec1a127c9d3b"
+}
