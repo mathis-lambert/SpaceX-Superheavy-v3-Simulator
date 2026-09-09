@@ -1,0 +1,29 @@
+{
+  "version": "0.1.0-alpha.4",
+  "executable_sha256": "279628e30c2848be967f930580b95f15500e73ee2cd7b881e7de0acf275ae300",
+  "chase_offset_step_cm": 9.275062463698822e-12,
+  "support_mask": 3,
+  "support_drift_m": 0.1388856685856247,
+  "evidence_directory": "C:\\Users\\lambe\\Documents\\Projets\\superheavy_landing\\SuperHeavySim\\Saved\\Recovery\\Alpha-0.1.0-alpha.4-20260909-172951",
+  "success": true,
+  "front_ingress": true,
+  "source_commit": "11565bb0db1473510caff2c2fa5cc34dd1f1a944",
+  "controls_checks": 69,
+  "capture": true,
+  "rendered_frames": 6649,
+  "visual_review_required": false,
+  "reconstruction": "NVIDIA DLSS / DLAA",
+  "visual_review": {
+    "reviewed": [
+      "ControlsAudit/Home.png",
+      "Review/CAPTURE.png",
+      "Review/SECURED.png"
+    ],
+    "result": "Home, front approach and unpowered secured frame inspected from the packaged executable."
+  },
+  "game_executable_sha256": "2f89e4cc2fea2524cb94c9fa611db91717cd187946e0ca1e45e6a634e2476e70",
+  "physics_models_passed": 23,
+  "full_flight_matrix_passed": 8,
+  "contact_fixtures_passed": 4,
+  "dynamic_return_comparison_passed": true
+}
