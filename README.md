@@ -3,7 +3,7 @@
 An interactive Unreal Engine 5.8 simulator: launch, stage separation, boostback, ballistic coast, atmospheric control, landing burn and physical tower capture.
 
 The current source version is `0.1.0-alpha.3`. See [launch instructions and known
-limitations](Docs/Releases/ALPHA_0.1.0.md), [site and photography changes](Docs/SITE_PHOTOGRAPHY.md), and the [first alpha validation](Docs/Releases/ALPHA_0.1.0_VALIDATION.md). Reproduce the standalone package with
+limitations](Docs/Releases/ALPHA_0.1.0.md), [site and photography changes](Docs/SITE_PHOTOGRAPHY.md), and [alpha.3 validation](Docs/Releases/ALPHA_0.1.0_ALPHA3_VALIDATION.md). Reproduce the standalone package with
 `./Tools/Runtime/package_alpha.ps1` from committed sources. Local release builds
 live in `Releases/`; generated binaries remain outside Git.
 

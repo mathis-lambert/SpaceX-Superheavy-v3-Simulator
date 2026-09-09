@@ -1,0 +1,8 @@
+{
+  "source_commit": "a7316589023514da3bc2dc136e54716101e379f5",
+  "method": "Full-frame mean luminance after sRGB linearization; rendered screenshots at EV -1 and +1",
+  "low": 0.17380121264193585,
+  "high": 0.48726741927284645,
+  "high_over_low": 2.803590446038554,
+  "success": true
+}
