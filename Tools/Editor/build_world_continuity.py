@@ -97,11 +97,15 @@ float visible=1-smoothstep(20000,150000,length(Camera-P));
 float foam=W*Coverage*(1-smoothstep(3,24,abs(distance)))*crest*smoothstep(.42,.76,Wave.r)*visible;
 return lerp(C,float3(.52,.57,.56),foam*.5);''')
     connect(m,surf,u.MaterialProperty.MP_BASE_COLOR)
-    swell=custom(m,{'P':p,'T':time,'W':water,'Camera':camera,'H':hydro,'Coverage':coverage},'''
+    # Vertex deformation only needs the surveyed local water mask. Passing the
+    # pixel-stage water classification here also samples every orbital imagery
+    # layer per vertex, including in the velocity pass. Outside this local patch
+    # the ocean keeps its wave normals; small vertex swells are not evaluated.
+    swell=custom(m,{'P':p,'T':time,'Camera':camera,'H':hydro,'Coverage':coverage},'''
 float distance=(H.g-.5)*256;
 float shoal=lerp(1,smoothstep(0,35,distance),Coverage);
 float fade=1-smoothstep(150000,400000,length(P-Camera));
-float height=(sin(P.x*.0019+P.y*.0008-T*1.1)*24+sin(P.x*.0007-P.y*.0013-T*.72)*12)*W*shoal*fade;
+float height=(sin(P.x*.0019+P.y*.0008-T*1.1)*24+sin(P.x*.0007-P.y*.0013-T*.72)*12)*H.r*Coverage*shoal*fade;
 return normalize(P+float3(0,0,637100000))*height;''')
     connect(m,swell,u.MaterialProperty.MP_WORLD_POSITION_OFFSET)
     vertex=ex(m,u.MaterialExpressionVertexNormalWS)

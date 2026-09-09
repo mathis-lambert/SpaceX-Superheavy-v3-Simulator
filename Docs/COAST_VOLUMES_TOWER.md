@@ -76,6 +76,9 @@ distance and an estimated optical shallows term. It is derived from elevation,
 not surveyed bathymetry or a tidal model. Shore foam is bounded near the shoreline
 and fades with viewing distance. Two warped wave-normal scales and up to 36 cm
 of near-water vertex displacement avoid a full ocean-fluid simulation.
+Small geometric swells are restricted to the local hydrology patch. Vertex and
+velocity passes sample that mask directly, without evaluating the orbital imagery
+pyramid used by the pixel shader; more distant water retains wave normals.
 
 ## Original volume flow
 
