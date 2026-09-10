@@ -1,0 +1,23 @@
+{
+  "blend": "C:\\Users\\lambe\\Documents\\Projets\\superheavy_landing\\ArtSource\\Effects\\TurbulentDeluge\\TurbulentDeluge.blend",
+  "dimensions_m": [
+    20.0,
+    16.0,
+    12.0
+  ],
+  "scene_fps": 24,
+  "frames": [
+    1,
+    64
+  ],
+  "settings": {
+    "use_adaptive_domain": false,
+    "use_collision_border_front": false,
+    "use_collision_border_back": false,
+    "use_collision_border_right": false,
+    "use_collision_border_left": false,
+    "use_collision_border_top": false,
+    "use_collision_border_bottom": false,
+    "use_adaptive_timesteps": true
+  }
+}
