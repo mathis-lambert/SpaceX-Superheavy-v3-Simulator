@@ -1,0 +1,20 @@
+[
+  {
+    "name": "InteractiveEmergency_SeparationRcs_60",
+    "mission_success": false,
+    "burn_s": 21.700001131743193,
+    "outage_s": 65.00000339001417,
+    "pass": true,
+    "speed_mps": 1.6993228163884775,
+    "reason": "Emergency surface contact / tower mission not recovered"
+  },
+  {
+    "name": "InteractiveEmergency_SeparationRcs_15",
+    "mission_success": false,
+    "burn_s": 21.766667801886797,
+    "outage_s": 65.00000339001417,
+    "pass": true,
+    "speed_mps": 1.8061580694239279,
+    "reason": "Emergency surface contact / tower mission not recovered"
+  }
+]

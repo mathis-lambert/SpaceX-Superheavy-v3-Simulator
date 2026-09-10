@@ -6,6 +6,11 @@ void FRecoveryGuidanceModel::Guide(const FRecoveryDynamicsState& Dynamics,const 
 {
     PredictorClock+=Dt;
     if(PredictorClock>=0.25) { PredictorClock-=0.25; PredictBallistic(); }
+    if(State.bAlternateRecovery)
+    {
+        FVector Force,Up;GuideAlternate(Dynamics,Dt,Force,Up);
+        State.Command.ThrustAccelerationMps2=Force;State.Command.TargetUpWorld=Up;return;
+    }
     const FVector Downrange=Config.TowerRotation.GetForwardVector();
     const FVector SiteWind=WindAt(Config.ReturnWindReferenceAltitudeM);
     FVector Crosswind=SiteWind-Downrange*FVector::DotProduct(SiteWind,Downrange);Crosswind.Z=0;
@@ -51,12 +56,12 @@ void FRecoveryGuidanceModel::Guide(const FRecoveryDynamicsState& Dynamics,const 
             if(State.PhaseTimeS>5 && FVector2D(State.PredictedImpactM-ReturnTarget).Size()<500 && PredictedApogee<Config.ApogeeM+3000)
             { Transition(ERecoveryPhase::Coast,ERecoveryGuidanceReason::Coast); State.Command.EngineCount=0; }
             else if(Dynamics.PropellantKg<Config.LandingReserveKg)
-            { Fail(ERecoveryGuidanceReason::ReserveDepleted); State.Command.EngineCount=0; }
+            { SelectAlternate(Dynamics);State.Command.EngineCount=0;ForceAccel=FVector::ZeroVector; }
         }
     }
     if(State.Phase==ERecoveryPhase::Coast && State.Navigation.VerticalSpeedMps<0 && State.Navigation.DynamicPressurePa>200)
         Transition(ERecoveryPhase::Entry,ERecoveryGuidanceReason::Entry);
-    if(State.Phase==ERecoveryPhase::Coast || State.Phase==ERecoveryPhase::Entry)
+    if(!State.bAlternateRecovery && (State.Phase==ERecoveryPhase::Coast || State.Phase==ERecoveryPhase::Entry))
     {
         State.Command.EngineCount=0; ForceAccel=FVector::ZeroVector;
         // Tail-first attitude and aerodynamic correction of the predicted entry point.
@@ -69,6 +74,33 @@ void FRecoveryGuidanceModel::Guide(const FRecoveryDynamicsState& Dynamics,const 
             const double Authority=State.Navigation.DynamicPressurePa*Config.BodySideAreaM2*Config.BodyNormalCoefficient/FMath::Max(1.,State.Navigation.MassKg);
             FVector Correction=(-DesiredA/FMath::Max(0.1,Authority)).GetClampedToMaxSize(FMath::Tan(FMath::DegreesToRadians(Config.MaxEntryAngleDeg)));
             TargetUp=(TargetUp+Correction).GetSafeNormal();
+        }
+        // A displaced entry footprint can require propulsion before terminal
+        // braking. Hysteresis prevents valve chatter while the prediction updates.
+        const double Miss=FVector2D(ReturnTarget-State.PredictedImpactM).Size();
+        const double Remaining=FMath::Max(0.,Dynamics.PropellantKg-Config.LandingReserveKg);
+        State.CorrectionFuelBudgetKg=Remaining;
+        const double Reserve=FMath::Max(Config.LandingReserveKg,State.LandingPrediction.FuelKg);
+        const double Spare=FMath::Max(0.,Dynamics.PropellantKg-Reserve);
+        const double Budget=State.Navigation.EngineIspS*RecoveryAtmosphere::G0*
+            FMath::Loge(State.Navigation.MassKg/FMath::Max(1.,State.Navigation.MassKg-Spare));
+        if(State.Phase==ERecoveryPhase::Entry && State.Navigation.AltitudeM>12000 && Miss>10000 &&
+            Miss/FMath::Max(8.,State.TimeToImpactS)>Budget*.7)
+        {
+            SelectAlternate(Dynamics);GuideAlternate(Dynamics,Dt,ForceAccel,TargetUp);
+            State.Command.ThrustAccelerationMps2=ForceAccel;State.Command.TargetUpWorld=TargetUp;return;
+        }
+        if(!State.bCorrectiveBurn && Miss>5000 && State.Navigation.AltitudeM>18000 &&
+            State.Navigation.DynamicPressurePa<1200 && Remaining>2500)State.bCorrectiveBurn=true;
+        if(Miss<900 || Remaining<500 || State.Navigation.AltitudeM<12000 || State.Navigation.DynamicPressurePa>2500)State.bCorrectiveBurn=false;
+        if(State.bCorrectiveBurn)
+        {
+            FVector DeltaV=(ReturnTarget-State.PredictedImpactM)/FMath::Max(20.,State.TimeToImpactS);DeltaV.Z=0;
+            const double Accel=3*AvailablePerEngine/State.Navigation.MassKg;
+            TargetUp=DeltaV.GetSafeNormal();
+            // Turn using existing fins/RCS, then fire only along a useful axis.
+            if(FVector::DotProduct(TargetUp,Body.Rotation.GetUpVector())>.94)
+            {State.Command.EngineCount=3;ForceAccel=TargetUp*FMath::Min(Accel,DeltaV.Size()/4.);State.CorrectiveBurnSeconds+=Dt;State.LastCorrectionBurnTimeS=State.SampleTimeS;}
         }
         LandingPredictionClock-=Dt;
         if(State.Navigation.VerticalSpeedMps<-20 && State.Navigation.AltitudeM<10000 && LandingPredictionClock<=0)
@@ -100,16 +132,17 @@ void FRecoveryGuidanceModel::Guide(const FRecoveryDynamicsState& Dynamics,const 
     if(State.Phase==ERecoveryPhase::Coast || State.Phase==ERecoveryPhase::Entry)
     {
         if(Dynamics.ThrustN<1) State.UnpoweredSeconds+=Dt;
-        else if(State.PhaseTimeS>2) State.bUnpoweredViolation=true;
+        else if(State.PhaseTimeS>2 && !State.bCorrectiveBurn && State.SampleTimeS-State.LastCorrectionBurnTimeS>2) State.bUnpoweredViolation=true;
     }
     if(Dynamics.PropellantKg<=0 && State.Phase!=ERecoveryPhase::Captured)
-    { State.Command.EngineCount=0; Fail(ERecoveryGuidanceReason::PropellantExhausted); }
+    { State.Command.EngineCount=0;SelectAlternate(Dynamics); }
 }
 
 void FRecoveryGuidanceModel::PredictBallistic()
 {
     // Forward point-mass coast prediction, no engine thrust. Recomputed from measured state.
     FVector P=State.Navigation.BasePositionM,V=State.Navigation.VelocityMps;
+    State.BallisticPathM.Reset();State.BallisticPathM.Add(P);
     const double Floor=Config.CaptureWorldM.Z+30;
     double T=0;
     for(;T<500 && (P.Z>Floor || V.Z>0);T+=0.75)
@@ -121,6 +154,7 @@ void FRecoveryGuidanceModel::PredictBallistic()
         const double CdA=Config.DragAreaM2*Cd+3*Config.GridFinAreaM2*Config.GridFinDragCoefficient;
         const FVector A=(FlightGeometry::EarthCenterCm()-P*100).GetSafeNormal()*Air.Gravity-0.5*Air.Density*CdA*Rel.Size()*Rel/FMath::Max(1.,State.Navigation.MassKg);
         P+=V*0.75+A*(0.5*0.75*0.75); V+=A*0.75;
+        if(FMath::Fmod(T,3.)<.1)State.BallisticPathM.Add(P);
     }
     State.TimeToImpactS=FMath::Max(1.,T);
     State.PredictedImpactM=P+FVector(V.X,V.Y,0)*Config.LandingDriftCorrectionS;

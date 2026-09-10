@@ -1,6 +1,6 @@
 param(
     [string]$EngineRoot='D:/Engines/UE_5.8',
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.6'
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.7'
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -18,7 +18,7 @@ $started=Get-Date
 $log=Join-Path $evidence "Alpha-$Version-package.log"
 # Development game build preserves the interactive force inspector and local
 # diagnostics. The Editor target and its MCP/toolset plugins are excluded.
-& (Join-Path $EngineRoot 'Engine/Build/BatchFiles/RunUAT.bat') BuildCookRun "-project=$project" -target=SuperHeavySim -noP4 -platform=Win64 -clientconfig=Development -installed -nocompileeditor -skipbuildeditor -build -cook -stage -pak -iostore -compressed -prereqs -nodebuginfo -archive "-archivedirectory=$archive" -ubtargs=-gather -utf8output -unattended *> $log
+& (Join-Path $EngineRoot 'Engine/Build/BatchFiles/RunUAT.bat') BuildCookRun "-project=$project" -target=SuperHeavySim -noP4 -platform=Win64 -clientconfig=Development -installed -nocompileeditor -skipbuildeditor -build -cook -stage -pak -iostore -compressed -prereqs -nodebuginfo -archive "-archivedirectory=$archive" -ubtargs=-NoUBTMakefiles -utf8output -unattended *> $log
 if($LASTEXITCODE -ne 0){Get-Content -LiteralPath $log -Tail 50;throw "Alpha packaging failed. See $log"}
 $executable=Join-Path $archive 'Windows/SuperHeavySim.exe'
 if(!(Test-Path -LiteralPath $executable) -or (Get-Item -LiteralPath $executable).LastWriteTime -lt $started){throw 'Packaging produced no fresh standalone executable'}
@@ -27,6 +27,7 @@ Copy-Item -LiteralPath "$root/Docs/SITE_PHOTOGRAPHY.md" -Destination "$archive/P
 Copy-Item -LiteralPath "$root/Docs/DYNAMIC_RETURN.md" -Destination "$archive/FLIGHT.md"
 Copy-Item -LiteralPath "$root/Docs/PROPULSION_AND_STARTUP.md" -Destination "$archive/PROPULSION.md"
 Copy-Item -LiteralPath "$root/Docs/COAST_VOLUMES_TOWER.md" -Destination "$archive/COAST-VOLUMES-TOWER.md"
+Copy-Item -LiteralPath "$root/Docs/INTERACTIVE_RECOVERY.md" -Destination "$archive/INTERACTIVE-RECOVERY.md"
 $null=New-Item -ItemType Directory -Path "$archive/ThirdParty" -Force
 Copy-Item -LiteralPath "$root/Docs/Research/CoastVolumes/regional-sources.json" -Destination "$archive/ThirdParty/REGIONAL-IMAGERY.json"
 Copy-Item -LiteralPath "$root/Docs/Research/CoastVolumes/lidar-sources.json" -Destination "$archive/ThirdParty/LIDAR.json"

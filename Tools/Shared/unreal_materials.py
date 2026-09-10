@@ -50,7 +50,11 @@ def material(path):
     name=path.rsplit('/',1)[-1];folder=path.rsplit('/',1)[0]
     result=u.load_asset(path) if A.does_asset_exist(path) else u.AssetToolsHelpers.get_asset_tools().create_asset(name,folder,u.Material,u.MaterialFactoryNew())
     assert result,path
-    E.delete_all_material_expressions(result)
+    # UE 5.8's DeleteAll iterates the live expression array while removing from
+    # it, leaving skipped nodes behind. Delete a snapshot for idempotent builds.
+    for node in list(E.get_material_expressions(result)):
+        E.delete_material_expression(result,node)
+    assert E.get_num_material_expressions(result)==0,path
     return result
 
 def save(material):

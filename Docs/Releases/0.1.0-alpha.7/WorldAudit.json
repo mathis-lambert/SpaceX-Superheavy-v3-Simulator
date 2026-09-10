@@ -1,0 +1,14 @@
+{
+	"success": true,
+	"checks": [
+		"Flight computer leaves simulation running: PASS",
+		"Failed engine closes its physical thrust valve: PASS",
+		"Jammed fin holds its measured angle: PASS",
+		"Experiment parameters reach flight model: PASS",
+		"Force samples have physical sources: PASS",
+		"Time acceleration advances the same physical flight: PASS",
+		"Restoring experiments restores actuator availability: PASS",
+		"Ray tracing has a supported-device fallback: PASS",
+		"Lumen hardware tracing matches the menu state: PASS"
+	]
+}

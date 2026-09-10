@@ -40,6 +40,7 @@ struct FRecoveryDynamicsCommand
     FVector HeadingWorld=FVector::ForwardVector;
     ERecoveryPhase Phase=ERecoveryPhase::Ready;
     int32 EngineCount=0;
+    double GimbalTranslationWeight=0;
     bool bSeparated=false,bContactShutdown=false,bGroundSupplyConnected=true;
     bool bExternalFlightFixture=false;
     int32 SupportContactCount=0;
@@ -62,7 +63,7 @@ struct FRecoveryDynamicsState
     FVector2D ConditioningFlowKgS=FVector2D::ZeroVector;
     double PropellantKg=0,RcsPropellantKg=0,MainFuelConsumedKg=0,ConditioningVentedKg=0,GroundSupplyKg=0;
     double ThrustN=0,Throttle=0,GridFinAuthority=0,FinControlSeconds=0;
-    double EngineIspS=0,DynamicPressurePa=0,GravityMps2=0;
+    double EngineIspS=0,DynamicPressurePa=0,GravityMps2=0,ReactionPressureEfficiency=1;
     double DelugeFlow=0,GroundClockS=0,ElapsedS=0;
     double PeakEngineForceRatio=0,PeakGimbalDeg=0;
     double MinimumStepS=TNumericLimits<double>::Max(),MaximumStepS=0;

@@ -23,7 +23,7 @@ enum class ERecoveryGuidanceReason : uint8
 {
     None, Separation, Boostback, Coast, ReserveDepleted, Entry, LandingBurn,
     Capture, Captured, PropellantExhausted, OperatorAbort, EnvelopeExceeded,
-    SupportLost, SupportEvaluated, ApproachEnvelopeExceeded
+    SupportLost, SupportEvaluated, ApproachEnvelopeExceeded, AlternateSelected, EmergencyContact, ImpactMitigation
 };
 
 // Resolve labels only when the game thread consumes an event or exports a result.
@@ -52,6 +52,20 @@ namespace RecoveryNavigation
 
 struct FRecoveryGuidanceState
 {
+    bool bAlternateRecovery=false;
+    bool bAlternateBraking=false;
+    bool bSafeAlternateAvailable=false;
+    double AvailableDivertDeltaVMps=0,RequiredDivertDeltaVMps=0;
+    FVector AlternateTargetM=FVector::ZeroVector;
+    double RejectedPlanSeconds=0;
+    double RcsDisabledSeconds=0,EngineFailedSeconds=0,FinJammedSeconds=0;
+    double LastCorrectionBurnTimeS=-100;
+    TArray<FVector> AlternateSitesM;
+    TArray<double> AlternateDeltaVMps;
+    TArray<bool> AlternateReachable;
+    TArray<FVector> BallisticPathM;
+    bool bCorrectiveBurn=false;
+    double CorrectiveBurnSeconds=0,CorrectionFuelBudgetKg=0;
     ERecoveryPhase Phase=ERecoveryPhase::Ready;
     FRecoveryDynamicsCommand Command;
     FRecoveryNavigationState Navigation;
@@ -106,6 +120,8 @@ private:
     void Navigate(const FRecoveryDynamicsState& Dynamics,bool Separated);
     void AuditFrontApproach();
     void PredictBallistic();
+    void SelectAlternate(const FRecoveryDynamicsState& Dynamics);
+    void GuideAlternate(const FRecoveryDynamicsState& Dynamics,double Dt,FVector& ForceAccel,FVector& TargetUp);
     FVector WindAt(double Height) const;
     void Transition(ERecoveryPhase Phase,ERecoveryGuidanceReason Reason);
     void Fail(ERecoveryGuidanceReason Reason);

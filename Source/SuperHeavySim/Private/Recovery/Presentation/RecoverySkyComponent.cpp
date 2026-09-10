@@ -16,9 +16,11 @@
 #include "Components/SpotLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInterface.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Recovery/Shared/FlightGeometry.h"
 #include "Recovery/Shared/RecoveryAssets.h"
 #include "Components/VolumetricCloudComponent.h"
+#include "Components/SkyAtmosphereComponent.h"
 #include "EngineUtils.h"
 #include "Misc/App.h"
 
@@ -40,13 +42,17 @@ void URecoverySkyComponent::FindScene()
     for(TActorIterator<AExponentialHeightFog> It(GetWorld());It;++It) { Fog=It->GetComponent();break; }
     for(TActorIterator<ASkyLight> It(GetWorld());It;++It) { Sky=It->GetLightComponent();break; }
     for(TActorIterator<AVolumetricCloud> It(GetWorld());It;++It) { Clouds=It->FindComponentByClass<UVolumetricCloudComponent>();break; }
+    for(TActorIterator<ASkyAtmosphere> It(GetWorld());It;++It) { Atmosphere=It->FindComponentByClass<USkyAtmosphereComponent>();break; }
     if(Sun.IsValid()) Sun->GetLightComponent()->SetMobility(EComponentMobility::Movable);
     if(Sky.IsValid()) { Sky->SetMobility(EComponentMobility::Movable);Sky->SetRealTimeCaptureEnabled(true); }
     if(Clouds.IsValid())
     {
         Clouds->TracingMaxDistanceMode=EVolumetricCloudTracingMaxDistanceMode::DistanceFromCloudLayerEntryPoint;
         Clouds->SetTracingStartMaxDistance(1800.f);
-        Clouds->SetTracingMaxDistance(450.f);
+        Clouds->SetTracingMaxDistance(2200.f);
+        Clouds->SetLayerBottomAltitude(.6f);Clouds->SetLayerHeight(10.4f);
+        if(auto* Material=LoadObject<UMaterialInterface>(nullptr,RecoveryAssets::M_LayeredWeather))
+        {WeatherMaterial=UMaterialInstanceDynamic::Create(Material,this);Clouds->SetMaterial(WeatherMaterial);}
     }
     Moon=GetWorld()->SpawnActor<ADirectionalLight>();
     Moon->GetLightComponent()->SetMobility(EComponentMobility::Movable);
@@ -101,7 +107,7 @@ void URecoverySkyComponent::TickComponent(float Dt,ELevelTick Type,FActorCompone
     if(StarField)StarField->SetWorldLocation(CameraLocation);
     // Retain full screen resolution near silhouettes; distant cloud layers need
     // fewer depth samples once the camera is far above their upper boundary.
-    const float Samples=FMath::Lerp(2.f,.75f,FMath::SmoothStep(7000.,20000.,Altitude));
+    const float Samples=1.f;
     if(Clouds.IsValid() && FMath::Abs(Samples-LastCloudSamples)>.04f)
     {
         Clouds->SetViewSampleCountScale(Samples);
@@ -110,10 +116,25 @@ void URecoverySkyComponent::TickComponent(float Dt,ELevelTick Type,FActorCompone
     }
     if(Fog.IsValid())
     {
-        const float Near=1-FMath::SmoothStep(1500.,16000.,Altitude);
-        Fog->SetFogDensity(0.003f*Near*(PC?PC->FogAmount:1.f));Fog->SetVisibility(Near>0.0001);
+        // Global extinction belongs to the spherical atmosphere. The planar
+        // exponential term creates an infinite false horizon in high-altitude
+        // views; retain this component only as the grid for local vapor volumes.
+        // UE removes the fog-grid scene proxy at exactly zero density.
+        Fog->SetFogDensity(2.e-8f);Fog->SetSecondFogDensity(0);Fog->SetFogMaxOpacity(0);Fog->SetVisibility(true);
         Fog->SetVolumetricFog(true);Fog->SetVolumetricFogDistance(150000);
         Fog->SetVolumetricFogScatteringDistribution(0.3f);
+    }
+    const int32 Weather=PC?FMath::Clamp(PC->WeatherPreset,0,3):2;
+    const float Coverage[]={.08f,.18f,.48f,.84f},Haze[]={.45f,1.8f,1.f,1.35f};
+    WeatherCoverage=FMath::FInterpTo(WeatherCoverage,Coverage[Weather],FApp::GetDeltaTime(),.35f);
+    WeatherHaze=FMath::FInterpTo(WeatherHaze,Haze[Weather],FApp::GetDeltaTime(),.35f);
+    if(Atmosphere.IsValid())Atmosphere->SetMieScatteringScale(WeatherHaze*(PC?PC->FogAmount:1.f));
+    if(WeatherMaterial)
+    {
+        WeatherMaterial->SetScalarParameterValue(TEXT("Coverage"),WeatherCoverage);
+        WeatherMaterial->SetScalarParameterValue(TEXT("HighClouds"),Weather==0?.18f:.65f);
+        const auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());const FVector Wind=D?D->GetWindVelocityMps(2000):FVector::ZeroVector;
+        WeatherMaterial->SetVectorParameterValue(TEXT("WindMps"),FLinearColor(Wind.X,Wind.Y,Wind.Z));
     }
     if(Exposure.IsValid())
     {

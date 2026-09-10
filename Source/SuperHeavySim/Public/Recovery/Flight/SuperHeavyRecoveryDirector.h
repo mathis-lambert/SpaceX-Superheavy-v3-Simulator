@@ -106,12 +106,14 @@ public:
     const FTransform& GetForceFrame() const { return AppliedForceFrame; }
     FVector GetWindVelocityMps(double Height) const { return WindAt(Height); }
     const FRecoveryFlightExperiment& GetExperiment() const { return Experiment; }
+    const TArray<FString>& GetMissionEvents() const { return PhaseEvents; }
     void SetFailedEngine(int32 Index);
     void SetJammedFin(int32 Index);
     void SetReactionJetsDisabled(bool Disabled);
     void SetAttitudeResponse(double Value);
     void SetWindScale(double Value);
     void ResetExperiments();
+    void SetTimedFault(int32 Kind,int32 Index,double DurationS);
     const TArray<FVector>& GetReactionForcesBodyN() const { return ReactionForcesBodyN; }
     double GetUpperStageThrustN() const { return UpperStageThrustN; }
     FVector2D GetConditioningFlowKgS() const { return ConditioningFlowKgS; }

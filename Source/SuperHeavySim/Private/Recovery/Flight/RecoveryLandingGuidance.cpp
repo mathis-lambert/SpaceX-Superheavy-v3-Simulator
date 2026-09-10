@@ -71,11 +71,12 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
             State.TerminalPlan=Candidate;
             State.TerminalInput=Input;
         }
-        if(CapabilityChanged && !Candidate.bFeasible)State.TerminalPlan.bFeasible=false;
+        if(!Candidate.bFeasible && (CapabilityChanged || TrackingLost || State.TerminalPlan.ElapsedS>=State.TerminalPlan.HorizonS))State.TerminalPlan.bFeasible=false;
     }
     bool TrackPlan=State.TerminalPlan.bFeasible && !State.bContactShutdown;
     if(TrackPlan)
     {
+        State.RejectedPlanSeconds=0;
         const auto& Plan=State.TerminalPlan;
         const double T=FMath::Min(Plan.ElapsedS,Plan.HorizonS);
         // Retain the accepted arrival deadline and reference history. Near the
@@ -112,6 +113,9 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
     }
     if(!TrackPlan)
     {
+        State.RejectedPlanSeconds+=Dt;
+        if(State.RejectedPlanSeconds>12 && Height<1800 && State.TerminalRejectedPlans>20 && N.HorizontalErrorM>300)
+        {SelectAlternate(Dynamics);GuideAlternate(Dynamics,Dt,ForceAccel,TargetUp);return;}
         // Energy braking remains active before a feasible terminal transfer is
         // available. It targets the catch altitude, with no fixed hover shelf.
         if(!State.bContactShutdown)State.TerminalBrakingSeconds+=Dt;
@@ -161,6 +165,18 @@ void FRecoveryGuidanceModel::GuideLanding(const FRecoveryDynamicsState& Dynamics
     const FVector Side=FVector(ForceAccel.X,ForceAccel.Y,0).GetClampedToMaxSize(ForceAccel.Z*FMath::Tan(FMath::DegreesToRadians(Config.MaxTiltDeg)));
     ForceAccel=FVector(Side.X,Side.Y,ForceAccel.Z);
     TargetUp=ForceAccel.GetSafeNormal();
+    // Near the rails, vector engine thrust for translation and assign residual
+    // pitch/roll moment to the gas jets. This allows an upright fitting contact
+    // without demanding that the entire vehicle lean for every lateral correction.
+    const FVector LocalDemand=Body.Rotation.UnrotateVector(ForceAccel*N.MassKg);
+    const double TranslationMoment=FVector2D(LocalDemand).Size()*Dynamics.Mass.CentreFromBaseM;
+    const double JetMargin=Config.ReactionControlTorqueNm*Dynamics.ReactionPressureEfficiency*.25;
+    const double Translation=(!External.Experiment.bReactionJetsDisabled && Dynamics.RcsPropellantKg>300)?
+        (1-FMath::SmoothStep(1.,8.,Height))*(1-FMath::SmoothStep(2.,5.,N.VelocityMps.Size()))*
+        FMath::Min(1.,JetMargin/FMath::Max(1.,TranslationMoment)):0.;
+    State.Command.GimbalTranslationWeight=Translation;
+    TargetUp=FMath::Lerp(TargetUp,FVector::UpVector,Translation).GetSafeNormal();
+    State.Command.TargetAngularVelocityWorldRadS*=1-Translation;
     const double ThreeEngineDemand=CoreThrust>0?ForceAccel.Size()*N.MassKg/CoreThrust:1.e10;
     LandingEngineGroup=LandingEngineGroup>=13?(ThreeEngineDemand<.80?3:13):(ThreeEngineDemand>.96?13:3);
     State.Command.EngineCount=LandingEngineGroup;

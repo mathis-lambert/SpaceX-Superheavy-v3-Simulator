@@ -91,8 +91,8 @@ void ARecoveryPlayerController::TickControlsAudit()
                 Shot(AuditStage==10?TEXT("ForcesReady.png"):TEXT("ForcesAscent.png"));
             }
             if(Index==12)Check(TEXT("I closes force inspector"),!bForceOverlay);
-            if(Index==13)Check(TEXT("L opens live lab"),bMenuOpen && !IsPaused());
-            if(Index==14)Check(TEXT("L closes focused live lab"),!bMenuOpen);
+            if(Index==13)Check(TEXT("L opens flight computer without pausing"),bFlightComputer && !bMenuOpen && !IsPaused());
+            if(Index==14)Check(TEXT("L closes flight computer"),!bFlightComputer && !bMenuOpen);
             if(Index==15)Check(TEXT("Tab opens camera picker"),bMenuOpen);
             if(Index==16)Check(TEXT("Tab closes focused camera picker"),!bMenuOpen);
             if(Index==22)Check(TEXT("J halves playback"),PlaybackRate==.5f);
@@ -108,7 +108,7 @@ void ARecoveryPlayerController::TickControlsAudit()
         Check(TEXT("Pause freezes the existing physical flight"),IsPaused() && D->MissionTime==AuditMissionTime && D->GetBody()->GetComponentLocation().Equals(AuditPosition,.01));
         Menu->ShowPage(8);Shot(TEXT("Settings.png"));AuditStage=15;AuditDeadline=Now+1;return;
     }
-    if(AuditStage==15){ResumeFlight();ToggleFlightLab();Shot(TEXT("Lab.png"));AuditStage=16;AuditDeadline=Now+1;return;}
+    if(AuditStage==15){ResumeFlight();ToggleFlightComputer();Shot(TEXT("Lab.png"));AuditStage=16;AuditDeadline=Now+1;return;}
     if(AuditStage==16){ResumeFlight();ReturnHome();AuditStage=17;AuditDeadline=Now+7;return;}
     if(AuditStage==17)
     {

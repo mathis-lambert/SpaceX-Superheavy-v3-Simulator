@@ -51,8 +51,9 @@ void FRecoveryGuidanceModel::Step(const FRecoveryBodyKinematics& Kinematics,cons
     const FRecoveryDynamicsCommand& External,double Dt)
 {
     if(Dt<=0 || !FMath::IsFinite(Dt))return;
-    Body=Kinematics;Experiment=External.Experiment;
+    Body=Kinematics;Experiment=External.Experiment.AtTime(State.MissionTimeS);
     State.Command=External;
+    State.Command.Experiment=Experiment;
     Navigate(Dynamics,External.bSeparated);
     // Ground operations and explicit collision fixtures have separate command
     // ownership. A flight begins only after the real launch mount is released.
@@ -64,6 +65,9 @@ void FRecoveryGuidanceModel::Step(const FRecoveryBodyKinematics& Kinematics,cons
         State.bFlightStarted=true;State.Phase=ERecoveryPhase::Ascent;
     }
     ++State.Steps;
+    if(Experiment.bReactionJetsDisabled)State.RcsDisabledSeconds+=Dt;
+    if(Experiment.FailedEngine>=0)State.EngineFailedSeconds+=Dt;
+    if(Experiment.JammedFin>=0)State.FinJammedSeconds+=Dt;
     State.ElapsedS+=Dt;State.MinimumStepS=FMath::Min(State.MinimumStepS,Dt);State.MaximumStepS=FMath::Max(State.MaximumStepS,Dt);
     // Navigation reads the incoming body sample. The command covers the next
     // interval and the mission clock below records that interval's endpoint.
@@ -79,7 +83,7 @@ void FRecoveryGuidanceModel::Step(const FRecoveryBodyKinematics& Kinematics,cons
     {
         if(State.MissionTimeS>Config.TimeoutSeconds || (State.Phase>=ERecoveryPhase::LandingBurn && State.Navigation.TiltDeg>70) ||
             State.Navigation.AltitudeM < -3 || Body.OriginM.ContainsNaN())Fail(ERecoveryGuidanceReason::EnvelopeExceeded);
-        else Guide(Dynamics,External,Dt);
+        else {auto Effective=External;Effective.Experiment=Experiment;Guide(Dynamics,Effective,Dt);}
     }
     AuditFrontApproach();
     if(State.Phase==ERecoveryPhase::Captured)

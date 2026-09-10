@@ -17,7 +17,12 @@ public:
         const FVector2D Size=G.GetLocalSize();const float Scale=FMath::Min(Size.X,Size.Y)/24.f;
         const auto Path=[&](std::initializer_list<FVector2D> Points){TArray<FVector2D>P;for(const auto& V:Points)P.Add(V*Scale);FSlateDrawElement::MakeLines(Out,Layer,G.ToPaintGeometry(),P,ESlateDrawEffect::None,Color*Style.GetColorAndOpacityTint(),true,1.65f*Scale);};
         const auto Circle=[&](float X,float Y,float R){TArray<FVector2D>P;for(int I=0;I<=32;++I){const float A=I*2*PI/32;P.Add(FVector2D(X+R*FMath::Cos(A),Y+R*FMath::Sin(A))*Scale);}FSlateDrawElement::MakeLines(Out,Layer,G.ToPaintGeometry(),P,ESlateDrawEffect::None,Color*Style.GetColorAndOpacityTint(),true,1.65f*Scale);};
-        if(Label.Contains(TEXT("back")) || Label.Contains(TEXT("cancel")))Path({{19,12},{5,12},{11,6},{5,12},{11,18}});
+        if(Label.Contains(TEXT("computer")) || Label.Contains(TEXT("systems"))){Path({{3,4},{21,4},{21,17},{3,17},{3,4}});Path({{8,21},{16,21},{12,21},{12,17}});Path({{6,9},{9,12},{6,15},{11,14},{16,14}});}
+        else if(Label.Contains(TEXT("weather"))){Circle(9,8,3);Path({{9,1},{9,3}});Path({{2,8},{4,8}});Path({{3,2},{5,4}});Path({{5,18},{5,14},{9,12},{13,14},{17,12},{21,15},{21,18},{5,18}});}
+        else if(Label.Contains(TEXT("faster"))){Path({{4,5},{11,12},{4,19}});Path({{13,5},{20,12},{13,19}});}
+        else if(Label.Contains(TEXT("slower"))){Path({{11,5},{4,12},{11,19}});Path({{20,5},{13,12},{20,19}});}
+        else if(Label.Contains(TEXT("events"))){Path({{4,5},{20,5},{20,20},{4,20},{4,5}});Path({{8,9},{16,9}});Path({{8,13},{16,13}});Path({{8,17},{13,17}});}
+        else if(Label.Contains(TEXT("back")) || Label.Contains(TEXT("cancel")))Path({{19,12},{5,12},{11,6},{5,12},{11,18}});
         else if(Label.Contains(TEXT("camera")) || Label.Contains(TEXT("view")) || Label.Contains(TEXT("orbit")) || Label.Contains(TEXT("observer"))){Path({{3,7},{7,7},{9,4},{15,4},{17,7},{21,7},{21,20},{3,20},{3,7}});Circle(12,13,4);}
         else if(Label.Contains(TEXT("display")) || Label.Contains(TEXT("graphics")) || Label.Contains(TEXT("image"))){Path({{3,4},{21,4},{21,17},{3,17},{3,4}});Path({{12,17},{12,21},{7,21},{17,21}});}
         else if(Label.StartsWith(TEXT("light")) || Label.Contains(TEXT("environment")) || Label.Contains(TEXT("ray"))){Circle(12,12,4);for(int I=0;I<8;++I){float A=I*PI/4;Path({{12+7*FMath::Cos(A),12+7*FMath::Sin(A)},{12+10*FMath::Cos(A),12+10*FMath::Sin(A)}});}}

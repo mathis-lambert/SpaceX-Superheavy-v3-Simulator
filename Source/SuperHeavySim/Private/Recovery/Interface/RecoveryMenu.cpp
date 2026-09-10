@@ -45,7 +45,7 @@ void SRecoveryMenu::Construct(const FArguments& Args)
     Controller=Args._Controller;
     ChildSlot
     [SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-      .BorderBackgroundColor_Lambda([this](){ return FLinearColor(.002f,.004f,.008f,Page==7 || (Page>=18 && Page<=21)?.04f:Page==6 || Page==13?0.12f:Page==0 && Controller.IsValid() && Controller->IsAtHome()?0.18f:0.55f); })
+      .BorderBackgroundColor_Lambda([this](){ return FLinearColor(.002f,.004f,.008f,Page==7 || (Page>=18 && Page<=21)?.04f:Page==6?0.12f:Page==0 && Controller.IsValid() && Controller->IsAtHome()?0.18f:0.55f); })
       .Padding(0)
       [SNew(SScaleBox).Stretch(EStretch::ScaleToFit)
         [SNew(SBox).WidthOverride(1920).HeightOverride(1080)
@@ -70,15 +70,13 @@ FReply SRecoveryMenu::OnPreviewKeyDown(const FGeometry& Geometry,const FKeyEvent
     if(Key==EKeys::Escape)
     {
         if(PC->bVideoConfirmation)PC->RevertVideo();
-        else if(Page==6 || Page==13)PC->ResumeFlight();
+        else if(Page==6)PC->ResumeFlight();
         else if(Page!=0)ShowPage(ParentPage(Page));
         else PC->TogglePauseMenu();
         return FReply::Handled();
     }
-    if((Page==6 && Key==EKeys::Tab) || (Page==13 && Key==EKeys::L))
+    if(Page==6 && Key==EKeys::Tab)
     {PC->ResumeFlight();return FReply::Handled();}
-    // The inspector remains usable from the live lab without touching flight state.
-    if(Page==13 && Key==EKeys::I){PC->ToggleForceOverlay();ShowPage(13);return FReply::Handled();}
     return FReply::Unhandled();
 }
 void SRecoveryMenu::Choice(TSharedRef<SVerticalBox> Rows,const FString& Label,TArray<FString> Values,int32 Selected,TFunction<void(int32)> Changed)
@@ -144,12 +142,12 @@ void SRecoveryMenu::ShowPage(int32 NewPage)
     Page=NewPage;auto* PC=Controller.Get();
     auto Rows=SNew(SVerticalBox);
     const bool Home=PC->IsAtHome();
-    const float Width=Page==6?1060:Page==0?520:Page==13?600:720;
+    const float Width=Page==6?1060:Page==0?520:720;
     FString Title=Home?TEXT("RETURN TO\nSTARBASE"):TEXT("PAUSED");
     const TMap<int32,FString> Titles={{1,TEXT("LAUNCH")},{2,TEXT("DISPLAY")},{3,TEXT("CONTROLS")},
         {4,TEXT("KEEP CHANGES?")},{5,TEXT("SAVED")},{6,TEXT("CAMERAS")},{7,TEXT("PHOTOGRAPHY")},
         {8,TEXT("SETTINGS")},{9,TEXT("ABOUT")},{10,TEXT("MISSION")},{11,TEXT("AUDIO")},
-        {12,TEXT("IMAGE QUALITY")},{13,TEXT("FLIGHT LAB")},{14,TEXT("RAY TRACING")},
+        {12,TEXT("IMAGE QUALITY")},{14,TEXT("RAY TRACING")},
         {15,TEXT("CREDITS")},{16,TEXT("RESTART FLIGHT?")},{17,TEXT("RETURN HOME?")},
         {18,TEXT("CAMERA OPTICS")},{19,TEXT("COLOR & EXPOSURE")},{20,TEXT("ENVIRONMENT")},{21,TEXT("SAVED LOOKS")}};
     if(const auto* Found=Titles.Find(Page))Title=*Found;
@@ -220,7 +218,7 @@ void SRecoveryMenu::ShowPage(int32 NewPage)
             .OnMouseCaptureEnd_Lambda([PC](){PC->SavePreferences();})
             .OnControllerCaptureEnd_Lambda([PC](){PC->SavePreferences();})];
         Toggle(Rows,TEXT("Automatic orbit"),PC->bAutomaticOrbit,[PC](bool B){PC->bAutomaticOrbit=B;PC->SavePreferences();});
-        Rows->AddSlot().AutoHeight().Padding(0,0,0,18)[Text(TEXT("Mouse: look · Wheel: zoom / move speed\nArrow keys or WASD / ZQSD: move · E / B: up / down"),14,RecoveryUI::Muted)];
+        Rows->AddSlot().AutoHeight().Padding(0,0,0,18)[Text(TEXT("Hold right mouse: look · Left click: inspect\nWheel: zoom / speed · Arrows or WASD / ZQSD: move\nE / B: up / down"),14,RecoveryUI::Muted)];
         for(const auto& Binding:RecoveryInput::Bindings())
             Rows->AddSlot().AutoHeight().Padding(0,0,0,9)[SNew(SHorizontalBox)
                 +SHorizontalBox::Slot().FillWidth(.4f)[Text(Binding.Key.GetDisplayName().ToString(),14,RecoveryUI::Accent)]
@@ -237,6 +235,7 @@ void SRecoveryMenu::ShowPage(int32 NewPage)
     else if(Page==7 || Page==18 || Page==19 || Page==21)PhotoPage(Rows);
     else if(Page==20)
     {
+        Choice(Rows,TEXT("Weather / affects wind"),{TEXT("Clear"),TEXT("Coastal haze"),TEXT("Broken clouds"),TEXT("Overcast")},PC->WeatherPreset,[PC](int32 I){PC->SetWeatherPreset(I);});
         Rows->AddSlot().AutoHeight().Padding(0,0,0,12)[Text(TEXT("STARBASE / LOCAL TIME"),13,RecoveryUI::Muted)];
         Choice(Rows,TEXT("Clock"),{TEXT("CDT / UTC−5"),TEXT("CST / UTC−6")},PC->Photography.UtcOffsetHours<-5.5f?1:0,[PC](int32 I){PC->Photography.UtcOffsetHours=I?-6.f:-5.f;PC->SavePreferences();});
         PhotoSlider(Rows,TEXT("Date / 2026"),&PC->Photography.SolarDayOfYear,1,365,TEXT("calendar"));
@@ -303,7 +302,7 @@ void SRecoveryMenu::ShowPage(int32 NewPage)
     {
         Choice(Rows,TEXT("Playback speed"),{TEXT("0.25× / inspect"),TEXT("0.5× / slow motion"),TEXT("1× / real time"),TEXT("2× / fast forward"),TEXT("4× / fast forward")},PC->PlaybackRate<.4?0:PC->PlaybackRate<.75?1:PC->PlaybackRate<1.5?2:PC->PlaybackRate<3?3:4,
             [PC](int32 I){const float Rates[]={.25,.5,1,2,4};PC->SetPlaybackRate(Rates[I]);});
-        Rows->AddSlot().AutoHeight().Padding(0,0,0,12)[Button(TEXT("Flight lab"),[PC](){PC->ResumeFlight();PC->ToggleFlightLab();})];
+        Rows->AddSlot().AutoHeight().Padding(0,0,0,12)[Button(TEXT("Flight computer"),[PC](){PC->ResumeFlight();PC->ToggleFlightComputer();})];
 
         Toggle(Rows,TEXT("Flight telemetry"),PC->bTelemetry,[PC](bool B){PC->SetTelemetry(B);});
         Rows->AddSlot().AutoHeight().Padding(0,12,0,10)[Button(TEXT("Cameras"),[this](){ShowPage(6);})];
@@ -322,29 +321,6 @@ void SRecoveryMenu::ShowPage(int32 NewPage)
         Rows->AddSlot().AutoHeight().Padding(0,0,0,25)[SNew(SSlider).Style(&RecoveryUI::ControlSliderStyle()).Value_Lambda([PC](){return PC->MasterVolume;})
             .OnValueChanged_Lambda([PC](float V){PC->MasterVolume=V;})
             .OnMouseCaptureEnd_Lambda([PC](){PC->SavePreferences();})];
-    }
-    else if(Page==13)
-    {
-        auto* D=PC->GetDirector();
-        if(D)
-        {
-            Toggle(Rows,TEXT("Force vectors"),PC->bForceOverlay,[PC](bool B){PC->bForceOverlay=B;});
-            TArray<FString> Names={TEXT("All engines available")};
-            for(const auto& Engine:D->GetEngines())Names.Add(TEXT("Fail ")+Engine.Id.ToString());
-            Choice(Rows,TEXT("Engine"),Names,D->GetExperiment().FailedEngine+1,[D](int32 I){D->SetFailedEngine(I-1);});
-            Choice(Rows,TEXT("Grid fin"),{TEXT("All fins available"),TEXT("Jam fin 1"),TEXT("Jam fin 2"),TEXT("Jam fin 3")},D->GetExperiment().JammedFin+1,[D](int32 I){D->SetJammedFin(I-1);});
-            Toggle(Rows,TEXT("Disable RCS"),D->GetExperiment().bReactionJetsDisabled,[D](bool B){D->SetReactionJetsDisabled(B);});
-            Choice(Rows,TEXT("Attitude response"),{TEXT("Gentle / 0.5×"),TEXT("Nominal / 1×"),TEXT("Aggressive / 1.5×")},FMath::RoundToInt(D->GetExperiment().AttitudeResponse*2)-1,[D](int32 I){D->SetAttitudeResponse((I+1)*.5);});
-            Choice(Rows,TEXT("Scenario wind"),{TEXT("Calm"),TEXT("Nominal"),TEXT("Double"),TEXT("Triple")},FMath::RoundToInt(D->GetExperiment().WindScale),[D](int32 I){D->SetWindScale(I);});
-            Rows->AddSlot().AutoHeight().Padding(0,6,0,16)
-            [SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular",14)).ColorAndOpacity(RecoveryUI::Muted)
-                .Text_Lambda([D](){const auto* T=D->Tower.Get();if(!T)return FText::GetEmpty();
-                    return FText::FromString(FString::Printf(TEXT("RAILS L / R   %.2f / %.2f MN   |   %.0f / %.0f mm\nARM DRIVE   %.0f%%   |   %s"),
-                        T->RailLoadN.X*1.e-6,T->RailLoadN.Y*1.e-6,T->RailCompressionM.X*1000,T->RailCompressionM.Y*1000,
-                        T->ArmClosure*100,(T->BrokenRailMask|T->BrokenHingeMask)?TEXT("MECHANICAL FAILURE"):TEXT("HARDWARE INTACT")));})];
-            Rows->AddSlot().AutoHeight().Padding(0,0,0,8)[Button(TEXT("Restore actuators"),[this,D](){D->ResetExperiments();ShowPage(13);})];
-            Rows->AddSlot().AutoHeight()[Button(TEXT("Close"),[PC](){PC->ResumeFlight();},true)];
-        }
     }
     else if(Page==14)
     {

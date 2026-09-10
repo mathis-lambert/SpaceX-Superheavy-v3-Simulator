@@ -5,6 +5,9 @@ const TCHAR* RecoveryGuidanceReasonText(ERecoveryGuidanceReason Reason)
 {
     switch(Reason)
     {
+    case ERecoveryGuidanceReason::AlternateSelected:return TEXT("Tower recovery abandoned / offshore diversion");
+    case ERecoveryGuidanceReason::EmergencyContact:return TEXT("Emergency surface contact / tower mission not recovered");
+    case ERecoveryGuidanceReason::ImpactMitigation:return TEXT("No reachable offshore candidate / braking to reduce impact");
     case ERecoveryGuidanceReason::Separation:return TEXT("MECO / stage separation / return attitude");
     case ERecoveryGuidanceReason::Boostback:return TEXT("13-engine boostback / solving ballistic return");
     case ERecoveryGuidanceReason::Coast:return TEXT("Boostback cutoff / unpowered coast to apogee");

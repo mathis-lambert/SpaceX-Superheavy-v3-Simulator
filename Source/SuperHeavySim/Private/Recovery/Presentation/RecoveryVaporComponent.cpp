@@ -103,10 +103,10 @@ void URecoveryVaporComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
             Spawn(FVector(Base.X,Base.Y,600)+Radial*(900+J*200),Radial*((Hot?3500:600)+J*140)+Wind+FVector(0,0,Hot?180+J*65:30),Hot?18:9,Hot?8+J:1.1,Hot?3.2f:.8f,(Hot?2.6f:.6f)*D->GetDelugeFlow(),EVaporKind::Deluge);
         }
     }
-    else if(Delivered>.01 && D->Phase==ERecoveryPhase::Ascent && D->AltitudeM>170 && D->AltitudeM<12000 && (Base-LastTrailPosition).Size()>6500)
+    if(Delivered>.001 && (D->Phase==ERecoveryPhase::Ascent || D->Phase==ERecoveryPhase::LandingBurn) && D->AltitudeM>170 && D->AltitudeM<12000 && (Base-LastTrailPosition).Size()>2200)
     {
         LastTrailPosition=Base;
-        Spawn(Base-Up*5500,Wind-Up*600,22,11,2.f,1.2f*FMath::Sqrt(D->PressurePa/101325.),EVaporKind::Trail);
+        Spawn(Base-Up*3500,Wind-Up*600,14,4,1.8f,FMath::Sqrt(Delivered)*FMath::Sqrt(D->PressurePa/101325.),EVaporKind::Trail);
     }
     for(int32 I=0;I<Billows.Num();++I)
     {

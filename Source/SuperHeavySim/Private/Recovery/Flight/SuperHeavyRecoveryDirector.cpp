@@ -70,6 +70,7 @@ void ASuperHeavyRecoveryDirector::BeginPlay()
     bChaseReview=FParse::Param(FCommandLine::Get(),TEXT("RecoveryChaseReview"));
     bEarthReview=FParse::Param(FCommandLine::Get(),TEXT("RecoveryEarthReview"));
     bIgnoreCameraInput=FParse::Param(FCommandLine::Get(),TEXT("RecoveryReview")) ||
+        FParse::Param(FCommandLine::Get(),TEXT("RecoveryInteractiveAudit")) ||
         FParse::Param(FCommandLine::Get(),TEXT("RecoveryCloudReview")) ||
         FParse::Param(FCommandLine::Get(),TEXT("RecoveryVaporReview"));
     FParse::Value(FCommandLine::Get(),TEXT("RecoveryReportName="),ReportName);
@@ -199,6 +200,20 @@ void ASuperHeavyRecoveryDirector::SelectScenario(int32 Index)
     ++MissionGeneration;
     LaunchSequence=FRecoveryLaunchSequence();DelugeFlow=0;
     Experiment=FRecoveryFlightExperiment();ChaseTracking=FRecoveryChaseTracking();
+    FString FaultTimeline;
+    if(FParse::Value(FCommandLine::Get(),TEXT("RecoveryFaults="),FaultTimeline))
+    {
+        TArray<FString> Items;FaultTimeline.ParseIntoArray(Items,TEXT(";"),true);
+        for(const auto& Item:Items)
+        {
+            TArray<FString> Fields;Item.ParseIntoArray(Fields,TEXT(":"),false);
+            if(Fields.Num()!=4)continue;
+            FRecoveryScheduledFault Fault;Fault.Kind=FCString::Atoi(*Fields[0]);Fault.Index=FCString::Atoi(*Fields[1]);
+            Fault.StartS=FCString::Atod(*Fields[2]);Fault.DurationS=FCString::Atod(*Fields[3]);
+            if(Fault.Kind>=1 && Fault.Kind<=3 && FMath::IsFinite(Fault.StartS) && Fault.StartS>=0 && FMath::IsFinite(Fault.DurationS) && Fault.DurationS>0)
+                Experiment.Schedule.Add(Fault);
+        }
+    }
     SetPhase(ERecoveryPhase::Ready,TEXT("RTLS / estimated mass & aero / SPACE to launch"));
     InitializeDynamics();
 }
@@ -265,6 +280,7 @@ void ASuperHeavyRecoveryDirector::Tick(float DeltaSeconds)
     if(!GuidanceState.bFlightStarted)PhaseTime+=Dt;
     if(!GuidanceState.bFlightStarted && Phase!=ERecoveryPhase::Ready && Phase!=ERecoveryPhase::Countdown && !bResultWritten) MissionTime+=Dt;
     UpdateNavigation();
+    if((Phase==ERecoveryPhase::Ready || Phase==ERecoveryPhase::Countdown) && Experiment.AdvanceGroundFaults(Dt))RecordExperiment(TEXT("TIMED_RESTORE"));
     if(Phase==ERecoveryPhase::Countdown) TickLaunchSequence(Dt);
     PrepareGroundCommand();
     PeakAltitudeM=FMath::Max(PeakAltitudeM,AltitudeM); PeakTiltDeg=FMath::Max(PeakTiltDeg,TiltDeg);

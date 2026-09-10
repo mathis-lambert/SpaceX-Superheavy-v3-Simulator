@@ -201,6 +201,18 @@ void ASuperHeavyRecoveryDirector::WriteResult(bool bSuccess,const FString& Reaso
         Decisions.Add(MakeShared<FJsonValueObject>(Decision));
     }
     Result->SetArrayField(TEXT("guidance_events"),Decisions);
+    Result->SetBoolField(TEXT("alternate_recovery"),GuidanceState.bAlternateRecovery);
+    Result->SetBoolField(TEXT("estimated_alternate_reachable"),GuidanceState.bSafeAlternateAvailable);
+    Result->SetNumberField(TEXT("divert_available_delta_v_mps"),GuidanceState.AvailableDivertDeltaVMps);
+    Result->SetNumberField(TEXT("divert_required_delta_v_mps"),GuidanceState.RequiredDivertDeltaVMps);
+    Result->SetNumberField(TEXT("corrective_burn_s"),GuidanceState.CorrectiveBurnSeconds);
+    Result->SetNumberField(TEXT("rcs_disabled_s"),GuidanceState.RcsDisabledSeconds);
+    Result->SetNumberField(TEXT("engine_failed_s"),GuidanceState.EngineFailedSeconds);
+    Result->SetNumberField(TEXT("fin_jammed_s"),GuidanceState.FinJammedSeconds);
+    Result->SetNumberField(TEXT("rejected_plan_streak_s"),GuidanceState.RejectedPlanSeconds);
+    Result->SetNumberField(TEXT("left_rail_load_n"),DynamicsState.Tower.RailLoadN.X);
+    Result->SetNumberField(TEXT("right_rail_load_n"),DynamicsState.Tower.RailLoadN.Y);
+    Result->SetStringField(TEXT("settled_attitude"),DynamicsState.Body.Rotation.Rotator().ToString());
     FString Json; FJsonSerializer::Serialize(Result,TJsonWriterFactory<>::Create(&Json));
     FFileHelper::SaveStringToFile(Json,*(Dir/FileName+TEXT(".json")));
     UE_LOG(LogRecovery,Display,TEXT("RECOVERY_RESULT %s"),*Json);

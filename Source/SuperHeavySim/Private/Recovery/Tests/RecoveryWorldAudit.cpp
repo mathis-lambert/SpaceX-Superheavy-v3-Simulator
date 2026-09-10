@@ -42,9 +42,9 @@ void ARecoveryPlayerController::TickWorldAudit()
     case 14:
         AuditPendingCamera=D->GetEngines().IndexOfByPredicate([](const FRecoveryEngineState& E){return E.bCentral;});
         D->SetFailedEngine(AuditPendingCamera);D->SetJammedFin(1);D->SetReactionJetsDisabled(true);D->SetAttitudeResponse(.5);D->SetWindScale(2.);
-        ToggleFlightLab();AuditMissionTime=D->MissionTime;AuditDeadline=Now+3;break;
+        ToggleFlightComputer();AuditMissionTime=D->MissionTime;AuditDeadline=Now+3;break;
     case 15:
-        Check(TEXT("Flight laboratory leaves simulation running"),!IsPaused() && bMenuOpen && D->MissionTime>AuditMissionTime+1);
+        Check(TEXT("Flight computer leaves simulation running"),!IsPaused() && bFlightComputer && !bMenuOpen && D->MissionTime>AuditMissionTime+1);
         Check(TEXT("Failed engine closes its physical thrust valve"),D->GetEngines().IsValidIndex(AuditPendingCamera) && D->GetEngines()[AuditPendingCamera].ThrustN<1.);
         Check(TEXT("Jammed fin holds its measured angle"),FMath::Abs(D->GridFinAnglesDeg.Y-D->GetExperiment().JammedFinAngleDeg)<1.e-6);
         Check(TEXT("Experiment parameters reach flight model"),D->GetExperiment().bReactionJetsDisabled && D->GetExperiment().AttitudeResponse==.5 && D->GetExperiment().WindScale==2.);

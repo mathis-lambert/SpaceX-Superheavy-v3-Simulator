@@ -67,10 +67,16 @@ def build_surface(name,tile=None):
         lo=-97.1569-half_lon+i*half_lon/2;hi=25.9973-half_lat+(j+1)*half_lat/2
         tileuv=custom(m,{'G':geo},f'return float2((G.x-({lo:.12f}))/{half_lon/2:.12f},({hi:.12f}-G.y)/{half_lat/2:.12f});',u.CustomMaterialOutputType.CMOT_FLOAT2)
         aerial=sample(m,ROOT+f'/Textures/Earth/T_BocaChica_{i}_{j}',tileuv)
-        base=custom(m,{'B':base,'C':(aerial,'RGB'),'A':(aerial,'A'),'UV':tileuv,'P':p,'Camera':camera},'''
+        coarse=sample(m,ROOT+f'/Textures/Earth/T_BocaChica_{i}_{j}',tileuv)
+        prop(coarse,'mip_value_mode',u.TextureMipValueMode.TMVM_MIP_LEVEL);prop(coarse,'const_mip_value',8)
+        regional_coarse=sample(m,regional,regionaluv)
+        prop(regional_coarse,'mip_value_mode',u.TextureMipValueMode.TMVM_MIP_LEVEL);prop(regional_coarse,'const_mip_value',4)
+        base=custom(m,{'B':base,'C':(aerial,'RGB'),'Low':(coarse,'RGB'),'Reference':(regional_coarse,'RGB'),'A':(aerial,'A'),'UV':tileuv,'P':p,'Camera':camera},'''
 float edge=600000-max(abs(P.x),abs(P.y));
-float near=1-smoothstep(3000000,9000000,length(Camera-P));
-return lerp(B,C,A*smoothstep(0,60000,edge)*near);''')
+float near=1-smoothstep(1000000,3000000,length(Camera-P));
+// Match broad photographic exposure while retaining the aerial high frequencies.
+float3 matched=C*clamp(Reference/max(Low,float3(.015,.015,.015)),.65,1.5);
+return lerp(B,matched,A*smoothstep(0,120000,edge)*near);''')
     # Water comes from a BRDF, not a lit photograph of an old ocean surface.
     base=custom(m,{'C':base,'W':water,'H':hydro,'Coverage':coverage},'float shallow=Coverage*exp(-H.b*7);float3 sea=lerp(float3(.004,.018,.028),float3(.022,.067,.067),shallow);return lerp(C,sea,W);')
     grounduv=custom(m,{'P':p},'return P.xy/430;',u.CustomMaterialOutputType.CMOT_FLOAT2)
@@ -113,28 +119,14 @@ for name in ('M_EarthGlobe','M_GulfRegion','M_BocaRegion'):build_surface(name)
 for j in range(4):
     for i in range(4):build_surface(f'M_BocaChica_{i}_{j}',(i,j))
 
-# Low-light star field is scene-linear emissive, so normal daylight exposure
-# naturally suppresses it. Procedural distribution is not an astronomy catalogue.
-stars=material(ROOT+'/Materials/M_StarField');prop(stars,'shading_model',u.MaterialShadingModel.MSM_UNLIT)
-prop(stars,'two_sided',True);prop(stars,'is_sky',True)
-p=ex(stars,u.MaterialExpressionWorldPosition);c=ex(stars,u.MaterialExpressionCameraPositionWS)
-sky=ex(stars,u.MaterialExpressionSkyAtmosphereViewLuminance)
-emission=custom(stars,{'P':p,'C':c,'Sky':sky},'''
-float3 d=normalize(P-C);float2 uv=float2(atan2(d.y,d.x)/6.2831853+.5,acos(clamp(d.z,-1,1))/3.14159265);
-float2 grid=uv*float2(1440,720),cell=floor(grid),f=frac(grid);
-float3 h=frac(cell.xyx*float3(.1031,.1030,.0973));h+=dot(h,h.yxz+33.33);h=frac((h.xxy+h.yxx)*h.zyx);
-float r=length(f-(.2+h.xy*.6));float aa=max(length(fwidth(grid)),.025);
-float star=(1-smoothstep(.07,.07+aa*.6,r))*step(.996,h.z);
-return Sky+MaterialExpressionSkyAtmosphereLightDiskLuminance(Parameters,0,-1)+MaterialExpressionSkyAtmosphereLightDiskLuminance(Parameters,1,-1)+star*lerp(float3(.65,.8,1),float3(1,.8,.58),h.x)*220;''')
-connect(stars,emission,u.MaterialProperty.MP_EMISSIVE_COLOR);save(stars)
-
+# The independent starfield overlay is authored by build_starfield_overlay.py.
 levels=u.get_editor_subsystem(u.LevelEditorSubsystem);assert levels.load_level(ROOT+'/Maps/L_RecoveryLab')
 for a in u.get_editor_subsystem(u.EditorActorSubsystem).get_all_level_actors():
     if a.get_actor_label()=='Recovery_Clouds':
         cloud=a.get_component_by_class(u.VolumetricCloudComponent)
         prop(cloud,'tracing_start_max_distance',1800.)
         prop(cloud,'tracing_max_distance_mode',u.VolumetricCloudTracingMaxDistanceMode.DISTANCE_FROM_CLOUD_LAYER_ENTRY_POINT)
-        prop(cloud,'tracing_max_distance',450.)
+        prop(cloud,'tracing_max_distance',2200.)
     if a.get_actor_label()=='Recovery_Sun':
         prop(a.light_component,'cloud_shadow_extent',150.)
 levels.save_current_level()

@@ -1,5 +1,8 @@
 # Alpha.6 audit: resilient flight decisions and continuous vapor
 
+Historical audit and design proposal. See [Interactive recovery](INTERACTIVE_RECOVERY.md)
+for the implemented behavior and current model limits; release validation is separate.
+
 10 September 2026. Audited source `794a671`; packaged game source `646ce82`.
 This document proposes the next implementation. It does not describe completed
 features. Existing user-session reports and a read-only Blender inspection are
@@ -245,3 +248,125 @@ the baseline on recovery quality and computation budget. A later advanced mode
 can add imperfect sensors, estimation and uncertain actuator failures. These
 features build on observable decisions and reproducible experiments rather than
 adding more unconnected HUD numbers.
+
+## Approved scope extension: interactive vehicle and continuous world
+
+10 September 2026, following the user's review. The six workstreams above remain
+the core scope. The items below extend that proposal; they are not implemented
+or validated by this document. The current alpha executable is unchanged.
+
+### Direct interaction contract
+
+- Show the cursor during normal viewing. Hold right mouse to rotate orbit/free
+  cameras; release to return to pointing. Preserve pointer position and discard
+  the capture-transition delta so entering or leaving a drag cannot jump the view.
+- Left click selects a visible engine, fin or RCS assembly and opens a compact
+  contextual card: identity, delivered output, health, Disable/Restore, and a
+  timed fault in simulation seconds. Selecting a part alone does not fail it.
+- Separate selection/query geometry from physical collision geometry. Resolve
+  occlusion and UI ownership before selecting; do not pick an engine through the
+  fuselage. Offer a small engine layout for parts inaccessible in the current view.
+- Make hover highlighting optional and restrained. Close a card with empty-space
+  click or Escape; suppress camera input while manipulating a UI control. Handle
+  lost focus, menu opening, right-button release outside the window and resizing.
+- Keep a sparse persistent toolbar for Cameras, Flight computer, Weather and
+  Playback. Use English labels/tooltips with consistent vector icons. Replace
+  the Lab as the primary interaction path, retaining its command API internally.
+- Fault commands enter the simulation through one timestamped command interface.
+  UI widgets never mutate vehicle transforms, forces or the planner directly.
+
+Confirmed in source: `RecoveryPlayerController::SetMenuVisible(false)` currently
+hides the pointer, selects GameOnly input and permanent capture/locking;
+`RecoveryCameras.cpp` consumes mouse delta without requiring right-button hold.
+Changing only cursor visibility would therefore be incomplete.
+
+### One continuous Earth, atmosphere and weather
+
+The current `build_world_continuity.py` already uses a 6,371 km sphere and common
+geodetic sampling for globe, regional and local surfaces. No explicit runtime
+level swap at 15 km was found in the inspected presentation code. Do not introduce
+a second planet, shrink physical Earth or change gravity to mask a visual seam.
+
+Confirmed: `RecoverySkyComponent.cpp` fades height-fog density between 1.5 and
+16 km, then hides it; cloud sampling also changes between 7 and 20 km. The older
+`polish_earth_transitions.py` authors a separate 3.5–16 km imagery blend, but the
+newer continuity builder rebuilds those materials. Its presence on disk does not
+prove that historical shader remains active in the current cooked assets.
+
+Inspect active material graphs and capture ascent/descent across 10–25 km with
+individual surface/cloud/fog layers isolated. Determine whether the reported
+square is coverage, geometry, depth composition, a stale material or atmospheric
+sampling. Inspect cloud-shell radius/centre, planet occlusion and aerial
+perspective for the reported orange internal spheres before choosing a fix.
+
+The target is continuous geometry coverage and imagery resolution, plus correctly
+scaled atmospheric extinction/scattering to soften distant contrast. Avoid a
+screen blur that also blurs the nearby booster. Epic's
+[Sky Atmosphere documentation](https://dev.epicgames.com/documentation/en-us/unreal-engine/sky-atmosphere-component-in-unreal-engine)
+supports ground-to-space rendering and describes sampling/LUT tradeoffs. Disabling
+all optimizations is not an established fix or performance budget.
+
+Add selectable Clear, Coastal haze, Broken clouds and Overcast weather profiles,
+with low marine clouds, mid-level coverage and optional thin high clouds. Share
+the planetary reference and wind profile with vapor and flight physics; show
+when a weather change alters the flight conditions. Blend profiles continuously.
+Use [NASA limb photographs](https://science.nasa.gov/earth/earth-observatory/earths-limb-with-a-crescent-moon-150240/)
+for scattering/color reference, accounting for their orbital altitude, exposure
+and lighting instead of copying their appearance at every flight altitude.
+
+### Propulsion and surface finish
+
+- Rebuild RCS appearance around a narrow nozzle exit, pressure-dependent expansion
+  and short pulses driven by delivered force. Improve contrast and temporal
+  readability without inflating the entire jet. Current width scales as
+  `(.8 + Power * 2.8) * (1 + Vacuum * .65)`; visibility is already tied to a
+  measured-force envelope, so preserve that connection.
+- Separate engine exhaust/condensation from ground-generated steam and dust.
+  Evaluate the airborne effect from ignition using ambient conditions; generate
+  ground effects from plume impingement and available water/surface material,
+  not solely a fixed altitude or an unconditional ignition flag. A restart high
+  above the site must not instantly fill the pad with steam.
+- Keep the explicit SVT interpolation/domain fixes above as a prerequisite for
+  increasing density. Validate motion at normal and accelerated playback with
+  video, streaming statistics and GPU timing, not attractive still frames alone.
+- Diagnose Starship reflection grain with film grain disabled and matched native
+  versus reconstructed views. Inspect normal-map frequency/mips, roughness,
+  tangents and reflection history separately. Adjust steel surface detail and
+  reflection quality together, preserving shape and avoiding excessive smoothing.
+  [Epic's Lumen guide](https://dev.epicgames.com/documentation/en-us/unreal-engine/lumen-global-illumination-and-reflections-in-unreal-engine)
+  documents noise/quality/cost tradeoffs; the current source alone does not identify
+  the dominant cause of the user's reflection artifact.
+
+### Physical capture equilibrium
+
+Existing nominal regression results permit a small contact tilt, and measured
+settled cases have reached roughly 1.8–2.4 degrees. Check both lug contact faces,
+rail normals, rail heights/travel, load distribution, friction and frame compliance
+before modifying guidance gains. Record both normal loads, contact points, body
+angular rate and attitude throughout settling. Align the approach to the actual
+support geometry and minimize residual lateral motion at first contact.
+
+Acceptance must require stable two-sided support and explain any residual tilt
+from mechanical equilibrium. Do not enforce a final rotation, weld the booster
+to the tower or hide failed support behind a Secured label.
+
+### Updated delivery order and verification
+
+1. Reproducible fault/decision baselines and continuous-vapor prototype (batch A).
+2. Visible-cursor/RMB interaction foundation and selectable parts, using the same
+   command/snapshot boundary that the flight computer will consume.
+3. Health-aware allocation, valid replanning and alternate objectives (B–C), then
+   expose their real diagnostics and trajectories in the computer (D). Clearly
+   distinguish the flown trail, accepted plan, ballistic prediction and candidate
+   alternatives; never label a decorative curve as a computed reachable path.
+4. Ground-to-space continuity, layered weather and vapor/RCS completion (E plus
+   the extensions above), followed by steel finish and interface visual polish.
+5. Capture equilibrium validation and complete regression/package verification.
+
+Keep simulation, telemetry/commands, interface and visual presentation separate.
+Retain current successful returns, compare isolated and combined faults, exercise
+cursor/menu/focus transitions, record uninterrupted ground-to-space flights and
+inspect smoke in motion at the pad and from distant cameras. Measure matched
+1440p performance and memory on the existing hardware before claiming a gain.
+The optional attitude schematic belongs in the flight computer first; do not
+crowd the main flight HUD with another permanent panel.

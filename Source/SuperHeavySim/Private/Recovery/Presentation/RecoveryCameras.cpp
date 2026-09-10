@@ -82,7 +82,7 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
         Camera->GetCameraComponent()->SetFieldOfView(FMath::FInterpTo(Camera->GetCameraComponent()->FieldOfView,FreeFov,ViewDt,3.));
         if(AcceptInput)
         {
-                float DX=0,DY=0;PC->GetInputMouseDelta(DX,DY);
+                float DX=0,DY=0;if(PC->IsInputKeyDown(EKeys::RightMouseButton) && !PC->WasInputKeyJustPressed(EKeys::RightMouseButton))PC->GetInputMouseDelta(DX,DY);
                 FRotator R=Camera->GetActorRotation();R.Yaw+=DX*Sensitivity;R.Pitch=FMath::Clamp(R.Pitch+DY*Sensitivity,-89.,89.);R.Roll=0;
                 Camera->SetActorRotation(R);
             const double Forward=(PC->IsInputKeyDown(EKeys::Up)||PC->IsInputKeyDown(EKeys::W)||PC->IsInputKeyDown(EKeys::Z)?1.:0)-(PC->IsInputKeyDown(EKeys::Down)||PC->IsInputKeyDown(EKeys::S)?1.:0);
@@ -171,7 +171,7 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
     const bool OrbitCamera=CameraMode==0 || CameraMode==2 || CameraMode==4 || CameraMode==6 || CameraMode==7 || CameraMode==11 || CameraMode==13;
     if(OrbitCamera)
     {
-        if(AcceptInput)
+        if(AcceptInput && PC->IsInputKeyDown(EKeys::RightMouseButton) && !PC->WasInputKeyJustPressed(EKeys::RightMouseButton))
         {
             float DX=0,DY=0;PC->GetInputMouseDelta(DX,DY);
             OrbitYaw=FMath::UnwindDegrees(OrbitYaw+DX*Sensitivity);

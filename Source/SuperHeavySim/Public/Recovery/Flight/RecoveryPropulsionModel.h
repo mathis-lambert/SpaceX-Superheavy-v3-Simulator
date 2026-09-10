@@ -46,5 +46,6 @@ namespace RecoveryPropulsion
 
     /** Allocate realizable engine moments after updating mass and centre of mass. */
     void AllocateGimbals(TArray<FRecoveryEngineState>& Engines,const FRecoveryEngineParameters& Parameters,
-        const FVector& CentreFromBaseM,const FVector& DesiredMomentBodyNm,double Dt,FRecoveryPropulsionStep& Step);
+        const FVector& CentreFromBaseM,const FVector& DesiredMomentBodyNm,double Dt,FRecoveryPropulsionStep& Step,
+        const FVector& DesiredForceBodyN=FVector::ZeroVector,double TranslationWeight=0);
 }

@@ -1,6 +1,7 @@
 #include "Recovery/Interface/RecoveryPlayerController.h"
 #include "Recovery/Presentation/RecoveryStartupSubsystem.h"
 #include "Recovery/Interface/RecoveryMenu.h"
+#include "Recovery/Interface/RecoveryFlightDeck.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Presentation/RecoveryRenderSettings.h"
 #include "Engine/Engine.h"
@@ -44,11 +45,12 @@ void ARecoveryPlayerController::BeginPlay()
     FParse::Value(FCommandLine::Get(),TEXT("RecoveryReconstruction="),ReconstructionMode);
     GConfig->GetFloat(TEXT("Recovery.Presentation"),TEXT("TimeOfDay"),TimeOfDay,GGameUserSettingsIni);
     GConfig->GetFloat(TEXT("Recovery.Presentation"),TEXT("FogAmount"),FogAmount,GGameUserSettingsIni);
+    GConfig->GetInt(TEXT("Recovery.Presentation"),TEXT("WeatherPreset"),WeatherPreset,GGameUserSettingsIni);WeatherPreset=FMath::Clamp(WeatherPreset,0,3);
     GConfig->GetFloat(TEXT("Recovery.Presentation"),TEXT("MotionBlur"),MotionBlur,GGameUserSettingsIni);
     GConfig->GetFloat(TEXT("Recovery.Presentation"),TEXT("CameraGrain"),CameraGrain,GGameUserSettingsIni);
     GConfig->GetBool(TEXT("Recovery.Presentation"),TEXT("DepthOfField"),bCameraDepthOfField,GGameUserSettingsIni);
     GConfig->GetFloat(TEXT("Recovery.Controls"),TEXT("MouseSensitivity"),MouseSensitivity,GGameUserSettingsIni);
-    GConfig->GetBool(TEXT("Recovery.Controls"),TEXT("AutomaticOrbit"),bAutomaticOrbit,GGameUserSettingsIni);
+    GConfig->GetBool(TEXT("Recovery.Controls"),TEXT("AutomaticOrbitV2"),bAutomaticOrbit,GGameUserSettingsIni);
     GConfig->GetFloat(TEXT("Recovery.Audio"),TEXT("MasterVolume"),MasterVolume,GGameUserSettingsIni);
     MouseSensitivity=FMath::Clamp(MouseSensitivity,0.1f,2.f);
     MasterVolume=FMath::Clamp(MasterVolume,0.f,1.f);
@@ -72,6 +74,9 @@ void ARecoveryPlayerController::BeginPlay()
 void ARecoveryPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
+    InputComponent->BindKey(EKeys::RightMouseButton,IE_Pressed,this,&ARecoveryPlayerController::BeginOrbitDrag);
+    InputComponent->BindKey(EKeys::RightMouseButton,IE_Released,this,&ARecoveryPlayerController::EndOrbitDrag);
+    InputComponent->BindKey(EKeys::LeftMouseButton,IE_Pressed,this,&ARecoveryPlayerController::SelectUnderCursor);
     for(const auto& Definition:RecoveryInput::Bindings())
     {
         FInputKeyBinding Binding(FInputChord(Definition.Key),IE_Pressed);
@@ -95,7 +100,7 @@ void ARecoveryPlayerController::HandleViewerAction(RecoveryInput::EAction Action
     case EAction::FreeCamera:D->ToggleFreeCamera();break;
     case EAction::Telemetry:SetTelemetry(!D->bShowTelemetry);break;
     case EAction::Inspect:ToggleForceOverlay();break;
-    case EAction::Laboratory:ToggleFlightLab();break;
+    case EAction::Computer:ToggleFlightComputer();break;
     case EAction::Slower:SlowerPlayback();break;
     case EAction::Faster:FasterPlayback();break;
     case EAction::Start:D->StartMission();break;
@@ -105,6 +110,7 @@ void ARecoveryPlayerController::HandleViewerAction(RecoveryInput::EAction Action
 void ARecoveryPlayerController::PlayerTick(float Dt)
 {
     Super::PlayerTick(Dt);
+    if(bOrbitDragging && (!IsInputKeyDown(EKeys::RightMouseButton) || !FSlateApplication::Get().IsActive()))EndOrbitDrag();
     if(IsPaused())if(auto* D=GetDirector())D->RefreshViewerCamera(FApp::GetDeltaTime());
     if(!bReconstructionInitialized && RecoveryRenderSettings::IsReconstructionReady())
     {
@@ -127,6 +133,8 @@ void ARecoveryPlayerController::PlayerTick(float Dt)
         bFrontendInitialized=true;
         Menu=SNew(SRecoveryMenu).Controller(this);
         GEngine->GameViewport->AddViewportWidgetContent(Menu.ToSharedRef(),100);
+        FlightDeck=SNew(SRecoveryFlightDeck).Controller(this);
+        GEngine->GameViewport->AddViewportWidgetContent(FlightDeck.ToSharedRef(),30);
         ReturnHome();
     }
     // Real time continues while the flight is paused, unlike world timers.
@@ -136,12 +144,13 @@ void ARecoveryPlayerController::PlayerTick(float Dt)
     if(bFrontendInitialized && FParse::Param(FCommandLine::Get(),TEXT("RecoveryOverhaulAudit"))) TickOverhaulAudit();
     if(bFrontendInitialized && FParse::Param(FCommandLine::Get(),TEXT("RecoveryWorldAudit"))) TickWorldAudit();
     if(bFrontendInitialized && FParse::Param(FCommandLine::Get(),TEXT("RecoveryPhotoAudit"))) TickPhotographyAudit();
+    if(bFrontendInitialized && FParse::Param(FCommandLine::Get(),TEXT("RecoveryInteractiveAudit"))) TickInteractiveAudit();
     if(bFrontendInitialized && (FParse::Param(FCommandLine::Get(),TEXT("RecoveryControlsAudit")) ||
         FParse::Param(FCommandLine::Get(),TEXT("RecoveryVaporReview")))) TickControlsAudit();
 }
 void ARecoveryPlayerController::SetMenuVisible(bool bVisible)
 {
-    bMenuOpen=bVisible;bShowMouseCursor=bVisible;
+    EndOrbitDrag();bMenuOpen=bVisible;bShowMouseCursor=true;
     if(Menu) Menu->SetVisibility(bVisible?EVisibility::Visible:EVisibility::Collapsed);
     if(auto* D=GetDirector())
     {
@@ -156,17 +165,18 @@ void ARecoveryPlayerController::SetMenuVisible(bool bVisible)
     }
     else
     {
-        FInputModeGameOnly Mode;Mode.SetConsumeCaptureMouseDown(false);SetInputMode(Mode);
+        FInputModeGameAndUI Mode;Mode.SetHideCursorDuringCapture(false);Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);SetInputMode(Mode);
         if(GEngine && GEngine->GameViewport)
         {
-            GEngine->GameViewport->SetMouseCaptureMode(EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown);
-            GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::LockAlways);
+            GEngine->GameViewport->SetMouseCaptureMode(EMouseCaptureMode::CaptureDuringRightMouseDown);
+            GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::DoNotLock);
         }
     }
     UE_LOG(LogTemp,Display,TEXT("RECOVERY_UI menu=%d home=%d paused=%d"),bMenuOpen,bAtHome,IsPaused());
 }
 void ARecoveryPlayerController::TogglePauseMenu()
 {
+    if(!bMenuOpen && (Selection.IsValid() || bFlightComputer)) {Selection={};bFlightComputer=false;if(FlightDeck)FlightDeck->Refresh();return;}
     if(bVideoConfirmation) { RevertVideo();return; }
     if(!Menu) return;
     if(bAtHome) { Menu->ShowPage();return; }
@@ -181,6 +191,8 @@ void ARecoveryPlayerController::LaunchFlight()
         SetPause(false);
         const FString ExpectedScenario=SelectedScenario==1?TEXT("Crosswind"):SelectedScenario==2?TEXT("Offset"):TEXT("Nominal");
         if(D->Phase!=ERecoveryPhase::Ready || D->ScenarioName!=ExpectedScenario)D->SelectScenario(SelectedScenario);
+        Selection={};bFlightComputer=false;
+        SetWeatherPreset(WeatherPreset);
         D->SetCameraMode(StartingCamera);
         D->bShowTelemetry=bTelemetry;bAtHome=false;SetMenuVisible(false);D->StartMission();SavePreferences();
     }
@@ -201,7 +213,7 @@ void ARecoveryPlayerController::ResumeFlight()
 void ARecoveryPlayerController::ReturnHome()
 {
     if(bVideoConfirmation) RevertVideo();
-    SetPause(false);bAtHome=true;
+    SetPause(false);bAtHome=true;Selection={};bFlightComputer=false;
     if(auto* D=GetDirector()) { D->SelectScenario(SelectedScenario);D->bShowTelemetry=bTelemetry; }
     if(Menu) Menu->ShowPage();
     SetMenuVisible(true);
@@ -215,11 +227,10 @@ void ARecoveryPlayerController::SetPlaybackRate(float Rate)
     EffectivePlaybackRate=FMath::Min(PlaybackRate,EffectivePlaybackRate);
     UGameplayStatics::SetGlobalTimeDilation(this,EffectivePlaybackRate);
 }
-void ARecoveryPlayerController::ToggleFlightLab()
+void ARecoveryPlayerController::ToggleFlightComputer()
 {
-    if(bAtHome || !Menu || bVideoConfirmation)return;
-    if(bMenuOpen){ResumeFlight();return;}
-    Menu->ShowPage(13);SetMenuVisible(true);
+    if(bAtHome || bVideoConfirmation)return;
+    bFlightComputer=!bFlightComputer;Selection={};if(FlightDeck)FlightDeck->Refresh();
 }
 void ARecoveryPlayerController::QuitSimulation()
 { UKismetSystemLibrary::QuitGame(this,this,EQuitPreference::Quit,false); }
@@ -238,11 +249,12 @@ void ARecoveryPlayerController::SavePreferences()
     GConfig->SetFloat(TEXT("Recovery.Interface"),TEXT("EngineLightScale"),EngineLightScale,GGameUserSettingsIni);
     GConfig->SetFloat(TEXT("Recovery.Presentation"),TEXT("TimeOfDay"),TimeOfDay,GGameUserSettingsIni);
     GConfig->SetFloat(TEXT("Recovery.Presentation"),TEXT("FogAmount"),FogAmount,GGameUserSettingsIni);
+    GConfig->SetInt(TEXT("Recovery.Presentation"),TEXT("WeatherPreset"),WeatherPreset,GGameUserSettingsIni);
     GConfig->SetFloat(TEXT("Recovery.Presentation"),TEXT("MotionBlur"),MotionBlur,GGameUserSettingsIni);
     GConfig->SetFloat(TEXT("Recovery.Presentation"),TEXT("CameraGrain"),CameraGrain,GGameUserSettingsIni);
     GConfig->SetBool(TEXT("Recovery.Presentation"),TEXT("DepthOfField"),bCameraDepthOfField,GGameUserSettingsIni);
     GConfig->SetFloat(TEXT("Recovery.Controls"),TEXT("MouseSensitivity"),MouseSensitivity,GGameUserSettingsIni);
-    GConfig->SetBool(TEXT("Recovery.Controls"),TEXT("AutomaticOrbit"),bAutomaticOrbit,GGameUserSettingsIni);
+    GConfig->SetBool(TEXT("Recovery.Controls"),TEXT("AutomaticOrbitV2"),bAutomaticOrbit,GGameUserSettingsIni);
     GConfig->RemoveKey(TEXT("Recovery.Controls"),TEXT("LearningOverlay"),GGameUserSettingsIni);
     GConfig->SetFloat(TEXT("Recovery.Audio"),TEXT("MasterVolume"),MasterVolume,GGameUserSettingsIni);
     GConfig->Flush(false,GGameUserSettingsIni);
@@ -281,6 +293,9 @@ void ARecoveryPlayerController::RevertVideo()
 }
 void ARecoveryPlayerController::EndPlay(const EEndPlayReason::Type Reason)
 {
+    EndOrbitDrag();
+    if(FlightDeck && GEngine && GEngine->GameViewport)GEngine->GameViewport->RemoveViewportWidgetContent(FlightDeck.ToSharedRef());
+    FlightDeck.Reset();
     if(bVideoConfirmation) RevertVideo();
     if(Menu && GEngine && GEngine->GameViewport) GEngine->GameViewport->RemoveViewportWidgetContent(Menu.ToSharedRef());
     Menu.Reset();Super::EndPlay(Reason);

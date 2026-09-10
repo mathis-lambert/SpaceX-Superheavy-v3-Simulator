@@ -33,7 +33,7 @@ FVector FRecoveryDynamicsModel::AttitudeMoment(const FRecoveryDynamicsCommand& C
     const FVector Inertia=State.Mass.InertiaKgM2;
     const double EffectiveInertia=FMath::Max(1.,(Inertia*Q.UnrotateVector(Axis)).Size());
     const double Authority=State.ThrustN*FMath::Tan(FMath::DegreesToRadians(Config.Engines.MaximumGimbalDeg))*31+
-        (State.RcsPropellantKg>0?Config.ReactionControlTorqueNm:0)+
+        (State.RcsPropellantKg>0 && !C.Experiment.bReactionJetsDisabled?Config.ReactionControlTorqueNm*State.ReactionPressureEfficiency:0)+
         State.DynamicPressurePa*Config.GridFinAreaM2*Config.GridFinLiftSlope*.4*28.8;
     const double BrakingRate=.65*FMath::Sqrt(2*FMath::Max(.00001,Authority/EffectiveInertia)*Angle);
     const double Rate=FMath::Min3(RecoveryActuators::MaximumBodyRateRadS,BrakingRate,Angle*Gain/Damping);
@@ -68,9 +68,9 @@ void FRecoveryDynamicsModel::Condition(const FRecoveryDynamicsCommand& C,double 
 
 void FRecoveryDynamicsModel::ReactionControl(const FRecoveryDynamicsCommand& C,const FVector& RequestedMoment,double Dt)
 {
-    const bool Enabled=!C.Experiment.bReactionJetsDisabled && C.EngineCount==0 && !C.bContactShutdown &&
+    const bool Enabled=!C.Experiment.bReactionJetsDisabled && !C.bContactShutdown &&
         C.Phase>=ERecoveryPhase::Ascent && C.Phase<ERecoveryPhase::Captured;
-    const double Blend=1-FMath::Clamp((State.DynamicPressurePa-100)/1000.,0.,1.);
+    const double Blend=State.ReactionPressureEfficiency;
     const FVector T=Enabled?RequestedMoment.GetClampedToMaxSize(Config.ReactionControlTorqueNm*Blend):FVector::ZeroVector;
     const FVector Demand[]={FVector(0,-T.X/50.,0),FVector(0,T.X/50.,0),FVector(T.Y/50.,0,0),
         FVector(-T.Y/50.,0,0),FVector(-T.Z/9.1,0,0),FVector(T.Z/9.1,0,0)};
@@ -83,9 +83,10 @@ void FRecoveryDynamicsModel::ReactionControl(const FRecoveryDynamicsCommand& C,c
         Force=FMath::Lerp(Force,Target,Response);if(Force.Size()<1.)Force=FVector::ZeroVector;
         Total+=Force.Size();
     }
-    const double Delivered=RecoveryActuators::FuelLimitedThrust(Total,State.RcsPropellantKg,150.,Dt);
+    const double Isp=150.*Blend;
+    const double Delivered=RecoveryActuators::FuelLimitedThrust(Total,State.RcsPropellantKg,Isp,Dt);
     const double Scale=Total>0?Delivered/Total:0.;
-    State.RcsPropellantKg=FMath::Max(0.,State.RcsPropellantKg-Delivered*Dt/(150.*RecoveryAtmosphere::G0));
+    State.RcsPropellantKg=FMath::Max(0.,State.RcsPropellantKg-Delivered*Dt/(Isp*RecoveryAtmosphere::G0));
     State.RcsMomentBodyNm=FVector::ZeroVector;
     const auto& Positions=FlightGeometry::ReactionNozzlePositionsM();
     for(int32 I=0;I<6;++I)
@@ -111,11 +112,28 @@ void FRecoveryDynamicsModel::Aerodynamics(const FRecoveryDynamicsCommand& C,doub
     State.AeroForceN=Drag+Q.RotateVector(Side);
     const FVector COM=BaseM+Q.GetUpVector()*State.Mass.CentreFromBaseM;
     AddForce(ERecoveryForceKind::Aerodynamic,0,State.AeroForceN,COM);
-    FVector Torque=AttitudeMoment(C,.45,1.35);if(C.EngineCount>0)Torque*=.1;
+    // Allocate remaining demand after the engine bank's measured delivered
+    // moment. An ignition request is not yet usable control authority.
+    const bool Powered=State.ThrustN>1.;
+    FVector Torque=AttitudeMoment(C,Powered?(C.Phase>=ERecoveryPhase::LandingBurn?2.5:.65):.45,
+        Powered?(C.Phase>=ERecoveryPhase::LandingBurn?3.2:1.6):1.35)-State.EngineMomentBodyNm;
     const double Lever=64.4486-State.Mass.CentreFromBaseM,Radius=6.2;
     const double F3=-Torque.Y/Lever,Sum=Torque.Z/Radius-F3;
-    const FVector Demand((Sum-Torque.X/Lever)/2,(Sum+Torque.X/Lever)/2,F3);
+    FVector Demand((Sum-Torque.X/Lever)/2,(Sum+Torque.X/Lever)/2,F3);
     const double PerRad=State.DynamicPressurePa*Config.GridFinAreaM2*Config.GridFinLiftSlope;
+    const FVector Columns[]={FVector(-Lever,0,Radius),FVector(Lever,0,Radius),FVector(0,-Lever,Radius)};
+    const double Limit=PerRad*FMath::DegreesToRadians(Config.GridFinMaxAngleDeg);
+    for(int32 I=0;I<3;++I)Demand[I]=I==C.Experiment.JammedFin?
+        PerRad*FMath::DegreesToRadians(C.Experiment.JammedFinAngleDeg):FMath::Clamp(Demand[I],-Limit,Limit);
+    // Bounded coordinate descent redistributes a jammed/saturated fin's moment.
+    // The objective measures angular acceleration, accounting for roll inertia.
+    const FVector Weight(1/FMath::Max(1.,State.Mass.InertiaKgM2.X),1/FMath::Max(1.,State.Mass.InertiaKgM2.Y),1/FMath::Max(1.,State.Mass.InertiaKgM2.Z));
+    for(int32 Pass=0;Pass<12;++Pass)for(int32 I=0;I<3;++I)if(I!=C.Experiment.JammedFin)
+    {
+        const FVector Residual=(Torque-Columns[0]*Demand[0]-Columns[1]*Demand[1]-Columns[2]*Demand[2])*Weight;
+        const FVector Column=Columns[I]*Weight;
+        Demand[I]=FMath::Clamp(Demand[I]+FVector::DotProduct(Column,Residual)/FMath::Max(1.e-30,Column.SizeSquared()),-Limit,Limit);
+    }
     for(int32 I=0;I<3;++I)
     {
         const double Desired=C.bContactShutdown || C.Phase>=ERecoveryPhase::Captured || State.DynamicPressurePa<100 || C.Phase<=ERecoveryPhase::Ascent ?
@@ -129,7 +147,8 @@ void FRecoveryDynamicsModel::Aerodynamics(const FRecoveryDynamicsCommand& C,doub
     const FVector Positions[]={FVector(Radius,0,Lever),FVector(-Radius,0,Lever),FVector(0,Radius,Lever)};
     const FVector Directions[]={FVector(0,1,0),FVector(0,-1,0),FVector(-1,0,0)};
     for(int32 I=0;I<3;++I)AddForce(ERecoveryForceKind::GridFin,I,Q.RotateVector(Directions[I]*Forces[I]),COM+Q.RotateVector(Positions[I]));
-    ReactionControl(C,Torque,Dt);
+    const FVector DeliveredFinMoment=Columns[0]*Forces[0]+Columns[1]*Forces[1]+Columns[2]*Forces[2];
+    ReactionControl(C,Torque-DeliveredFinMoment,Dt);
 }
 
 void FRecoveryDynamicsModel::Propulsion(const FRecoveryDynamicsCommand& C,double Dt)
@@ -146,7 +165,8 @@ void FRecoveryDynamicsModel::Propulsion(const FRecoveryDynamicsCommand& C,double
     State.Throttle=Step.AvailableThrustN>0?FMath::Clamp(State.ThrustN/Step.AvailableThrustN,0.,1.):0.;
     const FVector Moment=C.Phase<=ERecoveryPhase::Countdown || C.Phase>=ERecoveryPhase::Captured || C.bContactShutdown ? FVector::ZeroVector :
         AttitudeMoment(C,C.Phase>=ERecoveryPhase::LandingBurn?2.5:.65,C.Phase>=ERecoveryPhase::LandingBurn?3.2:1.6);
-    RecoveryPropulsion::AllocateGimbals(State.Engines,Config.Engines,FVector(0,0,State.Mass.CentreFromBaseM),Moment,Dt,Step);
+    RecoveryPropulsion::AllocateGimbals(State.Engines,Config.Engines,FVector(0,0,State.Mass.CentreFromBaseM),Moment,Dt,Step,
+        State.Body.Rotation.UnrotateVector(C.ThrustAccelerationMps2*State.Mass.MassKg),C.GimbalTranslationWeight);
     for(int32 I=0;I<State.Engines.Num();++I)
     {
         const auto& Engine=State.Engines[I];
@@ -167,14 +187,17 @@ void FRecoveryDynamicsModel::Step(const FRecoveryBodyKinematics& Body,const FRec
     BaseM=Body.OriginM-Body.Rotation.GetUpVector()*FlightGeometry::BoosterBaseOffsetM;
     const double Height=FlightGeometry::AltitudeM(BaseM*100.);
     const auto Air=RecoveryAtmosphere::Sample(Height,Config.SeaLevelTemperatureOffsetK);
+    // Estimated pressure-thrust loss, not a dynamic-pressure on/off interlock.
+    // Available gas jets can still oppose residual moment in the atmosphere.
+    State.ReactionPressureEfficiency=1-.25*FMath::Clamp(Air.Pressure/101325.,0.,1.);
     State.GravityMps2=Air.Gravity;
     State.EngineIspS=FMath::Lerp(Config.SpecificImpulseVacuumS,Config.SpecificImpulseSeaLevelS,FMath::Clamp(Air.Pressure/101325.,0.,1.));
     const FVector Relative=Body.VelocityMps-WindAt(Height,C);
     State.DynamicPressurePa=.5*Air.Density*Relative.SizeSquared();
     Condition(C,Dt);
     State.Mass=RecoveryMass::Booster(Config,State.PropellantKg,State.RcsPropellantKg,!C.bSeparated);
-    Aerodynamics(C,Height,Relative.Size()/Air.SoundSpeed,Dt);
     Propulsion(C,Dt);
+    Aerodynamics(C,Height,Relative.Size()/Air.SoundSpeed,Dt);
     const FVector COM=BaseM+Body.Rotation.GetUpVector()*State.Mass.CentreFromBaseM;
     const FVector Down=(FlightGeometry::EarthCenterCm()/100.-COM).GetSafeNormal();
     AddForce(ERecoveryForceKind::Gravity,0,Down*(Air.Gravity*State.Mass.MassKg),COM);

@@ -1,6 +1,6 @@
 # Starbase Flight Simulator — Alpha 0.1.0
 
-Version: `0.1.0-alpha.6`. Windows x64, Unreal Engine 5.8.
+Version: `0.1.0-alpha.7`. Windows x64, Unreal Engine 5.8.
 
 ## Start
 
@@ -16,8 +16,9 @@ been qualified. Graphics and image reconstruction remain configurable.
 ## Controls
 
 - Launch: choose a mission from the home screen.
-- Mouse: orbit the current focus; F: free camera; Tab: camera selector.
-- Escape: pause and settings; I: force inspector; L: live Flight Lab.
+- Mouse: visible pointer; hold right button to orbit; left-click a part to inspect.
+- F: free camera; Tab: camera selector; L: live flight computer.
+- Escape: close an inspection panel, then pause/settings; I: force inspector.
 - J / K: decrease / increase playback speed.
 
 The alpha is a standalone Development game build so the requested 3D force
@@ -42,7 +43,7 @@ See `PHOTOGRAPHY.md` for controls, sources and scope.
 
 This version delays landing ignition according to predicted stopping distance,
 current mass, velocity, available thrust and engine response. The three reference
-scenarios now take approximately 30–33 seconds of landing thrust, with a soft
+scenarios now take approximately 29–36 seconds of landing thrust, with a soft
 physical fitting contact and immediate weight transfer onto the rails. See
 `FLIGHT.md` for the measured comparison and model limitations.
 
@@ -57,13 +58,16 @@ The coastal world now includes surveyed USGS LiDAR relief, finer regional imager
 shared shoreline shading and less repetitive water. Original Blender flow caches
 supply turbulent lit deluge volumes. Tower arms rotate on torque-driven physical
 hinges; the rails have springs, dampers, travel limits and overload failure.
-The Flight Lab shows their measured loads and compression. See
+The flight computer shows measured rail loads and support. See
 `COAST-VOLUMES-TOWER.md` for data coverage, reproduction and model assumptions.
 
-The final polish increases launch and landing vapor coverage and density within
-the existing volume budgets. Weak RCS pulses are more legible, ocean shading uses
-directional wave scales instead of a repeating crossed texture, and the mission
-requests 0.25 m/s vertical contact with less lateral oscillation.
+This version adds contextual part controls, scheduled outages, health-aware
+control allocation, corrective-burn decisions and estimated alternate objectives.
+The flight computer distinguishes measured history, ballistic prediction and the
+accepted terminal plan. Weather presets blend multiple cloud layers; native
+planetary atmosphere replaces the old sky background. Ground steam interpolates
+its sparse volume animation, cryogenic vapor falls along the hull, and RCS jets
+use a narrower envelope. See `INTERACTIVE-RECOVERY.md` for controls and model limits.
 
 ## Known alpha limitations
 

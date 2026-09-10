@@ -48,16 +48,16 @@ void URecoveryVaporComponent::UpdateCryogenic(float Dt,const ASuperHeavyRecovery
         const FVector Out=Q.RotateVector(Directions[I]).GetSafeNormal();
         // Cover the complete downstream path, including crosswind. A fixed box
         // clips the long tail when a live wind experiment increases advection.
-        constexpr double TailTravel=28./2.5;
+        constexpr double TailTravel=44./2.5;
         const FVector Drift=Wind*(TailTravel-.9*(1-FMath::Exp(-TailTravel/.9)))*.2;
         const FVector LocalDrift=Q.UnrotateVector(Drift).GetAbs();
-        const FVector Centre=Vent-Up*1350+Out*250+Drift*.5;
+        const FVector Centre=Vent-Up*2150+Out*250+Drift*.5;
         V->SetWorldLocationAndRotation(Centre,Q);
         // UE integrates extinction over the local voxel ray. Keep isotropic
         // voxels and explicitly convert inverse metres to inverse local units;
         // stretching each axis made opacity depend on view and wind direction.
         constexpr double VoxelCm=50.;
-        const FVector Size=FVector(2400,2400,3200)+LocalDrift;
+        const FVector Size=FVector(2400,2400,4800)+LocalDrift;
         V->SetVolumeResolution(FIntVector(FMath::CeilToInt(Size.X/VoxelCm),FMath::CeilToInt(Size.Y/VoxelCm),FMath::CeilToInt(Size.Z/VoxelCm)));
         V->SetWorldScale3D(FVector(VoxelCm));
         M->SetVectorParameterValue(TEXT("VentPosition"),Colour(Vent));

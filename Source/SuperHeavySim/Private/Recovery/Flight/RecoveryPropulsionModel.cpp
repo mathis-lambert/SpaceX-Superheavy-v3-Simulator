@@ -60,20 +60,25 @@ FRecoveryPropulsionStep RecoveryPropulsion::AdvanceEngines(TArray<FRecoveryEngin
 }
 
 void RecoveryPropulsion::AllocateGimbals(TArray<FRecoveryEngineState>& Engines,const FRecoveryEngineParameters& P,
-    const FVector& COM,const FVector& DesiredMomentBodyNm,double Dt,FRecoveryPropulsionStep& Step)
+    const FVector& COM,const FVector& DesiredMomentBodyNm,double Dt,FRecoveryPropulsionStep& Step,
+    const FVector& DesiredForceBodyN,double TranslationWeight)
 {
     if(Dt<=0)return;
     FVector C0=FVector::ZeroVector,C1=FVector::ZeroVector,C2=FVector::ZeroVector,AxialTorque=FVector::ZeroVector;
+    double GimballedThrust=0;
     for(const auto& Engine:Engines)
     {
         const double MeanThrust=Engine.StepImpulseNs/Dt;
         const FVector R=Engine.PositionFromBaseM-COM;
         AxialTorque+=FVector::CrossProduct(R,FVector(0,0,MeanThrust));
         if(!Engine.bGimballed || MeanThrust<1.)continue;
+        GimballedThrust+=MeanThrust;
         for(const FVector A:{FVector(0,R.Z,-R.Y),FVector(-R.Z,0,R.X)})
         {C0+=A*A.X;C1+=A*A.Y;C2+=A*A.Z;}
     }
-    const FVector Lambda=RecoveryActuators::SolveSymmetric(C0,C1,C2,DesiredMomentBodyNm-AxialTorque);
+    const double Weight=FMath::Clamp(TranslationWeight,0.,1.);
+    const FVector GimbalMoment=DesiredMomentBodyNm*FVector(1-Weight,1-Weight,1);
+    const FVector Lambda=RecoveryActuators::SolveSymmetric(C0,C1,C2,GimbalMoment-AxialTorque);
     Step.ForceBodyN=Step.MomentBodyNm=FVector::ZeroVector;
     for(auto& Engine:Engines)
     {
@@ -83,6 +88,7 @@ void RecoveryPropulsion::AllocateGimbals(TArray<FRecoveryEngineState>& Engines,c
         if(Engine.bGimballed && MeanThrust>1.)
         {
             FVector Side(FVector::DotProduct(FVector(0,R.Z,-R.Y),Lambda),FVector::DotProduct(FVector(-R.Z,0,R.X),Lambda),0);
+            Side+=FVector(DesiredForceBodyN.X,DesiredForceBodyN.Y,0)*(Weight*MeanThrust/FMath::Max(1.,GimballedThrust));
             Side=Side.GetClampedToMaxSize(MeanThrust*FMath::Tan(FMath::DegreesToRadians(P.MaximumGimbalDeg)));
             Target=FVector(Side.X,Side.Y,MeanThrust).GetSafeNormal();
         }

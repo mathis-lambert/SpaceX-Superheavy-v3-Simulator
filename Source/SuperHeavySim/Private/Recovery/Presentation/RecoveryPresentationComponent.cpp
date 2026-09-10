@@ -261,8 +261,8 @@ void URecoveryPresentationComponent::TickComponent(float Dt,ELevelTick Type,FAct
         RcsPlumes[I]->SetVisibility(Power>0);
         // The envelope extends along local -Z, opposite the measured force.
         RcsPlumes[I]->SetWorldLocationAndRotation(Position,FRotationMatrix::MakeFromZ(Q.RotateVector(RcsDirections[I])).ToQuat());
-        const double Width=(.8+Power*2.8)*(1+Vacuum*.65);
-        RcsPlumes[I]->SetWorldScale3D(FVector(Width,Width,(5+Power*18)*(1+Vacuum*.3)));
+        const double Width=(.16+Power*.48)*(1+Vacuum*.85);
+        RcsPlumes[I]->SetWorldScale3D(FVector(Width,Width,(2.5+Power*9)*(1+Vacuum*.5)));
         RcsMaterials[I]->SetScalarParameterValue(TEXT("Power"),Power);RcsMaterials[I]->SetScalarParameterValue(TEXT("Time"),Clock);
     }
     D->UpdateCamera(Dt);

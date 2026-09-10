@@ -95,7 +95,7 @@ public:
             Text(FString::Printf(TEXT("THRUST %.2f MN    Q %.1f KPA    MACH %.2f"),TotalThrustN/1.e6,D->DynamicPressurePa/1000.,D->Mach),44,240,11,White);
             Text(FString::Printf(TEXT("FAILED ENGINE %s    JAMMED FIN %d"),*Engine,Experiment.JammedFin+1),44,266,11,White);
             Text(FString::Printf(TEXT("RCS %s    RESPONSE %.1f×    WIND %.1f×"),Experiment.bReactionJetsDisabled?TEXT("OFF"):TEXT("ON"),Experiment.AttitudeResponse,Experiment.WindScale),44,292,11,White);
-            Text(TEXT("L  FLIGHT LAB      I  CLOSE"),44,331,10,Grey);
+            Text(TEXT("L  COMPUTER      I  CLOSE"),44,331,10,Grey);
         }
         return Layer+3;
     }

@@ -97,4 +97,21 @@ bool FRecoveryEngineBankForceTest::RunTest(const FString&)
     TestTrue(TEXT("Impossible requested moments are saturated physically"),Step.MomentBodyNm.Size()<Demand.Size());
     return true;
 }
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRecoveryTranslationAllocationTest,"Recovery.Physics.TerminalTranslationAllocation",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FRecoveryTranslationAllocationTest::RunTest(const FString&)
+{
+    FRecoveryEngineParameters P;TArray<FRecoveryEngineState> Engines;
+    for(int32 I=0;I<3;++I)
+    {
+        FRecoveryEngineState E;E.bCentral=E.bGimballed=true;E.StepImpulseNs=1000000./120.;
+        E.PositionFromBaseM=FVector(FMath::Cos(I*2*UE_DOUBLE_PI/3),FMath::Sin(I*2*UE_DOUBLE_PI/3),0);Engines.Add(E);
+    }
+    FRecoveryPropulsionStep Result;const FVector COM(0,0,30),Force(60000,-30000,3000000);
+    for(int32 I=0;I<240;++I)RecoveryPropulsion::AllocateGimbals(Engines,P,COM,FVector::ZeroVector,1./120.,Result,Force,1);
+    TestTrue(TEXT("Bounded gimbals deliver the requested lateral translation"),FVector2D(Result.ForceBodyN-Force).Size()<100);
+    TestTrue(TEXT("Translation retains its physical counter-torque for residual allocation"),FMath::Abs(Result.MomentBodyNm.Y+30*Result.ForceBodyN.X)<1.e-5);
+    double Impulse=0;for(const auto& E:Engines)Impulse+=E.StepForceBodyN.Size()/120.;
+    TestTrue(TEXT("Vectoring preserves delivered impulse rather than creating force"),FMath::Abs(Impulse-25000)<1.e-5);
+    return true;
+}
 #endif

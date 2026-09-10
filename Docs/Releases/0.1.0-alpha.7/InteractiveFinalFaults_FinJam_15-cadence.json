@@ -1,0 +1,53 @@
+{
+	"schema_version": 4,
+	"measured": true,
+	"solver_steps":
+	{
+		"count": 50950,
+		"total_s": 424.58335547707975,
+		"min_s": 0.0083333337679505348,
+		"max_s": 0.0083333337679505348,
+		"mean_s": 0.0083333337679505348
+	},
+	"game_steps":
+	{
+		"count": 6369,
+		"total_s": 424.59997469931841,
+		"min_s": 0.066666662693023682,
+		"max_s": 0.066666670143604279,
+		"mean_s": 0.066666662694193496
+	},
+	"inner_dynamics_steps":
+	{
+		"count": 50950,
+		"total_s": 424.58335547707975,
+		"min_s": 0.0083333337679505348,
+		"max_s": 0.0083333337679505348,
+		"mean_s": 0.0083333337679505348
+	},
+	"flight_guidance_steps":
+	{
+		"count": 43751,
+		"total_s": 364.59168568160385,
+		"min_s": 0.0083333337679505348,
+		"max_s": 0.0083333337679505348,
+		"mean_s": 0.0083333337679505348
+	},
+	"upper_stage_steps":
+	{
+		"count": 28079,
+		"total_s": 233.99167887028307,
+		"min_s": 0.0083333337679505348,
+		"max_s": 0.0083333337679505348,
+		"mean_s": 0.0083333337679505348
+	},
+	"mission_generation": 1,
+	"scope": "Session cadence, including ground preparation; proof of scheduling only, not flight convergence.",
+	"substepping": false,
+	"async_physics": true,
+	"jitter_clock": false,
+	"configured_frame_cap_s": 0,
+	"async_block_mode": 1,
+	"configured_max_substep_s": 0.01666666753590107,
+	"configured_fixed_step_s": 0.0083333337679505348
+}

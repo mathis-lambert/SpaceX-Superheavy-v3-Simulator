@@ -8,6 +8,7 @@ class UStaticMeshComponent;
 class UMaterialInstanceDynamic;
 class UHeterogeneousVolumeComponent;
 class ASuperHeavyRecoveryDirector;
+class USparseVolumeTexture;
 
 /** Participating medium near the pad and plume, voxelized into the scene fog grid. */
 UCLASS(ClassGroup=(Recovery), meta=(BlueprintSpawnableComponent))
@@ -39,6 +40,7 @@ private:
     UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> CryogenicMaterials;
     UPROPERTY(Transient) TArray<TObjectPtr<UHeterogeneousVolumeComponent>> TurbulentVolumes;
     UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> TurbulentMaterials;
+    UPROPERTY(Transient) TObjectPtr<USparseVolumeTexture> TurbulentField;
     TArray<FBillow> TurbulentBillows;
     FVector TurbulentFrameOffset=FVector::ZeroVector;
     double TurbulentVoxelM=.15625,TurbulentSpawnClock=0;

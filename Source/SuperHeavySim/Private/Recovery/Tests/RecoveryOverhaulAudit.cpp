@@ -71,19 +71,28 @@ void ARecoveryPlayerController::TickOverhaulAudit()
         Check(FMath::Abs(GetWorld()->GetWorldSettings()->GetEffectiveTimeDilation()-.25f)<.001f,TEXT("Interactive playback rate changes world simulation speed"));
         SetPlaybackRate(1);TogglePauseMenu();Menu->ShowPage(10);break;
     case 30:Shot(TEXT("InteractiveFlight"));break;
-    case 31:ChooseCamera(11);AuditDeadline=Now+3;break;
+    case 31:bAutomaticOrbit=false;ChooseCamera(11);AuditDeadline=Now+3;break;
     case 32:
         AuditRotation=GetViewTarget()->GetActorRotation();
         InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::MouseX,IE_Axis,100,1));break;
     case 33:
-        Check(!IsInputKeyDown(EKeys::RightMouseButton) && FMath::Abs(FMath::FindDeltaAngleDegrees(AuditRotation.Yaw,GetViewTarget()->GetActorRotation().Yaw))>2,TEXT("Orbit camera responds to mouse axis without a button"));
+        Check(!IsInputKeyDown(EKeys::RightMouseButton) && FMath::Abs(FMath::FindDeltaAngleDegrees(AuditRotation.Yaw,GetViewTarget()->GetActorRotation().Yaw))<.1,TEXT("Pointing without RMB leaves orbit camera stationary"));
         ChooseCamera(8);AuditDeadline=Now+2;break;
     case 34:
         AuditRotation=GetViewTarget()->GetActorRotation();
         InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::MouseX,IE_Axis,100,1));break;
     case 35:
-        Check(!IsInputKeyDown(EKeys::RightMouseButton) && FMath::Abs(FMath::FindDeltaAngleDegrees(AuditRotation.Yaw,GetViewTarget()->GetActorRotation().Yaw))>2,TEXT("Free camera responds to mouse axis without a button"));
-        ReturnHome();break;
+        Check(!IsInputKeyDown(EKeys::RightMouseButton) && FMath::Abs(FMath::FindDeltaAngleDegrees(AuditRotation.Yaw,GetViewTarget()->GetActorRotation().Yaw))<.1,TEXT("Pointing without RMB leaves free camera stationary"));
+        break;
+    case 36:InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::RightMouseButton,IE_Pressed,1,1));break;
+    case 37:
+        AuditRotation=GetViewTarget()->GetActorRotation();
+        InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::MouseX,IE_Axis,100,1));break;
+    case 38:
+        Check(FMath::Abs(FMath::FindDeltaAngleDegrees(AuditRotation.Yaw,GetViewTarget()->GetActorRotation().Yaw))>1,TEXT("Holding RMB rotates the camera"));
+        InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::RightMouseButton,IE_Released,0,1));break;
+    case 39:
+        Check(bShowMouseCursor && !IsOrbitDragging(),TEXT("Releasing RMB restores the pointer"));ReturnHome();break;
     default:
         TSharedRef<FJsonObject> R=MakeShared<FJsonObject>();R->SetBoolField(TEXT("success"),bAuditPassed);
         TArray<TSharedPtr<FJsonValue>> Values;for(const auto& C:AuditChecks)Values.Add(MakeShared<FJsonValueString>(C));R->SetArrayField(TEXT("checks"),Values);

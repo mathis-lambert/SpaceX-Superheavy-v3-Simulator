@@ -33,22 +33,25 @@ uv=custom(m,{'Q':local,'T':time},'return Q*float3(.07,.07,.065)+float3(0,0,-T*.1
 n=sample(m,'/Game/Starbase/Textures/Effects/T_FlowNoise128',uv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
 fineuv=custom(m,{'UV':uv,'N':n},'return UV*3.07+(N.rgb-.5)*.44;')
 fine=sample(m,'/Game/Starbase/Textures/Effects/T_FlowNoise128',fineuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
-for node in (n,fine):
+wispuv=custom(m,{'UV':uv,'F':fine},'return UV*8.73+(F.rgb-.5)*.19;')
+wisp=sample(m,'/Game/Starbase/Textures/Effects/T_FlowNoise128',wispuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
+for node in (n,fine,wisp):
     prop(node,'mip_value_mode',u.TextureMipValueMode.TMVM_MIP_LEVEL);prop(node,'const_mip_value',0)
-d=custom(m,{'Q':local,'N':n,'F':fine,'S':strength,'VoxelM':voxel},'''
+d=custom(m,{'Q':local,'N':n,'F':fine,'Wisp':wisp,'S':strength,'VoxelM':voxel},'''
 float depth=max(Q.z,0);
-float width=.65+depth*.16;
+float width=.38+depth*.12;
 // Detached, curling lobes follow the downward flow; density fades before bounds.
 float2 q=Q.xy-float2(.22+depth*.048+(N.g-.5)*width*.9,(N.b-.5)*width*.9);
 float envelope=1-smoothstep(width*.35,width*1.5,length(q));
 float top=smoothstep(-.2,.35,Q.z);
-float tail=1-smoothstep(17,28,Q.z);
-float curls=smoothstep(.29,.67,N.r*.65+F.g*.35);
+float tail=1-smoothstep(25,44,Q.z);
+float curls=smoothstep(.26,.69,N.r*.48+F.g*.34+Wisp.b*.18);
+float core=exp(-dot(q,q)/max(.04,width*width*.09))*(1-smoothstep(0,9,depth));
 // No condensation inside the cylindrical hull (vent is at its surface).
 float hull=smoothstep(-.18,.08,Q.x+Q.y*Q.y/9.3);
 // Estimated droplet extinction in inverse metres, converted to UE's local
 // voxel integration units. No emissive term: water scatters the scene lights.
-float extinctionM=1.8*S*envelope*top*tail*curls*hull/(1+depth*.07);
+float extinctionM=2.1*S*envelope*top*tail*(curls+core*.3)*hull/(1+depth*.085);
 return extinctionM*VoxelM;
 ''',u.CustomMaterialOutputType.CMOT_FLOAT1)
 connect(m,d,u.MaterialProperty.MP_SUBSURFACE_COLOR)

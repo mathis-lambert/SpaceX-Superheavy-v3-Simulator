@@ -5,6 +5,7 @@
 // Canonical runtime references; update here when moving authored content.
 namespace RecoveryAssets
 {
+    inline constexpr TCHAR M_LayeredWeather[]=TEXT("/Game/Starbase/Materials/M_LayeredWeather.M_LayeredWeather");
     inline constexpr TCHAR S_EngineRumble[]=TEXT("/Game/Starbase/Audio/S_EngineRumble.S_EngineRumble");
     inline constexpr TCHAR S_EngineCrackle[]=TEXT("/Game/Starbase/Audio/S_EngineCrackle.S_EngineCrackle");
     inline constexpr TCHAR S_CryogenicHiss[]=TEXT("/Game/Starbase/Audio/S_CryogenicHiss.S_CryogenicHiss");
@@ -51,6 +52,7 @@ namespace RecoveryAssets
             FSoftObjectPath(S_TowerContact),
             FSoftObjectPath(S_MountRelease),
             FSoftObjectPath(M_StarField),
+            FSoftObjectPath(M_LayeredWeather),
             FSoftObjectPath(S_EngineRoar),
             FSoftObjectPath(S_CoastalWind),
             FSoftObjectPath(SM_ExhaustEnvelope),
