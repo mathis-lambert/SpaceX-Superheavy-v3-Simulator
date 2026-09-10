@@ -95,5 +95,10 @@ Hardware beyond this development machine has not been qualified.
 
 ## Packaged executable
 
+The first package passed the functional flight but failed the strict log check:
+an editor GameFeatureData scan rule attempted to load the absent GameFeatures
+runtime class. The rule is now editor-only, as in alpha.6. This failed candidate
+is retained under Saved/Recovery/RejectedPackages and is not the delivered build.
+
 Pending exact-package validation. Do not treat source-test results as proof that
 the packaged executable has passed startup, controls or a rendered full flight.
