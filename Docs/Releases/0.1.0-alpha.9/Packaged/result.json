@@ -1,0 +1,18 @@
+{
+  "source_commit": "1f52c6dc2b07e73ba92c05e2cdda19e4249d27d5",
+  "front_ingress": true,
+  "support_mask": 3,
+  "rendered_frames": 6440,
+  "success": true,
+  "version": "0.1.0-alpha.9",
+  "startup_seconds": 4.677828799933195,
+  "startup_assets": 35,
+  "capture": true,
+  "chase_offset_step_cm": 1.0449298582058015E-11,
+  "evidence_directory": "C:\\Users\\lambe\\Documents\\Projets\\superheavy_landing\\SuperHeavySim\\Saved\\Recovery\\Alpha-0.1.0-alpha.9-20260910-172529",
+  "visual_review_required": true,
+  "executable_sha256": "279628e30c2848be967f930580b95f15500e73ee2cd7b881e7de0acf275ae300",
+  "support_drift_m": 0.015574128796997115,
+  "reconstruction": "NVIDIA DLSS / DLAA",
+  "controls_checks": 69
+}
