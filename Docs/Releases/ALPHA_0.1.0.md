@@ -1,6 +1,6 @@
 # Starbase Flight Simulator — Alpha 0.1.0
 
-Version: `0.1.0-alpha.7`. Windows x64, Unreal Engine 5.8.
+Version: `0.1.0-alpha.8`. Windows x64, Unreal Engine 5.8.
 
 ## Start
 

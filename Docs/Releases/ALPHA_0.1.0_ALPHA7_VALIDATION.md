@@ -100,5 +100,9 @@ an editor GameFeatureData scan rule attempted to load the absent GameFeatures
 runtime class. The rule is now editor-only, as in alpha.6. This failed candidate
 is retained under Saved/Recovery/RejectedPackages and is not the delivered build.
 
-Pending exact-package validation. Do not treat source-test results as proof that
-the packaged executable has passed startup, controls or a rendered full flight.
+The configuration-corrected alpha.7 passed startup without the ensure. Its control
+audit then hit a wall-time assumption while a second user-launched instance shared
+the GPU: the countdown was still advancing, rather than stuck or reset. This
+candidate is superseded by alpha.8, which waits for measured ascent with a finite
+timeout. The user's running alpha.7 directory is preserved. See
+[alpha.8 validation](ALPHA_0.1.0_ALPHA8_VALIDATION.md) for the final package status.

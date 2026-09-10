@@ -98,7 +98,7 @@ private:
     void TickInteractiveAudit();
     int32 AuditStage=0;
     int32 AuditPendingCamera=-1;
-    double AuditDeadline=0,AuditMissionTime=0;
+    double AuditDeadline=0,AuditMissionTime=0,AuditLaunchTimeoutS=0;
     FVector AuditPosition=FVector::ZeroVector;
     FRotator AuditRotation=FRotator::ZeroRotator;
     FIntPoint AuditResolution;

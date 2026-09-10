@@ -71,7 +71,7 @@ void ARecoveryPlayerController::TickControlsAudit()
         if(Index>=Keys.Num())
         {
             Check(AuditStage==10?TEXT("Ready keys never reset experiments"):TEXT("Flight keys never reset experiments"),D->GetExperiment().WindScale==2);
-            if(AuditStage==10){D->StartMission();AuditMissionTime=D->MissionTime;AuditDeadline=Now+FRecoveryLaunchSequence::DurationS+17;AuditStage=12;return;}
+            if(AuditStage==10){D->StartMission();AuditMissionTime=D->MissionTime;AuditLaunchTimeoutS=Now+300;AuditDeadline=Now+.5;AuditStage=12;return;}
             AuditStage=13;return;
         }
         const FKey Key=Keys[Index];
@@ -100,7 +100,15 @@ void ARecoveryPlayerController::TickControlsAudit()
         }
         ++AuditPendingCamera;AuditDeadline=Now+.16;return;
     }
-    if(AuditStage==12){Check(TEXT("Launch advanced to ascent"),D->Phase==ERecoveryPhase::Ascent && D->MissionTime>5);AuditMissionTime=D->MissionTime;AuditPendingCamera=0;AuditStage=11;return;}
+    if(AuditStage==12)
+    {
+        // Rendering stalls and background throttling must not turn a wall-clock
+        // delay into a false launch failure. Observe the same simulated state,
+        // with a finite wall-clock timeout for a genuinely stuck countdown.
+        const bool Ascending=D->Phase==ERecoveryPhase::Ascent && D->MissionTime>5;
+        if(!Ascending && Now<AuditLaunchTimeoutS && D->Phase<=ERecoveryPhase::Ascent){AuditDeadline=Now+.5;return;}
+        Check(TEXT("Launch advanced to ascent"),Ascending);AuditMissionTime=D->MissionTime;AuditPendingCamera=0;AuditStage=11;return;
+    }
     if(AuditStage==13){TogglePauseMenu();Shot(TEXT("Pause.png"));AuditDeadline=Now+.5;AuditStage=19;return;}
     if(AuditStage==19){AuditMissionTime=D->MissionTime;AuditPosition=D->GetBody()->GetComponentLocation();AuditDeadline=Now+2;AuditStage=14;return;}
     if(AuditStage==14)
