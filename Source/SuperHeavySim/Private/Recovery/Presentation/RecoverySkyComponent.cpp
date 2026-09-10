@@ -43,14 +43,29 @@ void URecoverySkyComponent::FindScene()
     for(TActorIterator<ASkyLight> It(GetWorld());It;++It) { Sky=It->GetLightComponent();break; }
     for(TActorIterator<AVolumetricCloud> It(GetWorld());It;++It) { Clouds=It->FindComponentByClass<UVolumetricCloudComponent>();break; }
     for(TActorIterator<ASkyAtmosphere> It(GetWorld());It;++It) { Atmosphere=It->FindComponentByClass<USkyAtmosphereComponent>();break; }
-    if(Sun.IsValid()) Sun->GetLightComponent()->SetMobility(EComponentMobility::Movable);
-    if(Sky.IsValid()) { Sky->SetMobility(EComponentMobility::Movable);Sky->SetRealTimeCaptureEnabled(true); }
+    if(Sun.IsValid())
+    {
+        Sun->GetLightComponent()->SetMobility(EComponentMobility::Movable);
+        RegionalCloudShadowStrength=Cast<UDirectionalLightComponent>(Sun->GetLightComponent())->CloudShadowStrength;
+    }
+    if(Sky.IsValid())
+    {
+        Sky->SetMobility(EComponentMobility::Movable);
+        // The shipped level is already configured before scene registration.
+        // Avoid tearing down its render proxy during the first parallel draws.
+        if(!Sky->bRealTimeCapture)Sky->SetRealTimeCaptureEnabled(true);
+    }
     if(Clouds.IsValid())
     {
         Clouds->TracingMaxDistanceMode=EVolumetricCloudTracingMaxDistanceMode::DistanceFromCloudLayerEntryPoint;
         Clouds->SetTracingStartMaxDistance(1800.f);
         Clouds->SetTracingMaxDistance(2200.f);
         Clouds->SetLayerBottomAltitude(.6f);Clouds->SetLayerHeight(10.4f);
+        Clouds->SetbUsePerSampleAtmosphericLightTransmittance(true);
+        Clouds->SetReflectionViewSampleCountScale(.25f);
+        Clouds->SetShadowReflectionViewSampleCountScale(.25f);
+        Clouds->SetStopTracingTransmittanceThreshold(.01f);
+        Clouds->SetShadowTracingDistance(4.f);
         if(auto* Material=LoadObject<UMaterialInterface>(nullptr,RecoveryAssets::M_LayeredWeather))
         {WeatherMaterial=UMaterialInstanceDynamic::Create(Material,this);Clouds->SetMaterial(WeatherMaterial);}
     }
@@ -103,15 +118,30 @@ void URecoverySkyComponent::TickComponent(float Dt,ELevelTick Type,FActorCompone
     FVector CameraLocation=FVector::ZeroVector;
     if(PC && PC->GetViewTarget()) CameraLocation=PC->GetViewTarget()->GetActorLocation();
     const double Altitude=FlightGeometry::AltitudeM(CameraLocation);
-    if(Clouds.IsValid())Clouds->SetTracingStartMaxDistance(FMath::Max(1800.,FMath::CeilToDouble(Altitude/100000.)*100.+2000.));
+    if(Sun.IsValid())
+    {
+        // The finite orthographic cloud-shadow map is regional. Projecting it
+        // through the whole planet creates diagonal atmospheric streaks. Fade
+        // that map with observer distance; in-volume ray-marched shadows remain.
+        auto* Light=Cast<UDirectionalLightComponent>(Sun->GetLightComponent());
+        const float Strength=RegionalCloudShadowStrength*(1-FMath::SmoothStep(20000.,120000.,Altitude));
+        if(FMath::Abs(Light->CloudShadowStrength-Strength)>.01f || (Strength==0 && Light->CloudShadowStrength!=0))
+        {Light->CloudShadowStrength=Strength;Light->MarkRenderStateDirty();}
+    }
+    // The furthest visible cloud is near the planet tangent, not directly below
+    // the camera. Altitude + a constant clipped the globe into a circular disk.
+    if(Clouds.IsValid())
+    {
+        const double H=FMath::Max(0.,Altitude)*.001;
+        Clouds->SetTracingStartMaxDistance(FMath::Max(1800.,FMath::Sqrt(H*(12742.+H))+1000.));
+    }
     if(StarField)StarField->SetWorldLocation(CameraLocation);
-    // Retain full screen resolution near silhouettes; distant cloud layers need
-    // fewer depth samples once the camera is far above their upper boundary.
-    const float Samples=1.f;
+    // Fewer filtered depth samples from orbit; no camera-mode or altitude switch.
+    const float Samples=FMath::Lerp(2.f,.6f,FMath::SmoothStep(12000.,90000.,Altitude));
     if(Clouds.IsValid() && FMath::Abs(Samples-LastCloudSamples)>.04f)
     {
         Clouds->SetViewSampleCountScale(Samples);
-        Clouds->SetShadowViewSampleCountScale(FMath::Min(1.5f,Samples));
+        Clouds->SetShadowViewSampleCountScale(.8f);
         LastCloudSamples=Samples;
     }
     if(Fog.IsValid())
@@ -125,7 +155,7 @@ void URecoverySkyComponent::TickComponent(float Dt,ELevelTick Type,FActorCompone
         Fog->SetVolumetricFogScatteringDistribution(0.3f);
     }
     const int32 Weather=PC?FMath::Clamp(PC->WeatherPreset,0,3):2;
-    const float Coverage[]={.08f,.18f,.48f,.84f},Haze[]={.45f,1.8f,1.f,1.35f};
+    const float Coverage[]={.08f,.18f,.60f,.84f},Haze[]={.45f,1.8f,1.f,1.35f};
     WeatherCoverage=FMath::FInterpTo(WeatherCoverage,Coverage[Weather],FApp::GetDeltaTime(),.35f);
     WeatherHaze=FMath::FInterpTo(WeatherHaze,Haze[Weather],FApp::GetDeltaTime(),.35f);
     if(Atmosphere.IsValid())Atmosphere->SetMieScatteringScale(WeatherHaze*(PC?PC->FogAmount:1.f));

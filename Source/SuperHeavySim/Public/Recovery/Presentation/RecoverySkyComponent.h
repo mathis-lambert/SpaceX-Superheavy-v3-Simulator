@@ -43,6 +43,7 @@ private:
     float LastUtcOffset=100.f;
     FVector2D OriginLatLon=FVector2D(25.9973,-97.1569);
     float LastCloudSamples=-1;
+    float RegionalCloudShadowStrength=.35f;
     float ExposureEV=-1;
     void FindScene();
     void BuildSiteLighting();

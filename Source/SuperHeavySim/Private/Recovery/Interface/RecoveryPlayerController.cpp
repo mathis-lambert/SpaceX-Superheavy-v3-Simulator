@@ -45,7 +45,9 @@ void ARecoveryPlayerController::BeginPlay()
     FParse::Value(FCommandLine::Get(),TEXT("RecoveryReconstruction="),ReconstructionMode);
     GConfig->GetFloat(TEXT("Recovery.Presentation"),TEXT("TimeOfDay"),TimeOfDay,GGameUserSettingsIni);
     GConfig->GetFloat(TEXT("Recovery.Presentation"),TEXT("FogAmount"),FogAmount,GGameUserSettingsIni);
-    GConfig->GetInt(TEXT("Recovery.Presentation"),TEXT("WeatherPreset"),WeatherPreset,GGameUserSettingsIni);WeatherPreset=FMath::Clamp(WeatherPreset,0,3);
+    GConfig->GetInt(TEXT("Recovery.Presentation"),TEXT("WeatherPreset"),WeatherPreset,GGameUserSettingsIni);
+    FParse::Value(FCommandLine::Get(),TEXT("RecoveryWeather="),WeatherPreset);
+    WeatherPreset=FMath::Clamp(WeatherPreset,0,3);
     GConfig->GetFloat(TEXT("Recovery.Presentation"),TEXT("MotionBlur"),MotionBlur,GGameUserSettingsIni);
     GConfig->GetFloat(TEXT("Recovery.Presentation"),TEXT("CameraGrain"),CameraGrain,GGameUserSettingsIni);
     GConfig->GetBool(TEXT("Recovery.Presentation"),TEXT("DepthOfField"),bCameraDepthOfField,GGameUserSettingsIni);

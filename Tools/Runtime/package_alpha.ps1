@@ -1,6 +1,6 @@
 param(
     [string]$EngineRoot='D:/Engines/UE_5.8',
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.8'
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.9'
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -28,6 +28,7 @@ Copy-Item -LiteralPath "$root/Docs/DYNAMIC_RETURN.md" -Destination "$archive/FLI
 Copy-Item -LiteralPath "$root/Docs/PROPULSION_AND_STARTUP.md" -Destination "$archive/PROPULSION.md"
 Copy-Item -LiteralPath "$root/Docs/COAST_VOLUMES_TOWER.md" -Destination "$archive/COAST-VOLUMES-TOWER.md"
 Copy-Item -LiteralPath "$root/Docs/INTERACTIVE_RECOVERY.md" -Destination "$archive/INTERACTIVE-RECOVERY.md"
+Copy-Item -LiteralPath "$root/Docs/CLOUD_RENDERING.md" -Destination "$archive/CLOUDS.md"
 $null=New-Item -ItemType Directory -Path "$archive/ThirdParty" -Force
 Copy-Item -LiteralPath "$root/Docs/Research/CoastVolumes/regional-sources.json" -Destination "$archive/ThirdParty/REGIONAL-IMAGERY.json"
 Copy-Item -LiteralPath "$root/Docs/Research/CoastVolumes/lidar-sources.json" -Destination "$archive/ThirdParty/LIDAR.json"

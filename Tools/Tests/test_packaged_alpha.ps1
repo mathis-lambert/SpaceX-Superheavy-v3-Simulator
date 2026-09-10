@@ -1,6 +1,6 @@
 param(
     [string]$EngineRoot='D:/Engines/UE_5.8',
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.8'
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.9'
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -45,9 +45,14 @@ Invoke-Alpha -LogName 'controls' -Arguments @("-UserDir=$userDir/",'-windowed','
 $controls=Read-FreshAlphaReport 'ControlsAudit/result.json' $start
 Write-Host 'Packaged controls PASS'
 $start=Get-Date
-Invoke-Alpha -LogName 'flight' -Arguments @("-UserDir=$userDir/",'-windowed','-ForceRes','-ResX=1920','-ResY=1080','-UseFixedTimeStep','-FPS=15','-RecoveryPhysicsAudit','-ini:Engine:[Audio]:UnfocusedVolumeMultiplier=1','-RecoveryExperienceAudit','-RecoveryAudioAudit','-RecoveryReview','-RecoveryDetailReview','-RecoveryChaseReview','-RecoveryAutoExit','-RecoveryScenario=Crosswind','-RecoveryReportName=AlphaFlight','-RecoveryReconstruction=3','-nosplash','-unattended',"-abslog=$audit/flight.log")
+Invoke-Alpha -LogName 'flight' -Arguments @("-UserDir=$userDir/",'-windowed','-ForceRes','-ResX=1920','-ResY=1080','-UseFixedTimeStep','-FPS=15','-RecoveryPhysicsAudit','-ini:Engine:[Audio]:UnfocusedVolumeMultiplier=1','-RecoveryExperienceAudit','-RecoveryAudioAudit','-RecoveryReview','-RecoveryCloudReview','-RecoveryWeather=2','-RecoveryDetailReview','-RecoveryChaseReview','-RecoveryAutoExit','-RecoveryScenario=Crosswind','-RecoveryReportName=AlphaFlight','-RecoveryReconstruction=3','-nosplash','-unattended',"-abslog=$audit/flight.log")
 $flight=Read-FreshAlphaReport 'AlphaFlight.json' $start
 $render=Read-FreshAlphaReport 'experience-flight-audit.json' $start
+$cloudFrames=(Get-Content -Raw -LiteralPath "$saved/Review/frames.json" | ConvertFrom-Json).frames | Where-Object image -like 'Cloud_*'
+if(@($cloudFrames).Count -lt 60){throw 'Incomplete packaged moving-cloud review'}
+foreach($frame in $cloudFrames){
+    if((Get-Item -LiteralPath "$saved/Review/$($frame.image)").LastWriteTime -lt $start){throw 'Stale moving-cloud review frame'}
+}
 $audio=Get-Item -LiteralPath "$saved/Audio/LaunchMix.wav"
 if($audio.LastWriteTime -lt $start){throw 'No fresh packaged audio recording'}
 & (Join-Path $EngineRoot 'Engine/Binaries/ThirdParty/Python3/Win64/python.exe') "$root/Tools/Tests/audit_audio_capture.py" $audio.FullName

@@ -16,6 +16,40 @@ void ARecoveryPlayerController::TickInteractiveAudit()
     if(GShaderCompilingManager && GShaderCompilingManager->IsCompiling()){AuditDeadline=Now+2;return;}
     const FString Dir=FPaths::ProjectSavedDir()/TEXT("Recovery/InteractiveAudit");
     IFileManager::Get().MakeDirectory(*Dir,true);
+    // Isolated, stationary render probes. Only the observer moves; flight physics
+    // is untouched. Start capture after weather, exposure and PSOs have settled.
+    if(FParse::Param(FCommandLine::Get(),TEXT("RecoveryCloudBenchmark")))
+    {
+        if(AuditStage==0)
+        {
+            bAtHome=false;SetMenuVisible(false);D->SetCameraMode(8);
+            bAutomaticOrbit=false;CameraGrain=0;MotionBlur=0;bCameraDepthOfField=false;
+            float Height=80000,Pitch=-45,Hour=12;
+            FParse::Value(FCommandLine::Get(),TEXT("CloudHeight="),Height);
+            FParse::Value(FCommandLine::Get(),TEXT("CloudPitch="),Pitch);
+            FParse::Value(FCommandLine::Get(),TEXT("RecoveryHour="),Hour);TimeOfDay=Hour;
+            int32 Weather=2;FParse::Value(FCommandLine::Get(),TEXT("CloudWeather="),Weather);
+            SetWeatherPreset(Weather);
+            if(auto* Camera=Cast<ACameraActor>(GetViewTarget()))
+            {
+                Camera->SetActorLocationAndRotation(FVector(Height<500?-50000.:0,0,Height*100.),FRotator(Pitch,0,0));
+                Camera->GetCameraComponent()->SetFieldOfView(65);
+            }
+            AuditStage=1;AuditDeadline=Now+15;return;
+        }
+        if(AuditStage==1)
+        {
+            ConsoleCommand(TEXT("csvprofile frames=360"),false);
+            AuditStage=2;AuditDeadline=Now+2;return;
+        }
+        if(AuditStage==2)
+        {
+            FString Name=TEXT("CloudProbe");FParse::Value(FCommandLine::Get(),TEXT("RecoveryReviewName="),Name);
+            FScreenshotRequest::RequestScreenshot(Dir/FPaths::MakeValidFileName(Name)+TEXT(".png"),false,false);
+            AuditStage=3;
+        }
+        return;
+    }
     const auto Shot=[&](FString Name){FScreenshotRequest::RequestScreenshot(Dir/Name,true,false);};
     const auto Check=[&](const TCHAR* Name,bool Passed){bAuditPassed&=Passed;AuditChecks.Add(FString::Printf(TEXT("%s: %s"),Name,Passed?TEXT("PASS"):TEXT("FAIL")));};
     const auto Planet=[&](double Altitude)

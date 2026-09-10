@@ -1,6 +1,6 @@
 # Starbase Flight Simulator — Alpha 0.1.0
 
-Version: `0.1.0-alpha.8`. Windows x64, Unreal Engine 5.8.
+Version: `0.1.0-alpha.9`. Windows x64, Unreal Engine 5.8.
 
 ## Start
 
@@ -26,6 +26,11 @@ inspector and local diagnostic reports remain available. It contains neither
 the Unreal Editor nor the project's MCP and editing toolsets.
 
 ## Included
+
+Cloud rendering now uses a bounded real-time tracing budget, distance-filtered
+cloud noise and globe-wide solar transmittance. The orbital circular cutoff is
+removed. Clear, haze, scattered and overcast weather share continuous spherical
+layers. See `CLOUDS.md` for sources, measurements and validation limits.
 
 Launch conditioning and countdown, ascent, independent stage separation,
 boostback, engine-off coast, grid-fin descent, landing burn and physical rail

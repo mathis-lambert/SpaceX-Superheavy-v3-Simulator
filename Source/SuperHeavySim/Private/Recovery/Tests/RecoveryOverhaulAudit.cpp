@@ -54,7 +54,7 @@ void ARecoveryPlayerController::TickOverhaulAudit()
     case 17:TimeOfDay=17.9f;ResumeFlight();AuditDeadline=Now+3;break;
     case 18:
         Check(D->MissionTime>AuditMissionTime,TEXT("Flight resumes after lighting changes"));
-        Check(IConsoleManager::Get().FindConsoleVariable(TEXT("r.VolumetricRenderTarget.Mode"))->GetInt()==3,TEXT("Full-resolution cloud tracing enabled"));
+        Check(IConsoleManager::Get().FindConsoleVariable(TEXT("r.VolumetricRenderTarget.Mode"))->GetInt()==0,TEXT("Reactive cloud tracing enabled"));
         for(TActorIterator<APostProcessVolume> It(GetWorld());It;++It) if(It->bUnbound) {Check(FMath::Abs(It->Settings.FilmGrainIntensity-CameraGrain)<0.001,TEXT("Camera grain applied to scene postprocess"));break;}
         ReturnHome();Menu->ShowPage();AuditDeadline=Now+2;break;
     case 19:Menu->ShowPage(8);break;

@@ -1,0 +1,18 @@
+{
+  "hour": 12.0,
+  "warmup_seconds": 15,
+  "cloud_shadows": true,
+  "cloud_mode": 0,
+  "view": "Orbit",
+  "reconstruction": 3,
+  "weather": 2,
+  "capture_frames": 360,
+  "camera_altitude_m": 94000,
+  "clouds_enabled": true,
+  "pitch_deg": -55,
+  "upsampling": 3,
+  "output": [
+    2560,
+    1440
+  ]
+}

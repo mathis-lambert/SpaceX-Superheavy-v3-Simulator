@@ -7,7 +7,7 @@ param(
     [ValidateSet(0,1)][int]$HardwareRayTracing=0,
     [ValidateRange(0,24)][double]$Hour=17.9,
     [ValidateSet(1080,1440,2160)][int[]]$Heights=@(1440),
-    [ValidateSet(0,1,3)][int[]]$CloudModes=@(3),
+    [ValidateSet(0,1,3)][int[]]$CloudModes=@(0),
     [ValidateSet(30,60)][int]$SimulationHz=60
 )
 $ErrorActionPreference='Stop'

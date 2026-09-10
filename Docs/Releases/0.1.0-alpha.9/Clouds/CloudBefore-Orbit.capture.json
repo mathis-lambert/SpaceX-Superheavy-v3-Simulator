@@ -1,0 +1,16 @@
+{
+  "view": "Orbit",
+  "camera_altitude_m": 94000,
+  "pitch_deg": -55,
+  "hour": 12,
+  "weather": 2,
+  "cloud_mode": 3,
+  "reconstruction": 3,
+  "output": [
+    2560,
+    1440
+  ],
+  "warmup_seconds": 15,
+  "capture_frames": 360,
+  "provenance": "Reconstructed from CloudBefore-Orbit.log command line"
+}

@@ -1,6 +1,6 @@
 param(
     [string]$EngineRoot='D:/Engines/UE_5.8',
-    [ValidateSet(0,1,3)][int[]]$CloudModes=@(3,1),
+    [ValidateSet(0,1,3)][int[]]$CloudModes=@(0),
     [ValidateSet(1080,1440,2160)][int]$Height=1440,
     [string]$Prefix='CloudReview',
     [ValidateRange(0,24)][double]$Hour=14
@@ -19,7 +19,7 @@ try {
     foreach($cloud in $CloudModes) {
         $name="${Prefix}${Height}Mode${cloud}"
         $started=Get-Date
-        & $engine "$root/SuperHeavySim.uproject" /Game/Starbase/Maps/L_RecoveryLab -game -windowed -ForceRes "-ResX=$width" "-ResY=$Height" -RecoveryNoMenu -RecoveryAutoExit -RecoveryScenario=Nominal -RecoveryCloudReview -RecoveryEarthReview -UseFixedTimeStep -FPS=30 -RecoveryReconstruction=3 -RecoveryRayTracing=0 "-RecoveryHour=$($Hour.ToString([Globalization.CultureInfo]::InvariantCulture))" "-RecoveryReviewName=$name" "-RecoveryReportName=$name" -DisablePython -nosplash -unattended "-ExecCmds=r.SetRes ${width}x${Height}w,t.MaxFPS 0,r.VSync 0,r.VolumetricRenderTarget.Mode $cloud" "-abslog=$saved/$name.log" *> "$saved/$name-console.log"
+        & $engine "$root/SuperHeavySim.uproject" /Game/Starbase/Maps/L_RecoveryLab -game -windowed -ForceRes "-ResX=$width" "-ResY=$Height" -RecoveryNoMenu -RecoveryAutoExit -RecoveryScenario=Nominal -RecoveryCloudReview -RecoveryWeather=2 -RecoveryEarthReview -UseFixedTimeStep -FPS=30 -RecoveryReconstruction=3 -RecoveryRayTracing=0 "-RecoveryHour=$($Hour.ToString([Globalization.CultureInfo]::InvariantCulture))" "-RecoveryReviewName=$name" "-RecoveryReportName=$name" -DisablePython -nosplash -unattended "-ExecCmds=r.SetRes ${width}x${Height}w,t.MaxFPS 0,r.VSync 0,r.VolumetricRenderTarget.Mode $cloud" "-abslog=$saved/$name.log" *> "$saved/$name-console.log"
         if($LASTEXITCODE -ne 0){throw "Visual flight failed: $name"}
         if(Select-String -Quiet -LiteralPath "$saved/$name.log" -Pattern 'Failed to compile Material|Fatal error:'){throw "Invalid render: $name"}
         $manifest=Get-Item -LiteralPath "$saved/Review/$name/frames.json"

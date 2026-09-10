@@ -1,0 +1,212 @@
+[
+  {
+    "capture": "CloudBefore-Orbit.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 49.07543388888889,
+      "p95_ms": 52.6658,
+      "max_ms": 700.4581
+    },
+    "cloud": {
+      "mean_ms": 37.952908055555554,
+      "p95_ms": 40.3087,
+      "max_ms": 40.6794
+    },
+    "mean_fps": 20.37679386114218
+  },
+  {
+    "capture": "CloudBefore-Globe.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 41.235391388888885,
+      "p95_ms": 42.6806,
+      "max_ms": 591.631
+    },
+    "cloud": {
+      "mean_ms": 30.761901388888887,
+      "p95_ms": 32.511,
+      "max_ms": 33.28
+    },
+    "mean_fps": 24.25101269366042
+  },
+  {
+    "capture": "CloudBefore-Layer.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 32.81667361111111,
+      "p95_ms": 33.5034,
+      "max_ms": 717.7624
+    },
+    "cloud": {
+      "mean_ms": 22.73053388888889,
+      "p95_ms": 24.5136,
+      "max_ms": 25.2642
+    },
+    "mean_fps": 30.472314526766013
+  },
+  {
+    "capture": "CloudStable-Ground.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 8.46166388888889,
+      "p95_ms": 7.5055,
+      "max_ms": 649.601
+    },
+    "cloud": {
+      "mean_ms": 1.3139069444444444,
+      "p95_ms": 1.5422,
+      "max_ms": 1.7193
+    },
+    "mean_fps": 118.18006637123838
+  },
+  {
+    "capture": "CloudStable-Layer.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 9.796683333333332,
+      "p95_ms": 9.0573,
+      "max_ms": 698.9404
+    },
+    "cloud": {
+      "mean_ms": 1.6358125,
+      "p95_ms": 2.3214,
+      "max_ms": 2.5549
+    },
+    "mean_fps": 102.07536223994175
+  },
+  {
+    "capture": "CloudStable-CloudTop.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 12.39523,
+      "p95_ms": 17.1239,
+      "max_ms": 785.6602
+    },
+    "cloud": {
+      "mean_ms": 1.8118241666666666,
+      "p95_ms": 2.2405,
+      "max_ms": 6.2321
+    },
+    "mean_fps": 80.67619560104976
+  },
+  {
+    "capture": "CloudFlightLOD-Orbit.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 9.031077777777778,
+      "p95_ms": 11.1998,
+      "max_ms": 676.8733
+    },
+    "cloud": {
+      "mean_ms": 0.36567944444444445,
+      "p95_ms": 0.3994,
+      "max_ms": 0.5703
+    },
+    "mean_fps": 110.72875515042502
+  },
+  {
+    "capture": "CloudFlightLOD-Globe.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 8.046836944444445,
+      "p95_ms": 7.1507,
+      "max_ms": 571.7521
+    },
+    "cloud": {
+      "mean_ms": 0.46979333333333334,
+      "p95_ms": 0.5284,
+      "max_ms": 0.8141
+    },
+    "mean_fps": 124.2724323736176
+  },
+  {
+    "capture": "CloudFlightLODStress-Orbit.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 14.912965833333333,
+      "p95_ms": 17.2413,
+      "max_ms": 766.8359
+    },
+    "cloud": {
+      "mean_ms": 2.1891619444444443,
+      "p95_ms": 2.605,
+      "max_ms": 2.8068
+    },
+    "mean_fps": 67.05574271247967
+  },
+  {
+    "capture": "CloudStableStress-CloudTop.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 15.426015555555555,
+      "p95_ms": 15.2384,
+      "max_ms": 694.869
+    },
+    "cloud": {
+      "mean_ms": 4.134314444444445,
+      "p95_ms": 5.1446,
+      "max_ms": 5.4272
+    },
+    "mean_fps": 64.8255537146699
+  },
+  {
+    "capture": "CloudFlightLODSunset-Above.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 8.897442777777778,
+      "p95_ms": 8.1153,
+      "max_ms": 604.7566
+    },
+    "cloud": {
+      "mean_ms": 1.1341269444444444,
+      "p95_ms": 1.4418,
+      "max_ms": 1.6251
+    },
+    "mean_fps": 112.39184392369418
+  },
+  {
+    "capture": "CloudFlightLODSunset-Globe.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 8.141585555555556,
+      "p95_ms": 7.3682,
+      "max_ms": 585.3978
+    },
+    "cloud": {
+      "mean_ms": 0.4604425,
+      "p95_ms": 0.5069,
+      "max_ms": 0.7004
+    },
+    "mean_fps": 122.8261980637951
+  },
+  {
+    "capture": "CloudStableSunset-Ground.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 8.762003611111112,
+      "p95_ms": 7.7795,
+      "max_ms": 637.8065
+    },
+    "cloud": {
+      "mean_ms": 1.7045702777777778,
+      "p95_ms": 1.9661,
+      "max_ms": 2.3235
+    },
+    "mean_fps": 114.12914721147779
+  },
+  {
+    "capture": "CloudStableNight-Ground.csv",
+    "frames": 360,
+    "frame": {
+      "mean_ms": 8.671008888888888,
+      "p95_ms": 8.8645,
+      "max_ms": 448.8372
+    },
+    "cloud": {
+      "mean_ms": 2.297841666666667,
+      "p95_ms": 3.0914,
+      "max_ms": 3.2154
+    },
+    "mean_fps": 115.32683368384149
+  }
+]
