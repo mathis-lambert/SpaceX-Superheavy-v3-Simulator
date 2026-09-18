@@ -77,12 +77,27 @@ void URecoverySiteActivityComponent::TickComponent(float Dt,ELevelTick Type,FAct
     TrafficSpeed=FMath::FInterpConstantTo(TrafficSpeed,TrafficAllowed && Duty<72?3.2:0.,Dt,1.6);
     TrafficDistance+=Dt*TrafficSpeed;
     double Loop=0;for(int I=1;I<Road.Num();++I)Loop+=FVector::Dist(Road[I-1],Road[I]);
+    if(MissionGeneration!=D->GetMissionGeneration())
+    {
+        MissionGeneration=D->GetMissionGeneration();VehicleDistances={0,Loop*.48};
+    }
     for(int I=0;I<Trucks.Num();++I)
     {
         FVector P(136+(I-2)*24,26,.07);double Yaw=90;
         if(I<2 && Loop>0)
         {
-            double Distance=FMath::Fmod(TrafficDistance+I*Loop*.48,Loop);
+            auto& Travel=VehicleDistances[I];
+            if(TrafficAllowed)Travel=FMath::Fmod(Travel+Dt*TrafficSpeed,Loop);
+            else
+            {
+                // Clear to separated staging positions on the western road.
+                // Follow the road forward; never reverse instantly or teleport.
+                const double Parking=35+I*25;
+                const double Remaining=FMath::Fmod(Parking-Travel+Loop,Loop);
+                const double Speed=FMath::Min(9.,FMath::Sqrt(2.*2.*FMath::Abs(Remaining)));
+                Travel=FMath::Fmod(Travel+FMath::Sign(Remaining)*FMath::Min(FMath::Abs(Remaining),Speed*Dt)+Loop,Loop);
+            }
+            double Distance=Travel;
             for(int Segment=1;Segment<Road.Num();++Segment)
             {
                 const FVector Delta=Road[Segment]-Road[Segment-1];const double Length=Delta.Size();

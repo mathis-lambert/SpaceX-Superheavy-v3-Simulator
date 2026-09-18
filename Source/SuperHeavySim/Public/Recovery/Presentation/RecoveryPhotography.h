@@ -14,10 +14,12 @@ struct FRecoveryPhotography
     float FocusDistanceM=500.f;
     float MotionStrength=0.f;
     float OrbitSpeed=1.f;
+    float TrackingLagSeconds=0.f;
     float SolarDayOfYear=252.f;
     float UtcOffsetHours=-5.f;
     bool bAutomaticFraming=true;
     bool bAutomaticFocus=true;
+    bool bFixedFraming=false;
     void Sanitize();
     void Load(const FString& Section,const FString& Ini);
     void Save(const FString& Section,const FString& Ini) const;

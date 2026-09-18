@@ -59,11 +59,16 @@ float mip=clamp(log2(max(distanceM,100000)/100000),0,6);
 // A low-frequency, independently rotated field breaks the small noise tile's
 // visible periodicity and groups cells into banks, with clear lanes between.
 float3 advected=metres-W.xyz*T;
+// Wind shear and anisotropy distinguish middle-level banks and high streaks
+// without another volume lookup, extra layer component or altitude switch.
+float upper=smoothstep(3000,7000,h);
+advected.xy-=W.xy*T*upper*.65+float2(7300,-11300)*upper;
 float3 macroUV=float3(advected.x*.8+advected.y*.6,advected.y*.8-advected.x*.6,advected.z)/173000;
 float3 macro=Texture3DSampleLevel(Shape,ShapeSampler,macroUV+float3(.31,.71,.43),0).rgb;
 float bank=smoothstep(.26,.64,macro.r);
 cover*=lerp(.55+.45*bank,1,smoothstep(.65,.84,C));
 float3 uv=advected/6000+(macro-.5)*5;
+uv.xy=lerp(uv.xy,float2(uv.x*.18+uv.y*.08,uv.y*1.8-uv.x*.35),highProfile);
 float base=Texture3DSampleLevel(Shape,ShapeSampler,uv,mip).r;
 float detail=0;
 // Branch inside the custom node: no distant erosion texture fetch.

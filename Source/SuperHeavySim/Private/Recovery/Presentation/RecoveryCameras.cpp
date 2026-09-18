@@ -169,6 +169,9 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
         break;
     }
     const bool OrbitCamera=CameraMode==0 || CameraMode==2 || CameraMode==4 || CameraMode==6 || CameraMode==7 || CameraMode==11 || CameraMode==13;
+    const bool GroundCamera=CameraMode==1 || CameraMode==3 || CameraMode==9 || CameraMode==10;
+    if(GroundCamera && Settings && Settings->Photography.bFixedFraming)
+        Focus=Site+FVector(2400,0,6000);
     if(OrbitCamera)
     {
         if(AcceptInput && PC->IsInputKeyDown(EKeys::RightMouseButton) && !PC->WasInputKeyJustPressed(EKeys::RightMouseButton))
@@ -194,6 +197,11 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
     Position+=CameraBlendOffset;Focus+=CameraLookBlend;
     Camera->SetActorLocation(Position);
     FRotator ViewRotation=(Focus-Position).Rotation();
+    if(GroundCamera && Settings && !Changed && !Settings->Photography.bFixedFraming && Settings->Photography.TrackingLagSeconds>.001f)
+    {
+        const double BlendFactor=1-FMath::Exp(-ViewDt/Settings->Photography.TrackingLagSeconds);
+        ViewRotation=FQuat::Slerp(Camera->GetActorQuat(),ViewRotation.Quaternion(),BlendFactor).Rotator();
+    }
     // Small angular vibration belongs to the camera, never to the vehicle pose.
     // Fade to zero at physical support so secured Chase framing stays stable.
     if(Settings && Phase!=ERecoveryPhase::Captured)

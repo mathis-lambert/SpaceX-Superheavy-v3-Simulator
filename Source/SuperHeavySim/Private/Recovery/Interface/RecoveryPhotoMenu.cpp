@@ -49,6 +49,8 @@ void SRecoveryMenu::PhotoPage(TSharedRef<SVerticalBox> Rows)
             if(!P.bAutomaticFocus)PhotoSlider(Rows,TEXT("Focus distance"),&P.FocusDistanceM,2,20000,TEXT("m"),true);
         }
         PhotoSlider(Rows,TEXT("Camera vibration"),&P.MotionStrength,0,1,TEXT(""));
+        PhotoSlider(Rows,TEXT("Telephoto tracking delay"),&P.TrackingLagSeconds,0,.5f,TEXT("s"));
+        Toggle(Rows,TEXT("Fixed ground-camera framing"),P.bFixedFraming,[PC](bool V){PC->Photography.bFixedFraming=V;PC->SavePreferences();});
         PhotoSlider(Rows,TEXT("Motion blur"),&PC->MotionBlur,0,.5f,TEXT(""));
         Toggle(Rows,TEXT("Automatic cinematic orbit"),PC->bAutomaticOrbit,[PC](bool V){PC->bAutomaticOrbit=V;PC->SavePreferences();});
         PhotoSlider(Rows,TEXT("Orbit speed"),&P.OrbitSpeed,0,3,TEXT("x"));

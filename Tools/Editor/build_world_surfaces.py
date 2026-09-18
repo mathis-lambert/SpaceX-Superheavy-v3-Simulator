@@ -1,7 +1,8 @@
-"""Author one geographic shading contract across all Earth geometry scales.
+"""Canonical geographic shading across all Earth geometry scales.
 
-Run after the original Earth build. Geometry coverage no longer controls imagery
-coverage: all shells use the same geodetic UVs, water BRDF and fallback blending.
+Uses the authored level and registered terrain assets. Geometry coverage no
+longer controls imagery coverage: all shells use the same geodetic UVs, water
+BRDF and fallback blending.
 """
 import sys
 from pathlib import Path
@@ -17,7 +18,7 @@ tools=u.AssetToolsHelpers.get_asset_tools()
 def import_texture(name,path,srgb=True,compression=u.TextureCompressionSettings.TC_BC7):
     existing=u.load_asset(ROOT+'/Textures/Earth/'+name)
     command_line=u.SystemLibrary.get_command_line()
-    refresh_coast='-CoastalShadingReimport' in command_line and name in ('T_CoastalWaterMask','T_CoastalHydrology')
+    refresh_coast='-CoastalShadingReimport' in command_line and name=='T_CoastalHydrology'
     if existing and '-WorldReimportTextures' not in command_line and not refresh_coast:return existing
     task=u.AssetImportTask();task.filename=str(path);task.destination_path=ROOT+'/Textures/Earth';task.destination_name=name
     task.automated=True;task.replace_existing=True;task.save=True
@@ -32,8 +33,10 @@ coast=import_texture('T_CoastContinuous',ART_ROOT/'Earth/Continuity/Coast8192.pn
 gulf=import_texture('T_GulfContinuous',ART_ROOT/'Earth/Continuity/Gulf8192.png')
 regional=import_texture('T_RegionalContinuous',ART_ROOT/'Earth/Continuity/Regional8192.png')
 globe=u.load_asset(ROOT+'/Textures/Earth/T_EarthSeptember')
-coast_mask=import_texture('T_CoastalWaterMask',ART_ROOT/'Earth/Continuity/CoastalWaterMask.png',False,u.TextureCompressionSettings.TC_MASKS)
 hydrology=import_texture('T_CoastalHydrology',ART_ROOT/'Earth/Continuity/CoastalHydrology.png',False,u.TextureCompressionSettings.TC_MASKS)
+global_water=import_texture('T_GlobalOceanMask',ART_ROOT/'Earth/WaterCoverage/GlobalOcean.png',False,u.TextureCompressionSettings.TC_MASKS)
+regional_water=import_texture('T_RegionalOceanMask',ART_ROOT/'Earth/WaterCoverage/RegionalOcean.png',False,u.TextureCompressionSettings.TC_MASKS)
+prop(global_water,'address_x',u.TextureAddress.TA_WRAP);A.save_loaded_asset(global_water,False)
 GEO='''float3 q=normalize(float3(P.xy,P.z+637100000.0));
 float3 e=float3(.992208696,-.124586893,0),n=float3(.054610022,.434913642,.898814703),up=float3(-.111980532,-.891811774,.438328791);
 float3 p=e*q.x+n*q.y+up*q.z;
@@ -56,7 +59,10 @@ def build_surface(name,tile=None):
     regionaluv=custom(m,{'G':geo},'return float2((G.x+97.4569)/.6,(26.2973-G.y)/.6);',u.CustomMaterialOutputType.CMOT_FLOAT2)
     regional_color=sample(m,regional,regionaluv)
     base=blend(base,(regional_color,'RGB'),regionaluv)
-    water=custom(m,{'C':base},'return smoothstep(.001,.012,C.b-C.r*1.13)*smoothstep(0,.009,C.g-C.r*.9);',u.CustomMaterialOutputType.CMOT_FLOAT1)
+    ocean_global=sample(m,global_water,globeuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
+    ocean_region=sample(m,regional_water,gulfuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
+    water=custom(m,{'Global':(ocean_global,'R'),'Region':(ocean_region,'R'),'UV':gulfuv},
+        'float edge=min(min(UV.x,1-UV.x),min(UV.y,1-UV.y));return lerp(Global,Region,smoothstep(0,.08,edge));',u.CustomMaterialOutputType.CMOT_FLOAT1)
     half_lat=math.degrees(6000/6371000);half_lon=half_lat/math.cos(math.radians(25.9973))
     maskuv=custom(m,{'G':geo},f'return float2((G.x-({-97.1569-half_lon:.12f}))/{half_lon*2:.12f},({25.9973+half_lat:.12f}-G.y)/{half_lat*2:.12f});',u.CustomMaterialOutputType.CMOT_FLOAT2)
     hydro=sample(m,hydrology,maskuv,sampler=u.MaterialSamplerType.SAMPLERTYPE_MASKS)
@@ -76,9 +82,14 @@ float edge=600000-max(abs(P.x),abs(P.y));
 float near=1-smoothstep(1000000,3000000,length(Camera-P));
 // Match broad photographic exposure while retaining the aerial high frequencies.
 float3 matched=C*clamp(Reference/max(Low,float3(.015,.015,.015)),.65,1.5);
-return lerp(B,matched,A*smoothstep(0,120000,edge)*near);''')
+float tileEdge=min(min(UV.x,1-UV.x),min(UV.y,1-UV.y));
+return lerp(B,matched,A*smoothstep(0,120000,edge)*near*smoothstep(0,.025,tileEdge));''')
     # Water comes from a BRDF, not a lit photograph of an old ocean surface.
-    base=custom(m,{'C':base,'W':water,'H':hydro,'Coverage':coverage},'float shallow=Coverage*exp(-H.b*7);float3 sea=lerp(float3(.004,.018,.028),float3(.022,.067,.067),shallow);return lerp(C,sea,W);')
+    base=custom(m,{'C':base,'W':water,'H':hydro,'Coverage':coverage},'''float shallow=Coverage*exp(-H.b*7);
+float3 sea=lerp(float3(.004,.018,.028),float3(.022,.067,.067),shallow);
+float shoreDistance=(H.g-.5)*256;
+float wetSand=Coverage*(1-W)*exp(-abs(shoreDistance)/6);
+return lerp(C*(1-wetSand*.24),sea,W);''')
     grounduv=custom(m,{'P':p},'return P.xy/430;',u.CustomMaterialOutputType.CMOT_FLOAT2)
     grain=sample(m,'/Game/ThirdParty/MWLandscapeAutoMaterial/Textures/Ground/TEX_MWAM_SandA_col',grounduv)
     secondaryuv=custom(m,{'P':p},'return float2(P.x*.73+P.y*.683,-P.x*.683+P.y*.73)/1130+float2(.37,.81);',u.CustomMaterialOutputType.CMOT_FLOAT2)
@@ -109,7 +120,8 @@ return lerp(C,float3(.52,.57,.56),foam*.5);''')
     vertex=ex(m,u.MaterialExpressionVertexNormalWS)
     normal=custom(m,{'P':p,'Camera':camera,'T':time,'W':water,'Terrain':vertex,'Ground':(ground,'RGB')},normal_code())
     connect(m,normal,u.MaterialProperty.MP_NORMAL)
-    rough=custom(m,{'W':water,'P':p,'Camera':camera},'return lerp(.86,lerp(.12,.25,smoothstep(10000,650000,length(Camera-P))),W);',u.CustomMaterialOutputType.CMOT_FLOAT1)
+    rough=custom(m,{'W':water,'P':p,'Camera':camera,'H':hydro,'Coverage':coverage},'''float wetSand=Coverage*(1-W)*exp(-abs((H.g-.5)*256)/6);
+return lerp(lerp(.86,.42,wetSand),lerp(.17,.27,smoothstep(10000,650000,length(Camera-P))),W);''',u.CustomMaterialOutputType.CMOT_FLOAT1)
     connect(m,rough,u.MaterialProperty.MP_ROUGHNESS)
     connect(m,constant(m,.38),u.MaterialProperty.MP_SPECULAR)
     save(m)

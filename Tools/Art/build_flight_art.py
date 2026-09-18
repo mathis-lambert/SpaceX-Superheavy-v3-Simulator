@@ -20,35 +20,6 @@ def export(name,verts,faces,uvs=None):
     bpy.ops.object.select_all(action='DESELECT');obj.select_set(True);bpy.context.view_layer.objects.active=obj
     bpy.ops.export_scene.fbx(filepath=os.path.join(OUT,name+'.fbx'),use_selection=True,object_types={'MESH'},axis_forward='-Y',axis_up='Z',mesh_smooth_type='FACE')
     return obj
-R=6360000.
-# Curved ocean patch reaches beyond the 100 km horizon; dense rings near the site.
-verts=[(0,0,-3.5)];faces=[]
-N=512;K=140
-for i in range(K):
-    r=60*math.exp(i*math.log(2000000/60)/(K-1))
-    for j in range(N):
-        a=j*math.tau/N;verts.append((r*math.cos(a),r*math.sin(a),math.sqrt(R*R-r*r)-R-3.5))
-for j in range(N):faces.append((0,1+j,1+(j+1)%N))
-for i in range(K-1):
-    for j in range(N):
-        a=1+i*N+j;b=1+i*N+(j+1)%N;faces.append((a,a+N,b+N,b))
-export('SM_CurvedOcean',verts,faces)
-# Broad coastal plain, generic coastline rather than a claim of surveyed Starbase geography.
-verts=[];faces=[];N=256;K=180
-for j in range(N+1):
-    y=math.copysign(abs(2*j/N-1)**2.5*1600000,2*j/N-1)
-    shore=600+500*math.sin(y/12000)+900*math.sin(y/27000)
-    for i in range(K+1):
-        x=shore-2100000*(i/K)**2.8
-        inland=shore-x
-        z=2+math.sin(x/8000)*math.cos(y/7000)*25*min(1,inland/15000)
-        if abs(x)<2000 and abs(y)<2000:z=-0.35
-        z+=math.sqrt(R*R-x*x-y*y)-R
-        verts.append((x,y,z))
-for j in range(N):
-    for i in range(K):
-        a=j*(K+1)+i;faces.append((a,a+K+1,a+K+2,a+1))
-export('SM_CoastalPlain',verts,faces)
 # UV-mapped exhaust envelope: local -Z, normalized dimensions for runtime pressure scaling.
 verts=[];faces=[];uv=[];N=40;K=36
 for i in range(K+1):
@@ -59,24 +30,6 @@ for i in range(K):
     for j in range(N):
         a=i*(N+1)+j;faces.append((a,a+N+1,a+N+2,a+1))
 export('SM_ExhaustEnvelope',verts,faces,uv)
-# Upper-stage silhouette to make the carried mass and separation visually explicit.
-verts=[];faces=[];uv=[];N=96;K=64
-for i in range(K+1):
-    z=54*i/K
-    r=4.5 if z<=40 else 4.5*math.sqrt(max(0.0001,1-((z-40)/14)**1.5))
-    for j in range(N+1):
-        a=j*math.tau/N;verts.append((r*math.cos(a),r*math.sin(a),z));uv.append((j/N,z/54))
-for i in range(K):
-    for j in range(N):
-        a=i*(N+1)+j;faces.append((a,a+1,a+N+2,a+N+1))
-for sign in [-1,1]:
-    for z,height,span in [(4,13,5.0),(39,8,3.2)]:
-        start=len(verts)
-        for y in [-0.22,0.22]:
-            for x,zz in [(4.1,z),(4.1,z+height),(4.5+span,z+height*0.6),(4.5+span,z+height*0.12)]:
-                verts.append((x*sign,y,zz));uv.append((0.25 if sign<0 else 0.75,zz/54))
-        for f in [(0,1,2,3),(7,6,5,4),(0,4,5,1),(1,5,6,2),(2,6,7,3),(3,7,4,0)]:faces.append(tuple(start+i for i in f))
-ship=export('SM_UpperStageProxy',verts,faces,uv)
 # Open launch table with a clear exhaust passage, circular ring and eight legs.
 verts=[];faces=[]
 def ring(ro,ri,z0,z1,n=96):

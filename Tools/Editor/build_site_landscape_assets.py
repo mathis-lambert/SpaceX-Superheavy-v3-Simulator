@@ -3,34 +3,15 @@ import sys,json
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'Shared'))
 from project_paths import ART_ROOT,SAVED_ROOT
-from unreal_materials import u,prop,material,expression as ex,custom,sample,constant,color,connect,save
+from unreal_materials import u,prop
 from unreal_imports import import_scenery_mesh
+from surface_materials import road_surface
 ROOT='/Game/Starbase'
 SRC=ART_ROOT/'Starbase/Landscape'
 levels=u.get_editor_subsystem(u.LevelEditorSubsystem);assert levels.load_level(ROOT+'/Maps/L_RecoveryLab')
 actors=u.get_editor_subsystem(u.EditorActorSubsystem)
 
-def surface(name,gravel=False):
-    m=material(ROOT+'/Materials/Starbase/'+name)
-    p=ex(m,u.MaterialExpressionWorldPosition);uv=ex(m,u.MaterialExpressionTextureCoordinate)
-    coords=custom(m,{'P':p},'return P.xy/350;',u.CustomMaterialOutputType.CMOT_FLOAT2)
-    grain=sample(m,'/Game/ThirdParty/MWLandscapeAutoMaterial/Textures/Ground/TEX_MWAM_SandA_col',coords)
-    normal=sample(m,'/Game/ThirdParty/MWLandscapeAutoMaterial/Textures/Ground/TEX_MWAM_SandA_nrm',coords,normal=True)
-    base=custom(m,{'P':p,'UV':uv,'D':(grain,'RGB')},('''
-float aggregate=.7+dot(D,float3(.299,.587,.114))*.65;
-return float3(.24,.205,.16)*aggregate;
-''' if gravel else '''
-float aggregate=.85+dot(D,float3(.299,.587,.114))*.35;
-float lane=1-smoothstep(.003,.007,abs(UV.x-.5));
-float dash=1-smoothstep(3.8,4.0,fmod(UV.y,10));
-float edge=1-smoothstep(.003,.007,abs(abs(UV.x-.5)-.44));
-float wear=.75+.25*sin(P.x*.013+sin(P.y*.009)*2);
-return lerp(float3(.035,.039,.043)*aggregate,float3(.58,.56,.49),max(lane*dash,edge)*wear);
-'''))
-    connect(m,base,u.MaterialProperty.MP_BASE_COLOR);connect(m,normal,u.MaterialProperty.MP_NORMAL,'RGB')
-    connect(m,constant(m,.93 if gravel else .84),u.MaterialProperty.MP_ROUGHNESS);save(m);return m
-
-road=surface('M_ServiceRoad');shoulder=surface('M_ServiceShoulder',True)
+road=road_surface('M_ServiceRoad');shoulder=road_surface('M_ServiceShoulder',True)
 # Replace source meshes at their existing asset paths; no additional terrain layer.
 for j in (() if (ART_ROOT/'Earth/LidarCoast/Meshes/geometry.json').exists() else (1,2)):
     for i in (1,2):

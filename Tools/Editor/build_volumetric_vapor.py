@@ -49,14 +49,21 @@ for texture_node in (noise, fine):
     prop(texture_node, 'mip_value_mode', u.TextureMipValueMode.TMVM_MIP_LEVEL)
     prop(texture_node, 'const_mip_value', 0)
 extinction = custom(m, {'Q': local, 'N': noise, 'F': fine, 'D': density}, '''
-float envelope = saturate((1.0-length(Q))/.24);
+float3 warp=(N.gbr-.5)*.70+(F.brg-.5)*.20;
+float envelope=saturate((1-length(Q+warp))/.30);
+// Domain warping must not push visible density against the voxel bounds.
+float boundary=1-smoothstep(.78,.99,max(abs(Q.x),max(abs(Q.y),abs(Q.z))));
 float field=N.r*.62+N.g*.25+F.b*.13;
-float erosion=(1-envelope)*.36;
-float shape=smoothstep(.38,.62,field-erosion);
-return D*.11*shape*envelope;
+float erosion=(1-envelope)*.27;
+float shape=smoothstep(.33,.63,field-erosion);
+// The fog grid integrates centimetres. A .105 coefficient made a metre of
+// vapour effectively opaque and hid all internal erosion as a white blob.
+// This transported mist complements the dense near-source sparse volume;
+// it must not cover that resolved flow with another opaque spherical mass.
+return D*.0006*shape*envelope*boundary;
 ''', u.CustomMaterialOutputType.CMOT_FLOAT1)
 # In UE 5.8 RGB extinction occupies Subsurface Color; Opacity is unused for volumes.
-prop(extinction, 'description', 'Vapor extinction / inverse metres')
+prop(extinction, 'description', 'Vapor extinction / inverse centimetres')
 connect(m, extinction, u.MaterialProperty.MP_SUBSURFACE_COLOR)
 connect(m, color(m, (.82,.85,.89)), u.MaterialProperty.MP_BASE_COLOR)
 connect(m, color(m, (0,0,0)), u.MaterialProperty.MP_EMISSIVE_COLOR)

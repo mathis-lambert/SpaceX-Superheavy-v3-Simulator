@@ -1,0 +1,313 @@
+{
+  "success": true,
+  "scope": "First integrated pass across twelve workstreams; remaining art direction is documented in VISUAL_RENEWAL.md",
+  "unit_tests": {
+    "succeeded": 32,
+    "failed": 0,
+    "succeededWithWarnings": 0
+  },
+  "reports": [
+    {
+      "path": "Saved/Recovery/ExperienceRenderedFlight.json",
+      "sha256": "e501a97540bcbcdb8fd8688a4529f186e5bbe82241af3b28052bf977314af26a"
+    },
+    {
+      "path": "Saved/Recovery/experience-flight-audit.json",
+      "sha256": "9b507a473785da01f9d40e978e276e34aaf41fa1c9d6ff0c44937b7dfef7f3e4"
+    },
+    {
+      "path": "Saved/Recovery/experience-asset-audit.json",
+      "sha256": "89f50c2b8d14a67a148ec8564ddc37dd396e69db950391021053562ad83413c7"
+    },
+    {
+      "path": "Saved/Recovery/Photography-20260918-203116/Initial-result.json",
+      "sha256": "1916e269bd78953f9ac9e9872b46f9e6c21e5663cab9ad5784d94898570c3904"
+    },
+    {
+      "path": "Saved/Recovery/Photography-20260918-203116/Reload-result.json",
+      "sha256": "9b8644f88ce83eddff8871247d22fa5d4604e84d549a17b3f8cab5b21915a33a"
+    }
+  ],
+  "performance": {
+    "resolution": [
+      2560,
+      1440
+    ],
+    "reconstruction": "DLSS Quality",
+    "gpu": "RTX 4070 SUPER",
+    "cpu": "Ryzen 5 9600X",
+    "captures": {
+      "home_before": {
+        "evidence": {
+          "path": "Saved/Recovery/VisualRenewalBeforeHomeDLSSQuality1440Cloud0Hz60.csv",
+          "sha256": "56a3a8610c0eb91cf91a5b8013eec1089f4d23f67c7e6bcd7c42fb9827c15c49"
+        },
+        "fps_from_mean": 89.08,
+        "warmup_frames_excluded": 300,
+        "timings": {
+          "FrameTime": {
+            "samples": 900,
+            "mean_ms": 11.2265,
+            "p50_ms": 11.1522,
+            "p95_ms": 13.0528,
+            "p99_ms": 14.2914,
+            "p999_ms": 15.8712,
+            "max_ms": 16.971
+          },
+          "GPU/VolumetricCloudShadow": {
+            "samples": 900,
+            "mean_ms": 0.6538,
+            "p50_ms": 0.7151,
+            "p95_ms": 0.8455,
+            "p99_ms": 0.9563,
+            "p999_ms": 1.0515,
+            "max_ms": 1.1356
+          },
+          "GPU/VolumetricCloud": {
+            "samples": 900,
+            "mean_ms": 0.4382,
+            "p50_ms": 0.3728,
+            "p95_ms": 0.6001,
+            "p99_ms": 0.6575,
+            "p999_ms": 0.9362,
+            "max_ms": 0.938
+          },
+          "GPU/VolCloudComposeOverScene": {
+            "samples": 900,
+            "mean_ms": 0.0404,
+            "p50_ms": 0.0276,
+            "p95_ms": 0.2069,
+            "p99_ms": 0.2797,
+            "p999_ms": 0.3222,
+            "max_ms": 0.3287
+          },
+          "GPU/VolCloudReconstruction": {
+            "samples": 900,
+            "mean_ms": 0.0328,
+            "p50_ms": 0.0225,
+            "p95_ms": 0.0419,
+            "p99_ms": 0.2479,
+            "p999_ms": 0.3886,
+            "max_ms": 0.6124
+          }
+        }
+      },
+      "home_after": {
+        "evidence": {
+          "path": "Saved/Recovery/VisualRenewalFinalHomeDLSSQuality1440Cloud0Hz60.csv",
+          "sha256": "7bf2d266b53070a5325899cff07dbbd4f4c59643a9fd04d6abceaf6351d70ec1"
+        },
+        "fps_from_mean": 89.9,
+        "warmup_frames_excluded": 300,
+        "timings": {
+          "FrameTime": {
+            "samples": 900,
+            "mean_ms": 11.1237,
+            "p50_ms": 11.0695,
+            "p95_ms": 12.3841,
+            "p99_ms": 13.2311,
+            "p999_ms": 15.6409,
+            "max_ms": 16.4983
+          },
+          "GPU/VolumetricCloudShadow": {
+            "samples": 900,
+            "mean_ms": 0.665,
+            "p50_ms": 0.5954,
+            "p95_ms": 0.8609,
+            "p99_ms": 0.8877,
+            "p999_ms": 1.0109,
+            "max_ms": 1.012
+          },
+          "GPU/VolumetricCloud": {
+            "samples": 900,
+            "mean_ms": 0.4793,
+            "p50_ms": 0.5222,
+            "p95_ms": 0.6083,
+            "p99_ms": 0.641,
+            "p999_ms": 0.6727,
+            "max_ms": 0.6728
+          },
+          "GPU/VolCloudComposeOverScene": {
+            "samples": 900,
+            "mean_ms": 0.0387,
+            "p50_ms": 0.0389,
+            "p95_ms": 0.039,
+            "p99_ms": 0.039,
+            "p999_ms": 0.0516,
+            "max_ms": 0.128
+          },
+          "GPU/VolCloudReconstruction": {
+            "samples": 900,
+            "mean_ms": 0.0226,
+            "p50_ms": 0.0225,
+            "p95_ms": 0.0245,
+            "p99_ms": 0.0246,
+            "p999_ms": 0.0269,
+            "max_ms": 0.0297
+          }
+        }
+      },
+      "cloud_layer": {
+        "evidence": {
+          "path": "Saved/Recovery/VisualRenewal-Layer.csv",
+          "sha256": "ecc38197d3fed6d3dd4bf27277f54537a7de6796ceb86cc4e4a4677c98046e39"
+        },
+        "fps_from_mean": 87.08,
+        "warmup_frames_excluded": 0,
+        "timings": {
+          "FrameTime": {
+            "samples": 360,
+            "mean_ms": 11.4834,
+            "p50_ms": 9.4994,
+            "p95_ms": 10.4843,
+            "p99_ms": 10.8691,
+            "p999_ms": 476.1936,
+            "max_ms": 733.7633
+          },
+          "GPU/VolumetricCloud": {
+            "samples": 360,
+            "mean_ms": 1.7971,
+            "p50_ms": 1.8253,
+            "p95_ms": 1.9753,
+            "p99_ms": 2.0222,
+            "p999_ms": 2.0656,
+            "max_ms": 2.0685
+          },
+          "GPU/VolumetricCloudShadow": {
+            "samples": 360,
+            "mean_ms": 0.5733,
+            "p50_ms": 0.5442,
+            "p95_ms": 0.7209,
+            "p99_ms": 0.8387,
+            "p999_ms": 0.8862,
+            "max_ms": 0.8869
+          },
+          "GPU/VolCloudComposeOverScene": {
+            "samples": 360,
+            "mean_ms": 0.0498,
+            "p50_ms": 0.0389,
+            "p95_ms": 0.209,
+            "p99_ms": 0.2552,
+            "p999_ms": 0.3116,
+            "max_ms": 0.3134
+          },
+          "GPU/VolCloudReconstruction": {
+            "samples": 360,
+            "mean_ms": 0.0254,
+            "p50_ms": 0.0246,
+            "p95_ms": 0.0277,
+            "p99_ms": 0.0297,
+            "p999_ms": 0.1423,
+            "max_ms": 0.2048
+          }
+        }
+      },
+      "orbit": {
+        "evidence": {
+          "path": "Saved/Recovery/VisualRenewalAtmosphere-Orbit.csv",
+          "sha256": "e68c91ffab154dd42b1a70361d6ce32d26838331a4ef4965997acf0eb21fe425"
+        },
+        "fps_from_mean": 90.15,
+        "warmup_frames_excluded": 0,
+        "timings": {
+          "FrameTime": {
+            "samples": 360,
+            "mean_ms": 11.0922,
+            "p50_ms": 8.8338,
+            "p95_ms": 13.6665,
+            "p99_ms": 14.7929,
+            "p999_ms": 504.7173,
+            "max_ms": 776.5523
+          },
+          "GPU/VolumetricCloudShadow": {
+            "samples": 360,
+            "mean_ms": 0.5949,
+            "p50_ms": 0.5577,
+            "p95_ms": 0.7374,
+            "p99_ms": 0.8579,
+            "p999_ms": 0.8998,
+            "max_ms": 0.9011
+          },
+          "GPU/VolumetricCloud": {
+            "samples": 360,
+            "mean_ms": 0.4078,
+            "p50_ms": 0.4065,
+            "p95_ms": 0.4178,
+            "p99_ms": 0.4248,
+            "p999_ms": 0.5614,
+            "max_ms": 0.5632
+          },
+          "GPU/VolCloudComposeOverScene": {
+            "samples": 360,
+            "mean_ms": 0.0384,
+            "p50_ms": 0.0379,
+            "p95_ms": 0.039,
+            "p99_ms": 0.039,
+            "p999_ms": 0.0462,
+            "max_ms": 0.0502
+          },
+          "GPU/VolCloudReconstruction": {
+            "samples": 360,
+            "mean_ms": 0.0332,
+            "p50_ms": 0.0328,
+            "p95_ms": 0.0348,
+            "p99_ms": 0.0349,
+            "p999_ms": 0.0355,
+            "max_ms": 0.0358
+          }
+        }
+      },
+      "globe": {
+        "evidence": {
+          "path": "Saved/Recovery/VisualRenewalAtmosphere-Globe.csv",
+          "sha256": "d759e9c275b394ddf12d4cfedc0fa0d38ad4620b4e7b331b010f1d63b7e2d1a8"
+        },
+        "fps_from_mean": 96.68,
+        "warmup_frames_excluded": 0,
+        "timings": {
+          "FrameTime": {
+            "samples": 360,
+            "mean_ms": 10.3436,
+            "p50_ms": 8.4119,
+            "p95_ms": 9.8217,
+            "p99_ms": 13.2374,
+            "p999_ms": 443.0706,
+            "max_ms": 681.7464
+          },
+          "GPU/VolumetricCloud": {
+            "samples": 360,
+            "mean_ms": 0.5458,
+            "p50_ms": 0.5048,
+            "p95_ms": 0.7516,
+            "p99_ms": 0.8494,
+            "p999_ms": 0.9271,
+            "max_ms": 0.937
+          },
+          "GPU/VolCloudComposeOverScene": {
+            "samples": 360,
+            "mean_ms": 0.0402,
+            "p50_ms": 0.0379,
+            "p95_ms": 0.038,
+            "p99_ms": 0.2073,
+            "p999_ms": 0.2149,
+            "max_ms": 0.216
+          },
+          "GPU/VolCloudReconstruction": {
+            "samples": 360,
+            "mean_ms": 0.0338,
+            "p50_ms": 0.0256,
+            "p95_ms": 0.0286,
+            "p99_ms": 0.2114,
+            "p999_ms": 0.2635,
+            "max_ms": 0.2877
+          }
+        }
+      }
+    },
+    "limits": "Stationary warm captures; not a whole-flight minimum FPS or 4K qualification."
+  },
+  "visual_review": {
+    "orbit_rectangle": "Removed in matched before/after captures after atmospheric-ground correction",
+    "steam": "Less opaque; broad rounded masses still require art-direction work"
+  }
+}

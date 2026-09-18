@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'Shared'))
 from project_paths import ART_ROOT
 import unreal as u
-for name in ['EngineRumble','EngineCrackle','CryogenicHiss','Deluge','TowerDrive','TowerContact','MountRelease']:
+for name in ['EngineRoar','CoastalWind','EngineRumble','EngineCrackle','CryogenicHiss','Deluge','TowerDrive','TowerContact','MountRelease']:
     task=u.AssetImportTask();task.filename=str(ART_ROOT/'Audio'/(name+'.wav'))
     task.destination_path='/Game/Starbase/Audio';task.destination_name='S_'+name
     task.automated=True;task.replace_existing=True;task.save=False

@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Recovery/Presentation/RecoverySurfaceHistory.h"
 #include "RecoverySkyComponent.generated.h"
 class ADirectionalLight;
 class APostProcessVolume;
@@ -12,6 +13,7 @@ class USkyAtmosphereComponent;
 class USpotLightComponent;
 class UMaterialInstanceDynamic;
 class UStaticMeshComponent;
+class UMaterialParameterCollection;
 
 UCLASS(ClassGroup=(Recovery),meta=(BlueprintSpawnableComponent))
 class SUPERHEAVYSIM_API URecoverySkyComponent : public UActorComponent
@@ -36,6 +38,8 @@ private:
     UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> BeaconMaterials;
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> StarField;
     UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> WeatherMaterial;
+    UPROPERTY(Transient) TObjectPtr<UMaterialParameterCollection> SurfaceCollection;
+    FRecoverySurfaceHistory SurfaceHistory;
     float WeatherCoverage=.48f,WeatherHaze=1.f;
     bool bFound=false;
     float LastHour=-1;

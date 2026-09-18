@@ -27,8 +27,10 @@ private:
     UPROPERTY(Transient) TArray<TObjectPtr<UHeterogeneousVolumeComponent>> Vents;
     UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> VentMaterials;
     TArray<FVector> Road;
+    TArray<double> VehicleDistances;
     double ActivityTime=0,TrafficDistance=0;
     double TrafficSpeed=0;
+    uint32 MissionGeneration=MAX_uint32;
     bool bBuilt=false;
     void Build(const FTransform& Site);
     void UpdateFacilityVents(const FTransform& Site,const FVector& Wind);

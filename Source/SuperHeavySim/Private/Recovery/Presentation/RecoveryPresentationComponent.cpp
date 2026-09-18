@@ -223,7 +223,8 @@ void URecoveryPresentationComponent::TickComponent(float Dt,ELevelTick Type,FAct
         const double Power=RecoveryPropulsionVisuals::DeliveredFraction(D->GetEngines(),P->EngineThrustN);
         // Interpolated GPU spawning fills the path between frames. Old particles
         // remain in world space and drift with wind after engine shutdown.
-        const double Rate=D->Phase==ERecoveryPhase::Ascent?FMath::Clamp(70+D->VelocityMps.Size()*0.55,70.,330.)*FMath::Sqrt(Air)*Power:0;
+        const bool AtmosphericBurn=D->Phase==ERecoveryPhase::Ascent || D->Phase==ERecoveryPhase::LandingBurn;
+        const double Rate=AtmosphericBurn?FMath::Clamp(70+D->VelocityMps.Size()*0.55,70.,330.)*FMath::Sqrt(Air)*Power:0;
         const double TailM=FMath::Min(FMath::Max(D->AltitudeM-6.,0.),35.+20.*D->Throttle);
         VaporTrail->SetWorldLocation(Base-Up*TailM*100);
         VaporTrail->SetVariableFloat(TEXT("SpawnRate"),Rate);

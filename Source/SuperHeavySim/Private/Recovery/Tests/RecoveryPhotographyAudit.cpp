@@ -90,9 +90,11 @@ void ARecoveryPlayerController::TickPhotographyAudit()
     case 21:Shot(TEXT("11_EnvironmentMenu"));break;
     case 22:
         Photography.FocalLengthMm=145;Photography.SolarDayOfYear=172;Photography.UtcOffsetHours=-6;TimeOfDay=17.25;
+        Photography.TrackingLagSeconds=.16f;Photography.bFixedFraming=true;
         SavePhotoLook(1);ApplyPhotoPreset(0);LoadPhotoLook(1);Menu->ShowPage(21);break;
     case 23:
         Check(TEXT("Custom look restores optics, calendar and civil clock"),HasPhotoLook(1) && Photography.FocalLengthMm==145 && Photography.SolarDayOfYear==172 && Photography.UtcOffsetHours==-6 && TimeOfDay==17.25);
+        Check(TEXT("Saved look restores tracking character"),Photography.TrackingLagSeconds==.16f && Photography.bFixedFraming);
         Shot(TEXT("12_SavedLooks"));break;
     case 24:
     {
@@ -109,11 +111,15 @@ void ARecoveryPlayerController::TickPhotographyAudit()
     case 26:Shot(TEXT("13_ExposureLow"));break;
     case 27:Photography.ExposureBiasEV=1;AuditDeadline=Now+5;break;
     case 28:Shot(TEXT("14_ExposureHigh"));break;
-    case 29:Finish();break;
+    case 29:ResumeFlight();ApplyPhotoPreset(5);AuditDeadline=Now+4;break;
+    case 30:
+        Check(TEXT("Fixed coastal preset uses a fixed ground camera"),Photography.bFixedFraming && !Photography.bAutomaticFraming && D->GetCameraMode()==9);
+        Shot(TEXT("15_FixedCoastal"));Finish();break;
     case 40:
         Check(TEXT("Look survives application restart"),HasPhotoLook(1));LoadPhotoLook(1);AuditDeadline=Now+3;break;
     case 41:
         Check(TEXT("Reloaded optics and environment remain exact"),Photography.FocalLengthMm==145 && Photography.SolarDayOfYear==172 && Photography.UtcOffsetHours==-6 && TimeOfDay==17.25);
+        Check(TEXT("Tracking character survives application restart"),Photography.TrackingLagSeconds==.16f && Photography.bFixedFraming);
         Finish();break;
     default:break;
     }

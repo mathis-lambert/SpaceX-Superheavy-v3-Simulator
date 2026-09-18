@@ -17,6 +17,10 @@
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialParameterCollection.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
+#include "Recovery/Presentation/RecoveryPropulsionVisuals.h"
+#include "Recovery/Flight/SuperHeavyLaunchTower.h"
 #include "Recovery/Shared/FlightGeometry.h"
 #include "Recovery/Shared/RecoveryAssets.h"
 #include "Components/VolumetricCloudComponent.h"
@@ -83,6 +87,7 @@ void URecoverySkyComponent::FindScene()
         L->SetVolumetricScatteringIntensity(0.3f);L->RegisterComponent();GetOwner()->AddInstanceComponent(L);SiteLights.Add(L);
     }
     BuildSiteLighting();
+    SurfaceCollection=LoadObject<UMaterialParameterCollection>(nullptr,RecoveryAssets::MPC_SurfaceState);
     if(auto* StarMaterial=LoadObject<UMaterialInterface>(nullptr,RecoveryAssets::M_StarField))
     {
         StarField=NewObject<UStaticMeshComponent>(GetOwner(),TEXT("DistantStars"));
@@ -101,6 +106,17 @@ void URecoverySkyComponent::TickComponent(float Dt,ELevelTick Type,FActorCompone
     if(!URecoveryStartupSubsystem::AssetsLoaded(GetWorld()))return;if(!FApp::CanEverRender())return;
     if(!bFound)FindScene();
     const auto* PC=Cast<ARecoveryPlayerController>(GetWorld()->GetFirstPlayerController());
+    if(const auto* Mission=Cast<ASuperHeavyRecoveryDirector>(GetOwner());Mission && SurfaceCollection)
+    {
+        const double Power=RecoveryPropulsionVisuals::DeliveredFraction(Mission->GetEngines(),Mission->GetProfile()->EngineThrustN);
+        SurfaceHistory.Update(Mission->GetMissionGeneration(),PC && PC->IsPaused()?0:Dt,
+            Mission->GetDelugeFlow(),Power*(1-FMath::SmoothStep(30.,180.,Mission->AltitudeM)));
+        auto* State=GetWorld()->GetParameterCollectionInstance(SurfaceCollection);
+        State->SetScalarParameterValue(TEXT("PadWetness"),SurfaceHistory.Wetness);
+        State->SetScalarParameterValue(TEXT("PadResidue"),SurfaceHistory.Residue);
+        const FVector Origin=Mission->Tower?Mission->Tower->GetActorTransform().TransformPosition(FVector(2400,0,0)):FVector(2400,0,0);
+        State->SetVectorParameterValue(TEXT("PadOrigin"),FLinearColor(Origin.X,Origin.Y,Origin.Z,0));
+    }
     const double Hour=PC?PC->TimeOfDay:17.;
     const int32 SolarDay=PC?FMath::RoundToInt(PC->Photography.SolarDayOfYear):252;
     const float UtcOffset=PC?PC->Photography.UtcOffsetHours:-5.f;
@@ -170,7 +186,11 @@ void URecoverySkyComponent::TickComponent(float Dt,ELevelTick Type,FActorCompone
     {
         auto& S=Exposure->Settings;
         const auto* D=Cast<ASuperHeavyRecoveryDirector>(GetOwner());
-        const float EnginePower=D && D->ActiveEngines>0?FMath::Clamp(float(D->Throttle),0.f,1.f):0.f;
+        // Adapt to the source's angular influence, not an engine anywhere in the
+        // world: a distant observer must not darken when an invisible engine fires.
+        const double Delivered=D?RecoveryPropulsionVisuals::DeliveredFraction(D->GetEngines(),D->GetProfile()->EngineThrustN):0.;
+        const double Range=D && D->GetBody()?FVector::Distance(CameraLocation,D->GetBody()->GetComponentLocation())*.01:1.e9;
+        const float EnginePower=FMath::Clamp(Delivered*4.,0.,1.)/(1+FMath::Square(Range/800.));
         const float BaseEV=FMath::Lerp(6.5f,12.5f,Day)+HighSun*2.35f;
         // A night tracking camera stops down as the engines ignite. This retains
         // surface detail instead of whitening the whole pad with a daylight source.

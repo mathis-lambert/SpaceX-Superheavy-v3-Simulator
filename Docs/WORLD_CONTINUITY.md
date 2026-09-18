@@ -45,7 +45,7 @@ Two new unbranded Blender models provide four service pickups and three towable 
 
 ## Rebuild and review
 
-Run `fetch_world_continuity.py` and `fetch_coastal_elevation.py` in Tools/Data, then `build_earth_art.py` in Blender and `prepare_earth_scenery.py` in normal Python. In Unreal, run `import_terrain_relief.py` and `build_world_continuity.py`. Existing continuous textures are reused unless `-WorldReimportTextures` is supplied.
+Run `fetch_world_continuity.py` and `fetch_coastal_elevation.py` in Tools/Data, then `build_earth_art.py` in Blender and `prepare_earth_scenery.py` in normal Python. In Unreal, run `import_terrain_relief.py` and `build_world_surfaces.py`. Existing continuous textures are reused unless `-WorldReimportTextures` is supplied.
 
 `build_flow_noise.py` creates the vapor field; `build_volumetric_vapor.py` imports it. `build_site_service_props.py` runs in Blender, then `import_site_service_props.py` runs in Unreal. All authoring scripts are distinct from runtime simulation.
 

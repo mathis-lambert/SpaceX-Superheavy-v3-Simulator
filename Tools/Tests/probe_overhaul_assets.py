@@ -15,7 +15,7 @@ for path in ['/Game/Starbase/Vehicle/Materials/SuperheavyBody','/Game/Starbase/M
         if isinstance(n,u.MaterialExpressionScalarParameter):print('SCALAR',n.get_editor_property('parameter_name'),n.get_editor_property('default_value'))
         if isinstance(n,u.MaterialExpressionVectorParameter):print('VECTOR',n.get_editor_property('parameter_name'),n.get_editor_property('default_value'))
         if isinstance(n,u.MaterialExpressionTextureSample):print('TEXTURE',n.get_name(),n.texture)
-for n in ['T_EarthSeptember','T_BocaRegion','T_BocaChica_0_0']:
+for n in ['T_EarthSeptember','T_RegionalContinuous','T_BocaChica_0_0']:
     t=u.load_asset('/Game/Starbase/Textures/Earth/'+n)
     print('TEXTURE_RESOLUTION',n,t.blueprint_get_size_x(),t.blueprint_get_size_y(),t.get_editor_property('max_texture_size'))
 for s in ['audit_recovery_assets.py','audit_earth_assets.py','audit_recovery_vfx.py']:

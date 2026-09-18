@@ -47,3 +47,11 @@ Continuous imagery and source DEMs are in `ArtSource/Earth/Continuity`; updated 
 `RecoveryFlightInspection` owns physical force samples and experiment inputs. `RecoveryForceDisplayComponent` consumes those samples without changing physics. `RecoveryCameraTracking` holds only presentation state. Flight experiments are exposed by the interface and recorded through one event-writing helper. `RecoveryWorldAudit` is opt-in and exercises the live laboratory, time scaling and rendering settings.
 
 `RecoveryInput.h` is the shared key/action registry for the controller and Controls page. The vehicle Blueprint and director no longer register viewer keys. `RecoveryCryogenicVapor.cpp` owns local continuous condensation volumes; `RecoverySiteActivityComponent` owns decorative traffic, beacons and wind flags. The empty template GameMode class was removed; the active flight GameMode remains.
+
+The current visual rebuild entry point is `Tools/Editor/build_visual_renewal.py`.
+`surface_materials.py` owns shared industrial, vehicle and service-road graphs;
+`build_world_surfaces.py` owns the nineteen geographic surfaces. The serialized
+map and referenced source assets are authoritative; deleted prototype scene
+builders must not be replayed. `RecoverySurfaceHistory` supplies optical wetness
+and residue through `MPC_SurfaceState`, without modifying the flight model.
+See [visual renewal](VISUAL_RENEWAL.md) for replacement and validation details.

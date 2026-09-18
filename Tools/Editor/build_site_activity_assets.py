@@ -15,7 +15,7 @@ float wave=sin(UV.x*11-T*(2+W*.12)+UV.y*3)*.65+sin(UV.x*23-T*4-UV.y*7)*.24;
 return N.xyz*UV.x*UV.x*wave*clamp(W*4,5,45)+float3(0,0,-UV.x*UV.x*12);
 ''')
 connect(m,offset,u.MaterialProperty.MP_WORLD_POSITION_OFFSET)
-fabric=custom(m,{'UV':uv},'float weave=.96+.04*sin(UV.x*900)*sin(UV.y*450);return float3(.70,.73,.76)*weave;')
+fabric=custom(m,{'UV':uv},'float2 q=UV*float2(900,450);float resolved=1-smoothstep(.5,2,length(fwidth(q)));float weave=.98+.02*sin(q.x)*sin(q.y)*resolved;return float3(.70,.73,.76)*weave;')
 connect(m,fabric,u.MaterialProperty.MP_BASE_COLOR);connect(m,constant(m,.9),u.MaterialProperty.MP_ROUGHNESS);save(m)
 mesh=import_scenery_mesh(ART_ROOT/'Starbase/Activity/SM_WindFlag.fbx','/Game/Starbase/Meshes/Starbase/SM_WindFlag')
 mesh.set_material(0,m);u.EditorAssetLibrary.save_loaded_asset(mesh,False)

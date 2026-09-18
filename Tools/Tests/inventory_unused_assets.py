@@ -14,7 +14,16 @@ roots=set();source_paths=[]
 for base in ('Source','Config'):
     for path in (PROJECT_ROOT/base).rglob('*'):
         if path.suffix not in ('.h','.cpp','.ini') or 'Tests' in path.parts:continue
-        for match in re.findall(r'/Game/[A-Za-z0-9_./]+',path.read_text(encoding='utf-8',errors='replace')):
+        text=path.read_text(encoding='utf-8',errors='replace')
+        # Cook inclusion/exclusion policies do not prove runtime use. Treating
+        # these folder names as roots previously made every asset "reachable",
+        # even assets explicitly excluded from cooking.
+        if path.suffix=='.ini':
+            text='\n'.join(line for line in text.splitlines()
+                           if not line.lstrip().startswith(';')
+                           and 'DirectoriesToAlwaysCook' not in line
+                           and 'DirectoriesToNeverCook' not in line)
+        for match in re.findall(r'/Game/[A-Za-z0-9_./]+',text):
             package=match.split('.')[0].rstrip('/')
             if package in all_packages:roots.add(package)
             else:roots.update(p for p in all_packages if p.startswith(package+'/'))

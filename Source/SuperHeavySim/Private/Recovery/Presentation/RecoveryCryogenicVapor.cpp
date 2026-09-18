@@ -58,7 +58,8 @@ void URecoveryVaporComponent::UpdateCryogenic(float Dt,const ASuperHeavyRecovery
         // stretching each axis made opacity depend on view and wind direction.
         constexpr double VoxelCm=50.;
         const FVector Size=FVector(2400,2400,4800)+LocalDrift;
-        V->SetVolumeResolution(FIntVector(FMath::CeilToInt(Size.X/VoxelCm),FMath::CeilToInt(Size.Y/VoxelCm),FMath::CeilToInt(Size.Z/VoxelCm)));
+        const FIntVector Resolution(FMath::CeilToInt(Size.X/VoxelCm),FMath::CeilToInt(Size.Y/VoxelCm),FMath::CeilToInt(Size.Z/VoxelCm));
+        if(V->VolumeResolution!=Resolution)V->SetVolumeResolution(Resolution);
         V->SetWorldScale3D(FVector(VoxelCm));
         M->SetVectorParameterValue(TEXT("VentPosition"),Colour(Vent));
         M->SetVectorParameterValue(TEXT("Up"),Colour(Up));M->SetVectorParameterValue(TEXT("Outward"),Colour(Out));

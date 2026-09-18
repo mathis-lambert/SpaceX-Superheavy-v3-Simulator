@@ -131,7 +131,7 @@ Generated source caches live under `../ArtSource`; runtime assets are under
 2. In Blender background mode run `build_lidar_terrain.py`,
    `bake_turbulent_volumes.py`, and `build_tower_meshes.py`.
 3. In Unreal Python commandlets run `import_coast_volumes.py`,
-   `build_world_continuity.py -CoastalShadingReimport` (the flag belongs on the
+   `build_world_surfaces.py -CoastalShadingReimport` (the flag belongs on the
    commandlet command line), then `finalize_coast_mechanics.py`,
    `configure_dynamic_return.py` and `build_attitude_gas.py`.
 4. Run `audit_lidar_meshes.py` in Blender. Run the model, contact-fixture,

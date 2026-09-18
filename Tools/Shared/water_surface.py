@@ -40,7 +40,8 @@ float3 east=normalize(cross(float3(0,1,0),up)),north=cross(up,east);
 float viewDistance=length(Camera-P);
 slope*=1-smoothstep(120000,650000,viewDistance);
 float near=1-smoothstep(15000,150000,viewDistance);
-float ripples=sin(P.x*.23+P.y*.11+sin(P.y*.017)*.8)*.07*(1-smoothstep(1200,6500,viewDistance));
+float ripplePhase=P.x*.23+P.y*.11+sin(P.y*.017)*.8;
+float ripples=sin(ripplePhase)*.035*(1-smoothstep(.5,2,fwidth(ripplePhase)))*(1-smoothstep(1200,6500,viewDistance));
 float3 land=normalize(Terrain+(east*Ground.x+north*Ground.y)*near*.55+(east*.9+north*.43)*ripples);
 return normalize(lerp(land,normalize(up-east*slope.x-north*slope.y),W));'''
 

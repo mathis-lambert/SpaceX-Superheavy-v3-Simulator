@@ -28,7 +28,7 @@ for prefix in [root+'/Vehicle/Meshes/Imported_Clean']:
 actors=u.get_editor_subsystem(u.EditorActorSubsystem).get_all_level_actors()
 assert not any(a.get_actor_label() in ['Recovery_LaunchPad','Recovery_CatchPad'] for a in actors)
 cloud=next(a for a in actors if a.get_actor_label()=='Recovery_Clouds').get_component_by_class(u.VolumetricCloudComponent)
-assert cloud.get_editor_property('material').get_path_name()==root+'/Materials/MI_CloudFlight.MI_CloudFlight'
+assert cloud.get_editor_property('material').get_path_name()==root+'/Materials/M_LayeredWeather.M_LayeredWeather'
 for name in ['S_EngineRoar','S_CoastalWind','S_EngineRumble','S_EngineCrackle','S_CryogenicHiss','S_Deluge','S_TowerDrive']:
     sound=u.load_asset(root+'/Audio/'+name);assert sound and sound.get_editor_property('looping'),name
     assert sound.get_editor_property('virtualization_mode')==u.VirtualizationMode.PLAY_WHEN_SILENT,name
@@ -49,7 +49,7 @@ assert flow_material.get_editor_property('blend_mode')==u.BlendMode.BLEND_ADDITI
 assert flow_material.get_editor_property('used_with_heterogeneous_volumes')
 report['turbulent_flow_frames']=flow.get_num_frames()
 extinction=u.MaterialEditingLibrary.get_material_property_input_node(vapor,u.MaterialProperty.MP_SUBSURFACE_COLOR)
-assert extinction and extinction.get_editor_property('description')=='Vapor extinction / inverse metres','Vapor extinction is not connected to the RGB volume output'
+assert extinction and extinction.get_editor_property('description')=='Vapor extinction / inverse centimetres','Vapor extinction is not connected to the RGB volume output'
 opts=u.AssetRegistryDependencyOptions(include_soft_package_references=True,include_hard_package_references=True)
 registry_header=(PROJECT_ROOT/'Source/SuperHeavySim/Public/Recovery/Shared/RecoveryAssets.h').read_text(encoding='utf-8')
 runtime=[p.split('.')[0] for p in re.findall(r'TEXT\("(/Game/[^"\n]+)"\)',registry_header)]

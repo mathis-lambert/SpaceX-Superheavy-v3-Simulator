@@ -1,6 +1,6 @@
 # Starbase Flight Simulator — Alpha 0.1.0
 
-Version: `0.1.0-alpha.9`. Windows x64, Unreal Engine 5.8.
+Version: `0.1.0-alpha.10`. Windows x64, Unreal Engine 5.8.
 
 ## Start
 
@@ -26,6 +26,13 @@ inspector and local diagnostic reports remain available. It contains neither
 the Unreal Editor nor the project's MCP and editing toolsets.
 
 ## Included
+
+The visual renewal consolidates surface and effect authoring, removes obsolete
+assets, corrects the rectangular orbital lighting seam, adds geographic ocean
+coverage, filters fine material detail, and introduces persistent pad wetness
+and residue. Broadcast tracking delay and a fixed coastal camera are available
+in saved photographic looks. See `VISUAL-RENEWAL.md` for the twelve workstreams,
+validation evidence and remaining art-direction limits.
 
 Cloud rendering now uses a bounded real-time tracing budget, distance-filtered
 cloud noise and globe-wide solar transmittance. The orbital circular cutoff is
