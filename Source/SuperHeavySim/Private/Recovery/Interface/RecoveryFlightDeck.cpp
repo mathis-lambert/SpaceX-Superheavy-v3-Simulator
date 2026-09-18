@@ -32,6 +32,8 @@ void SRecoveryFlightDeck::Construct(const FArguments& Args)
     ChildSlot[SNew(SOverlay)
         +SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Top).Padding(0,24)
         [SNew(SHorizontalBox)
+            +SHorizontalBox::Slot().AutoWidth()[Button(TEXT("Mission"),[this](){Controller->OpenMissionControls();})]
+            +SHorizontalBox::Slot().AutoWidth()[Button(TEXT("Restart"),[this](){Controller->ConfirmRestart();})]
             +SHorizontalBox::Slot().AutoWidth()[Button(TEXT("Cameras"),[this](){Controller->ToggleCameraPicker();})]
             +SHorizontalBox::Slot().AutoWidth()[Button(TEXT("Computer"),[this](){Controller->ToggleFlightComputer();})]
             +SHorizontalBox::Slot().AutoWidth()[Button(TEXT("Weather"),[this](){Controller->OpenWeather();})]

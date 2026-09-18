@@ -55,6 +55,7 @@ void ARecoveryPlayerController::BeginPlay()
     GConfig->GetBool(TEXT("Recovery.Controls"),TEXT("AutomaticOrbitV2"),bAutomaticOrbit,GGameUserSettingsIni);
     GConfig->GetFloat(TEXT("Recovery.Audio"),TEXT("MasterVolume"),MasterVolume,GGameUserSettingsIni);
     MouseSensitivity=FMath::Clamp(MouseSensitivity,0.1f,2.f);
+    GConfig->GetBool(TEXT("Recovery.Controls"),TEXT("InvertVerticalLook"),bInvertVerticalLook,GGameUserSettingsIni);
     MasterVolume=FMath::Clamp(MasterVolume,0.f,1.f);
     FParse::Value(FCommandLine::Get(),TEXT("RecoveryHour="),TimeOfDay);
     TimeOfDay=FMath::Clamp(TimeOfDay,0.f,24.f);FogAmount=FMath::Clamp(FogAmount,0.f,2.f);
@@ -220,7 +221,21 @@ void ARecoveryPlayerController::ReturnHome()
     if(Menu) Menu->ShowPage();
     SetMenuVisible(true);
 }
-void ARecoveryPlayerController::RestartFlight() { LaunchFlight(); }
+void ARecoveryPlayerController::RestartFlight()
+{
+    if(auto* D=GetDirector())D->SelectScenario(SelectedScenario);
+    SetPlaybackRate(1);LaunchFlight();
+}
+void ARecoveryPlayerController::OpenMissionControls()
+{
+    if(bAtHome || !Menu)return;
+    SetPause(true);Menu->ShowPage(10);SetMenuVisible(true);
+}
+void ARecoveryPlayerController::ConfirmRestart()
+{
+    if(bAtHome || !Menu)return;
+    SetPause(true);Menu->ShowPage(16);SetMenuVisible(true);
+}
 void ARecoveryPlayerController::SetPlaybackRate(float Rate)
 {
     if(!FMath::IsFinite(Rate))return;
@@ -240,8 +255,13 @@ void ARecoveryPlayerController::SetTelemetry(bool bEnabled)
 { bTelemetry=bEnabled;if(auto* D=GetDirector()) D->bShowTelemetry=bEnabled;SavePreferences(); }
 void ARecoveryPlayerController::SavePreferences()
 {
-    // Render/input audits may vary scene settings, but never persist test values.
-    if(FString(FCommandLine::Get()).Contains(TEXT("Audit")) || FParse::Param(FCommandLine::Get(),TEXT("RecoveryVaporReview")))return;
+    // Persistence audits require an isolated user directory. All other audits
+    // remain read-only with respect to the viewer's preferences.
+    FString AuditUserDirectory;
+    const bool bIsolatedPersistenceAudit=FParse::Param(FCommandLine::Get(),TEXT("RecoveryPhotoAudit")) &&
+        FParse::Value(FCommandLine::Get(),TEXT("UserDir="),AuditUserDirectory) && !AuditUserDirectory.IsEmpty();
+    if((FString(FCommandLine::Get()).Contains(TEXT("Audit")) && !bIsolatedPersistenceAudit) ||
+        FParse::Param(FCommandLine::Get(),TEXT("RecoveryVaporReview")))return;
     GConfig->SetInt(TEXT("Recovery.Rendering"),TEXT("Reconstruction"),ReconstructionMode,GGameUserSettingsIni);
     Photography.Sanitize();Photography.Save(TEXT("Recovery.Photography"),GGameUserSettingsIni);
     GConfig->SetBool(TEXT("Recovery.Rendering"),TEXT("HardwareRayTracing"),bHardwareRayTracing,GGameUserSettingsIni);
@@ -256,6 +276,7 @@ void ARecoveryPlayerController::SavePreferences()
     GConfig->SetFloat(TEXT("Recovery.Presentation"),TEXT("CameraGrain"),CameraGrain,GGameUserSettingsIni);
     GConfig->SetBool(TEXT("Recovery.Presentation"),TEXT("DepthOfField"),bCameraDepthOfField,GGameUserSettingsIni);
     GConfig->SetFloat(TEXT("Recovery.Controls"),TEXT("MouseSensitivity"),MouseSensitivity,GGameUserSettingsIni);
+    GConfig->SetBool(TEXT("Recovery.Controls"),TEXT("InvertVerticalLook"),bInvertVerticalLook,GGameUserSettingsIni);
     GConfig->SetBool(TEXT("Recovery.Controls"),TEXT("AutomaticOrbitV2"),bAutomaticOrbit,GGameUserSettingsIni);
     GConfig->RemoveKey(TEXT("Recovery.Controls"),TEXT("LearningOverlay"),GGameUserSettingsIni);
     GConfig->SetFloat(TEXT("Recovery.Audio"),TEXT("MasterVolume"),MasterVolume,GGameUserSettingsIni);

@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "Recovery/Flight/RecoveryWaterMap.h"
 #include "Recovery/Flight/RecoveryFlightPhase.h"
 #include "Recovery/Flight/RecoveryFlightInspection.h"
 #include "Recovery/Flight/RecoveryMassProperties.h"
@@ -10,6 +11,7 @@
 /** Immutable numeric configuration copied from the authored mission profile. */
 struct FRecoveryDynamicsConfiguration
 {
+    TSharedPtr<const FRecoveryWaterMap,ESPMode::ThreadSafe> WaterMap;
     FRecoveryEngineParameters Engines;
     double DryMassKg=0,UpperStageMassKg=0,MixtureRatio=0,OxygenDensityKgM3=0,MethaneDensityKgM3=0;
     double OxygenTankBottomM=0,MethaneTankBottomM=0;
@@ -67,6 +69,8 @@ struct FRecoveryDynamicsState
     double DelugeFlow=0,GroundClockS=0,ElapsedS=0;
     double PeakEngineForceRatio=0,PeakGimbalDeg=0;
     double MinimumStepS=TNumericLimits<double>::Max(),MaximumStepS=0;
+    double SubmergedVolumeM3=0;
+    bool bWaterContact=false;
     uint64 Steps=0;
 };
 

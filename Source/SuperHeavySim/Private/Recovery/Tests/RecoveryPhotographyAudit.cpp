@@ -91,6 +91,7 @@ void ARecoveryPlayerController::TickPhotographyAudit()
     case 22:
         Photography.FocalLengthMm=145;Photography.SolarDayOfYear=172;Photography.UtcOffsetHours=-6;TimeOfDay=17.25;
         Photography.TrackingLagSeconds=.16f;Photography.bFixedFraming=true;
+        bInvertVerticalLook=false;SavePreferences();
         SavePhotoLook(1);ApplyPhotoPreset(0);LoadPhotoLook(1);Menu->ShowPage(21);break;
     case 23:
         Check(TEXT("Custom look restores optics, calendar and civil clock"),HasPhotoLook(1) && Photography.FocalLengthMm==145 && Photography.SolarDayOfYear==172 && Photography.UtcOffsetHours==-6 && TimeOfDay==17.25);
@@ -120,6 +121,7 @@ void ARecoveryPlayerController::TickPhotographyAudit()
     case 41:
         Check(TEXT("Reloaded optics and environment remain exact"),Photography.FocalLengthMm==145 && Photography.SolarDayOfYear==172 && Photography.UtcOffsetHours==-6 && TimeOfDay==17.25);
         Check(TEXT("Tracking character survives application restart"),Photography.TrackingLagSeconds==.16f && Photography.bFixedFraming);
+        Check(TEXT("Vertical look inversion survives application restart"),!bInvertVerticalLook);
         Finish();break;
     default:break;
     }

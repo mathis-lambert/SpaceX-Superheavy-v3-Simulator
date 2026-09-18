@@ -5,6 +5,7 @@ const TCHAR* RecoveryGuidanceReasonText(ERecoveryGuidanceReason Reason)
 {
     switch(Reason)
     {
+    case ERecoveryGuidanceReason::Splashdown:return TEXT("Splashdown / engines off / floating hull");
     case ERecoveryGuidanceReason::AlternateSelected:return TEXT("Tower recovery abandoned / offshore diversion");
     case ERecoveryGuidanceReason::EmergencyContact:return TEXT("Emergency surface contact / tower mission not recovered");
     case ERecoveryGuidanceReason::ImpactMitigation:return TEXT("No reachable offshore candidate / braking to reduce impact");

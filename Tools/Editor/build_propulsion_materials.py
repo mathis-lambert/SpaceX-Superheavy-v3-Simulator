@@ -39,15 +39,26 @@ return col*(lerp(7200,13500,Mix)*(.7+.5*N.r)+diamond*21000)*Throttle;
 connect(m, emission, u.MaterialProperty.MP_EMISSIVE_COLOR)
 opacity = custom(m, inputs, '''
 float z=UV.y;
-float envelope=smoothstep(0,.018,z)*pow(saturate(1-z),1.6);
+float envelope=smoothstep(0,.004,z)*pow(saturate(1-z),1.6);
 float breakup=smoothstep(lerp(.10,.43,z),.70,N.r*.7+N.g*.3);
-return envelope*breakup*lerp(.48,.24,Mix)*(1-.65*Vacuum*Mix);
+return envelope*breakup*lerp(.58,.075,Mix)*(1-.65*Vacuum*Mix);
 ''', u.CustomMaterialOutputType.CMOT_FLOAT1)
 connect(m, opacity, u.MaterialProperty.MP_OPACITY)
 normal = expression(m, u.MaterialExpressionVertexNormalWS)
 wpo = custom(m, {**inputs, 'Normal': normal}, '''
-return Normal*(N.b-.5)*sin(UV.y*3.14159265)*lerp(30,160,Mix);
+return Normal*((N.b-.5)*sin(UV.y*3.14159265)*lerp(14,45,Mix)+Vacuum*(1-Mix)*900*smoothstep(.005,.6,UV.y));
 ''')
 connect(m, wpo, u.MaterialProperty.MP_WORLD_POSITION_OFFSET)
 save(m)
 print('PROPULSION_MATERIALS_READY', flush=True)
+
+# Instanced, pressure-independent throat glow. Apparent emission is separate
+# from the bounded point lights illuminating nearby metal.
+core=material('/Game/Starbase/Materials/M_NozzleCore')
+prop(core,'shading_model',u.MaterialShadingModel.MSM_UNLIT)
+prop(core,'used_with_instanced_static_meshes',True)
+power=expression(core,u.MaterialExpressionPerInstanceCustomData);prop(power,'data_index',0)
+clock=expression(core,u.MaterialExpressionTime)
+glow=custom(core,{'Power':power,'T':clock},'return float3(.83,.90,1)*max(0,Power)*(90000+8000*sin(T*57)+4000*sin(T*91));')
+connect(core,glow,u.MaterialProperty.MP_EMISSIVE_COLOR)
+save(core)

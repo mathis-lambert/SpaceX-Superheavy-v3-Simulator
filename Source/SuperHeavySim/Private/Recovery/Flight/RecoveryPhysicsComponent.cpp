@@ -296,6 +296,7 @@ FRecoveryUpperStageConfiguration URecoveryPhysicsComponent::BuildUpperStageConfi
 FRecoveryDynamicsConfiguration URecoveryPhysicsComponent::BuildConfiguration(const USuperHeavyRecoveryProfile& P)
 {
     FRecoveryDynamicsConfiguration C;
+    C.WaterMap=FRecoveryWaterMap::Load();
     C.Engines.MinimumThrottle=P.MinimumThrottle;C.Engines.OpeningTimeConstantS=P.ThrottleTimeConstant;
     C.Engines.ShutdownTimeS=P.EngineShutdownTimeS;C.Engines.MaximumGimbalDeg=P.MaxGimbalDeg;C.Engines.GimbalRateDegS=P.GimbalRateDegS;
     C.DryMassKg=P.DryMassKg;C.UpperStageMassKg=P.UpperStageMassKg;C.MixtureRatio=P.MixtureRatio;

@@ -21,7 +21,7 @@ struct FRecoveryGuidanceConfiguration : FRecoveryDynamicsConfiguration
 
 enum class ERecoveryGuidanceReason : uint8
 {
-    None, Separation, Boostback, Coast, ReserveDepleted, Entry, LandingBurn,
+    None, Splashdown, Separation, Boostback, Coast, ReserveDepleted, Entry, LandingBurn,
     Capture, Captured, PropellantExhausted, OperatorAbort, EnvelopeExceeded,
     SupportLost, SupportEvaluated, ApproachEnvelopeExceeded, AlternateSelected, EmergencyContact, ImpactMitigation
 };

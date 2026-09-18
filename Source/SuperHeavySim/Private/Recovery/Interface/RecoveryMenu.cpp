@@ -217,6 +217,7 @@ void SRecoveryMenu::ShowPage(int32 NewPage)
             .OnValueChanged_Lambda([PC](float V){PC->MouseSensitivity=.1f+V*1.9f;})
             .OnMouseCaptureEnd_Lambda([PC](){PC->SavePreferences();})
             .OnControllerCaptureEnd_Lambda([PC](){PC->SavePreferences();})];
+        Toggle(Rows,TEXT("Invert vertical look"),PC->bInvertVerticalLook,[PC](bool B){PC->bInvertVerticalLook=B;PC->SavePreferences();});
         Toggle(Rows,TEXT("Automatic orbit"),PC->bAutomaticOrbit,[PC](bool B){PC->bAutomaticOrbit=B;PC->SavePreferences();});
         Rows->AddSlot().AutoHeight().Padding(0,0,0,18)[Text(TEXT("Hold right mouse: look · Left click: inspect\nWheel: zoom / speed · Arrows or WASD / ZQSD: move\nE / B: up / down"),14,RecoveryUI::Muted)];
         for(const auto& Binding:RecoveryInput::Bindings())

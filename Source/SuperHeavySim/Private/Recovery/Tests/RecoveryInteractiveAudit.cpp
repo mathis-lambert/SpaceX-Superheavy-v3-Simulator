@@ -8,6 +8,7 @@
 #include "Serialization/JsonSerializer.h"
 #include "UnrealClient.h"
 #include "ShaderCompiler.h"
+#include "HAL/IConsoleManager.h"
 
 void ARecoveryPlayerController::TickInteractiveAudit()
 {
@@ -39,6 +40,7 @@ void ARecoveryPlayerController::TickInteractiveAudit()
         }
         if(AuditStage==1)
         {
+            UE_LOG(LogTemp,Display,TEXT("CLOUD_PROBE_MODE %d"),IConsoleManager::Get().FindConsoleVariable(TEXT("r.VolumetricRenderTarget.Mode"))->GetInt());
             ConsoleCommand(TEXT("csvprofile frames=360"),false);
             AuditStage=2;AuditDeadline=Now+2;return;
         }

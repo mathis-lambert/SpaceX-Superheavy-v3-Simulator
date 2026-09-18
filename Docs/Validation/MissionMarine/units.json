@@ -1,0 +1,552 @@
+﻿{
+	"devices": [
+		{
+			"deviceName": "PC_MATHIS",
+			"instance": "1DF777574AA4DEA249B55CBD5029A56A",
+			"instanceName": "PC_MATHIS-14836",
+			"platform": "WindowsEditor",
+			"oSVersion": "Windows 11 (25H2) [10.0.26200.9457] ",
+			"model": "Default",
+			"gPU": "NVIDIA GeForce RTX 4070 SUPER",
+			"cPUModel": "AMD Ryzen 5 9600X 6-Core Processor             ",
+			"rAMInGB": 32,
+			"renderMode": "SM6",
+			"rHI": "",
+			"appInstanceLog": ""
+		}
+	],
+	"reportCreatedOn": "2026.09.18-20.10.29",
+	"succeeded": 34,
+	"succeededWithWarnings": 0,
+	"failed": 0,
+	"notRun": 0,
+	"inProcess": 0,
+	"totalDuration": 0.2807391881942749,
+	"comparisonExported": false,
+	"comparisonExportDirectory": "",
+	"tests": [
+		{
+			"testDisplayName": "TerminalSequence",
+			"fullTestPath": "Recovery.Ground.TerminalSequence",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0078980997204780579,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "AlternateBraking",
+			"fullTestPath": "Recovery.Physics.AlternateBraking",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082711987197399139,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "AlternateFuelLimits",
+			"fullTestPath": "Recovery.Physics.AlternateFuelLimits",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0080845989286899567,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "AngularRateActuation",
+			"fullTestPath": "Recovery.Physics.AngularRateActuation",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0084982998669147491,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "CorrectionDecision",
+			"fullTestPath": "Recovery.Physics.CorrectionDecision",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0080588981509208679,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "CrossrangeReference",
+			"fullTestPath": "Recovery.Physics.CrossrangeReference",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0084348991513252258,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "DynamicsCoastLoads",
+			"fullTestPath": "Recovery.Physics.DynamicsCoastLoads",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0084054991602897644,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "DynamicsImpulseLedger",
+			"fullTestPath": "Recovery.Physics.DynamicsImpulseLedger",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0079626999795436859,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "EngineBankFuelBudget",
+			"fullTestPath": "Recovery.Physics.EngineBankFuelBudget",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.008483298122882843,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "EngineBankRealizableForces",
+			"fullTestPath": "Recovery.Physics.EngineBankRealizableForces",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0083037018775939941,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "EngineMomentAllocation",
+			"fullTestPath": "Recovery.Physics.EngineMomentAllocation",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082047991454601288,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "FrontApproachGeometry",
+			"fullTestPath": "Recovery.Physics.FrontApproachGeometry",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082579031586647034,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "FuelImpulseBudget",
+			"fullTestPath": "Recovery.Physics.FuelImpulseBudget",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082065016031265259,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "GuidanceMechanicalAcknowledgement",
+			"fullTestPath": "Recovery.Physics.GuidanceMechanicalAcknowledgement",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0083733014762401581,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "GuidancePhysicalClock",
+			"fullTestPath": "Recovery.Physics.GuidancePhysicalClock",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0083544999361038208,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "LandingReachability",
+			"fullTestPath": "Recovery.Physics.LandingReachability",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082547999918460846,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "MeasuredTerminalApproach",
+			"fullTestPath": "Recovery.Physics.MeasuredTerminalApproach",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.008579399436712265,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "RailFootprint",
+			"fullTestPath": "Recovery.Physics.RailFootprint",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082628987729549408,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "ResidualControl",
+			"fullTestPath": "Recovery.Physics.ResidualControl",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0085211992263793945,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "SeparationVelocityField",
+			"fullTestPath": "Recovery.Physics.SeparationVelocityField",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082623995840549469,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "StageMassConservation",
+			"fullTestPath": "Recovery.Physics.StageMassConservation",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082036033272743225,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "TerminalTransfer",
+			"fullTestPath": "Recovery.Physics.TerminalTransfer",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082429014146327972,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [
+				{
+					"event":
+					{
+						"type": "Info",
+						"message": "candidates=112 thrust=43 attitude=68 clearance=0 fuel=0 horizon=19.50",
+						"context": "",
+						"artifact": "00000000000000000000000000000000"
+					},
+					"filename": "",
+					"lineNumber": -1,
+					"timestamp": "2026.09.18-20.10.29"
+				}
+			],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "TerminalTranslationAllocation",
+			"fullTestPath": "Recovery.Physics.TerminalTranslationAllocation",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0081107020378112793,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "TimedFaults",
+			"fullTestPath": "Recovery.Physics.TimedFaults",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082725025713443756,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "UpperStageCoastLoads",
+			"fullTestPath": "Recovery.Physics.UpperStageCoastLoads",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0081505998969078064,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "UpperStageImpulseLedger",
+			"fullTestPath": "Recovery.Physics.UpperStageImpulseLedger",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082607008516788483,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "ValveImpulseConvergence",
+			"fullTestPath": "Recovery.Physics.ValveImpulseConvergence",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0083337016403675079,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "WaterContact",
+			"fullTestPath": "Recovery.Physics.WaterContact",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082040987908840179,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "AcousticArrival",
+			"fullTestPath": "Recovery.Presentation.AcousticArrival",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0081618987023830414,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "AcousticMixAndExhaust",
+			"fullTestPath": "Recovery.Presentation.AcousticMixAndExhaust",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0081019997596740723,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "ChaseContactStability",
+			"fullTestPath": "Recovery.Presentation.ChaseContactStability",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082117989659309387,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "OrbitInput",
+			"fullTestPath": "Recovery.Presentation.OrbitInput",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0084416009485721588,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "SolarGeography",
+			"fullTestPath": "Recovery.Presentation.SolarGeography",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0081521980464458466,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		},
+		{
+			"testDisplayName": "SurfaceHistory",
+			"fullTestPath": "Recovery.Presentation.SurfaceHistory",
+			"tags": [],
+			"state": "Success",
+			"deviceInstance": [
+				"1DF777574AA4DEA249B55CBD5029A56A"
+			],
+			"duration": 0.0082120001316070557,
+			"dateTime": "2026.09.18-20.10.29",
+			"entries": [],
+			"warnings": 0,
+			"errors": 0,
+			"artifacts": []
+		}
+	]
+}

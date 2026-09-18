@@ -19,7 +19,8 @@ weather=import_texture('CloudWeather2048.png','T_CloudWeather')
 prop(weather,'address_y',u.TextureAddress.TA_CLAMP);assets.save_loaded_asset(weather,False)
 volume=u.load_asset(folder+'/T_CloudShape128') or tools.create_asset('T_CloudShape128',folder,u.VolumeTexture,u.VolumeTextureFactory())
 prop(volume,'source2d_texture',atlas);prop(volume,'source2d_tile_size_x',128);prop(volume,'source2d_tile_size_y',128)
-prop(volume,'srgb',False);prop(volume,'compression_settings',u.TextureCompressionSettings.TC_MASKS)
+prop(volume,'srgb',False);prop(volume,'compression_settings',u.TextureCompressionSettings.TC_VECTOR_DISPLACEMENTMAP)
+prop(volume,'filter',u.TextureFilter.TF_TRILINEAR)
 assets.save_loaded_asset(volume,False)
 
 m=material('/Game/Starbase/Materials/M_LayeredWeather')
@@ -31,7 +32,7 @@ time=expression(m,u.MaterialExpressionTime)
 wind=vector(m,'WindMps',(8,3,0,0));coverage=scalar(m,'Coverage',.48)
 def texture_object(texture):
     node=expression(m,u.MaterialExpressionTextureObject);prop(node,'texture',texture)
-    prop(node,'sampler_type',u.MaterialSamplerType.SAMPLERTYPE_MASKS);return node
+    prop(node,'sampler_type',u.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR if texture==volume else u.MaterialSamplerType.SAMPLERTYPE_MASKS);return node
 weather_obj=texture_object(weather);shape_obj=texture_object(volume)
 header='''
 float3 metres=P*.01;
@@ -55,7 +56,7 @@ float midProfile=smoothstep(3900,4400,h)*(1-smoothstep(5400,6400,h));
 float highProfile=smoothstep(8300,8500,h)*(1-smoothstep(9100,9500,h));
 if(cover<.001 && highCover*highProfile<.001)return 0;
 float distanceM=length(P-Camera)*.01;
-float mip=clamp(log2(max(distanceM,100000)/100000),0,6);
+float mip=clamp(log2(max(distanceM,80000)/80000),0,5);
 // A low-frequency, independently rotated field breaks the small noise tile's
 // visible periodicity and groups cells into banks, with clear lanes between.
 float3 advected=metres-W.xyz*T;

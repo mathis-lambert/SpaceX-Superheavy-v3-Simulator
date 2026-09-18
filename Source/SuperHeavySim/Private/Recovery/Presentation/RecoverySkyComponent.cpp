@@ -24,6 +24,7 @@
 #include "Recovery/Shared/FlightGeometry.h"
 #include "Recovery/Shared/RecoveryAssets.h"
 #include "Components/VolumetricCloudComponent.h"
+#include "HAL/IConsoleManager.h"
 #include "Components/SkyAtmosphereComponent.h"
 #include "EngineUtils.h"
 #include "Misc/App.h"
@@ -153,7 +154,15 @@ void URecoverySkyComponent::TickComponent(float Dt,ELevelTick Type,FActorCompone
     }
     if(StarField)StarField->SetWorldLocation(CameraLocation);
     // Fewer filtered depth samples from orbit; no camera-mode or altitude switch.
-    const float Samples=FMath::Lerp(2.f,.6f,FMath::SmoothStep(12000.,90000.,Altitude));
+    // Above the cloud deck preserve pixel detail instead of combining coarse
+    // reconstruction with aggressively reduced ray samples. Hysteresis avoids churn.
+    if(Altitude>12000)bHighCloudResolution=true;
+    else if(Altitude<10500)bHighCloudResolution=false;
+    static IConsoleVariable* Mode=IConsoleManager::Get().FindConsoleVariable(TEXT("r.VolumetricRenderTarget.Mode"));
+    // Explicit console/capture overrides remain authoritative.
+    if(Mode && (Mode->GetFlags() & ECVF_SetByMask)<=ECVF_SetByCode)
+        if(Mode->GetInt()!=(bHighCloudResolution?1:0))Mode->Set(bHighCloudResolution?1:0,ECVF_SetByCode);
+    const float Samples=FMath::Lerp(2.f,1.f,FMath::SmoothStep(12000.,90000.,Altitude));
     if(Clouds.IsValid() && FMath::Abs(Samples-LastCloudSamples)>.04f)
     {
         Clouds->SetViewSampleCountScale(Samples);

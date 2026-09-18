@@ -117,7 +117,18 @@ void ARecoveryPlayerController::TickControlsAudit()
         Menu->ShowPage(8);Shot(TEXT("Settings.png"));AuditStage=15;AuditDeadline=Now+1;return;
     }
     if(AuditStage==15){ResumeFlight();ToggleFlightComputer();Shot(TEXT("Lab.png"));AuditStage=16;AuditDeadline=Now+1;return;}
-    if(AuditStage==16){ResumeFlight();ReturnHome();AuditStage=17;AuditDeadline=Now+7;return;}
+    if(AuditStage==16)
+    {
+        ResumeFlight();AuditMissionTime=D->MissionTime;AuditPendingCamera=D->GetMissionGeneration();
+        OpenMissionControls();
+        Check(TEXT("Mission button opens paused controls without reset"),IsPaused() && bMenuOpen && D->MissionTime==AuditMissionTime);
+        ResumeFlight();ConfirmRestart();
+        Check(TEXT("Restart requests confirmation before changing the mission"),IsPaused() && D->GetMissionGeneration()==uint32(AuditPendingCamera));
+        ResumeFlight();Check(TEXT("Cancelling restart preserves generation"),D->GetMissionGeneration()==uint32(AuditPendingCamera));
+        ConfirmRestart();RestartFlight();
+        Check(TEXT("Confirmed restart creates a fresh countdown"),!IsPaused() && !bMenuOpen && D->Phase==ERecoveryPhase::Countdown && D->GetMissionGeneration()>uint32(AuditPendingCamera));
+        ReturnHome();AuditStage=17;AuditDeadline=Now+7;return;
+    }
     if(AuditStage==17)
     {
         const auto* Vapor=D->FindComponentByClass<URecoveryVaporComponent>();

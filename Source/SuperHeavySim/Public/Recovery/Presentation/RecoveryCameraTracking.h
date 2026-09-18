@@ -1,6 +1,23 @@
 #pragma once
 #include "CoreMinimal.h"
 
+/** Smooth the user's composition, never the rocket's world position. */
+struct FRecoveryOrbitInput
+{
+    double TargetYaw=0,TargetPitch=0,Yaw=0,Pitch=0;
+    void Add(double X,double Y)
+    {
+        TargetYaw=FMath::UnwindDegrees(TargetYaw+X);
+        TargetPitch=FMath::Clamp(TargetPitch+Y,-75.,75.);
+    }
+    void Step(double WallSeconds)
+    {
+        const double Alpha=1-FMath::Exp(-FMath::Max(0.,WallSeconds)/.045);
+        Yaw=FMath::UnwindDegrees(Yaw+FMath::FindDeltaAngleDegrees(Yaw,TargetYaw)*Alpha);
+        Pitch=FMath::Lerp(Pitch,TargetPitch,Alpha);
+    }
+};
+
 /** Presentation state only: contact jitter must never define a flight heading. */
 struct FRecoveryChaseTracking
 {

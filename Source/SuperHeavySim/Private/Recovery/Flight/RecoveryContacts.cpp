@@ -36,10 +36,18 @@ void ASuperHeavyRecoveryDirector::InitializeContactFixture()
     bSeparated=true;PropellantKg=75000;UpdateMass();
     FVector P=CaptureWorldM+FVector(0,0,1);
     const double Heading=ContactFixture==TEXT("WrongHeading")?0:RuntimeProfile->CaptureHeadingDeg;
-    const FQuat Q=Tower->GetActorQuat()*FQuat(FVector::UpVector,FMath::DegreesToRadians(Heading));
+    FQuat Q=Tower->GetActorQuat()*FQuat(FVector::UpVector,FMath::DegreesToRadians(Heading));
     if(ContactFixture==TEXT("SideImpact")) P+=Tower->GetActorRightVector()*12;
     if(ContactFixture==TEXT("AlongRail")) P+=Tower->GetActorForwardVector()*3;
     if(ContactFixture==TEXT("EmptyTower") || ContactFixture==TEXT("OpenTower") || ContactFixture==TEXT("SleepingClose")) P+=Tower->GetActorForwardVector()*100;
+    const bool Marine=ContactFixture.StartsWith(TEXT("Water"));
+    if(Marine)
+    {
+        const double Sea=FMath::Sqrt(6371000.*6371000.-20000.*20000.)-6371000.;
+        P=FVector(20000,0,Sea+3);
+        if(ContactFixture==TEXT("WaterHorizontal"))
+        {Q=FQuat(FVector::RightVector,PI*.5);P.Z=Sea+10-BaseOffsetM;}
+    }
     Body->SetSimulatePhysics(false);
     Vehicle->SetActorLocationAndRotation((P+FVector(0,0,BaseOffsetM))*100,Q,false,nullptr,ETeleportType::TeleportPhysics);
     Body->SetWorldLocationAndRotation((P+FVector(0,0,BaseOffsetM))*100,Q,false,nullptr,ETeleportType::TeleportPhysics);
@@ -52,6 +60,7 @@ void ASuperHeavyRecoveryDirector::InitializeContactFixture()
     }
     Body->SetPhysicsLinearVelocity(ContactFixture==TEXT("SideImpact")?-Tower->GetActorRightVector()*600:FVector::ZeroVector);
     if(ContactFixture==TEXT("Overload"))Body->SetPhysicsLinearVelocity(FVector(0,0,-1600));
+    if(Marine)Body->SetPhysicsLinearVelocity(FVector(0,0,ContactFixture==TEXT("WaterFast")?-10000:-500));
     bContactShutdown=true;ActualThrustN=0;ActiveEngines=0;Throttle=0;
     RuntimeProfile->WindVelocityMps=FVector::ZeroVector;
     SetPhase(ERecoveryPhase::Capture,TEXT("Unpowered contact fixture"));
@@ -62,6 +71,14 @@ void ASuperHeavyRecoveryDirector::TickContactFixture(double Dt)
     ActualThrustN=0;ActiveEngines=0;Throttle=0;
     SetFlightCommand(FVector::ZeroVector,FVector::UpVector);
     if(ContactFixture==TEXT("SleepingClose") && MissionTime>1.)Tower->SetArmClosure(1);
+    if(ContactFixture.StartsWith(TEXT("Water")))
+    {
+        if(MissionTime<120)return;
+        const double CentreAltitude=(Body->GetComponentLocation()-FVector(0,0,-637100000)).Size()/100.-6371000;
+        const bool Floating=DynamicsState.bWaterContact && DynamicsState.SubmergedVolumeM3>1 &&
+            CentreAltitude>-45 && CentreAltitude<70 && FMath::Abs(VelocityMps.Z)<.5 && ActualThrustN<1;
+        WriteResult(Floating,TEXT("Unpowered water support evaluated after 120 seconds"));return;
+    }
     if(MissionTime<5)return;
     const bool Both=EverSupportContact[0] && EverSupportContact[1];
     bool Passed=false;

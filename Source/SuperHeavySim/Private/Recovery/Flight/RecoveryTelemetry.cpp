@@ -81,6 +81,8 @@ void ASuperHeavyRecoveryDirector::WriteResult(bool bSuccess,const FString& Reaso
     FFileHelper::SaveStringToFile(Csv,*(Dir/FileName+TEXT(".csv")));
     TSharedRef<FJsonObject> Result=MakeShared<FJsonObject>();
     Result->SetBoolField(TEXT("success"),bSuccess);
+    Result->SetBoolField(TEXT("water_contact"),DynamicsState.bWaterContact);
+    Result->SetNumberField(TEXT("submerged_volume_m3"),DynamicsState.SubmergedVolumeM3);
     Result->SetStringField(TEXT("scenario"),ScenarioName); Result->SetStringField(TEXT("reason"),Reason);
     Result->SetNumberField(TEXT("duration_s"),MissionTime);
     Result->SetNumberField(TEXT("peak_altitude_m"),PeakAltitudeM);

@@ -59,8 +59,9 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
     const bool AcceptInput=PC && (!Settings || !Settings->IsMenuOpen()) &&
         !bIgnoreCameraInput;
     const double Sensitivity=Settings?Settings->MouseSensitivity:0.65;
+    const double VerticalSign=Settings && Settings->bInvertVerticalLook?-1.:1.;
     const bool Changed=LastCameraMode!=CameraMode;
-    if(Changed) { OrbitYaw=0;OrbitPitch=0;CinematicAzimuth=-0.85;bOrbitManuallyAdjusted=false; }
+    if(Changed) { OrbitInput={};SmoothedCameraZoom=CameraZoom;OrbitYaw=0;OrbitPitch=0;CinematicAzimuth=-0.85;bOrbitManuallyAdjusted=false; }
     const FVector Centre=Body->GetComponentLocation();
     const FQuat Q=Body->GetComponentQuat();
     const FVector Up=Q.GetUpVector();
@@ -83,7 +84,7 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
         if(AcceptInput)
         {
                 float DX=0,DY=0;if(PC->IsInputKeyDown(EKeys::RightMouseButton) && !PC->WasInputKeyJustPressed(EKeys::RightMouseButton))PC->GetInputMouseDelta(DX,DY);
-                FRotator R=Camera->GetActorRotation();R.Yaw+=DX*Sensitivity;R.Pitch=FMath::Clamp(R.Pitch+DY*Sensitivity,-89.,89.);R.Roll=0;
+                FRotator R=Camera->GetActorRotation();R.Yaw+=DX*Sensitivity;R.Pitch=FMath::Clamp(R.Pitch+DY*Sensitivity*VerticalSign,-89.,89.);R.Roll=0;
                 Camera->SetActorRotation(R);
             const double Forward=(PC->IsInputKeyDown(EKeys::Up)||PC->IsInputKeyDown(EKeys::W)||PC->IsInputKeyDown(EKeys::Z)?1.:0)-(PC->IsInputKeyDown(EKeys::Down)||PC->IsInputKeyDown(EKeys::S)?1.:0);
             const double Side=(PC->IsInputKeyDown(EKeys::Right)||PC->IsInputKeyDown(EKeys::D)?1.:0)-(PC->IsInputKeyDown(EKeys::Left)||PC->IsInputKeyDown(EKeys::A)||PC->IsInputKeyDown(EKeys::Q)?1.:0);
@@ -96,6 +97,8 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
         LastCameraFocus=Camera->GetActorLocation()+Camera->GetActorForwardVector()*10000;
         return;
     }
+    SmoothedCameraZoom=FMath::Lerp(SmoothedCameraZoom,CameraZoom,1-FMath::Exp(-FMath::Max(0.,ViewDt)/.10));
+    const double Zoom=SmoothedCameraZoom;
     // Follow the current physical position exactly. Smooth only composition and
     // user-selected camera changes; interpolating world position trails a rocket
     // by hundreds of metres during ascent.
@@ -108,64 +111,64 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
     {
     case 1:
         Position=Site+FVector(55000,-72000,1600);
-        Fov=FMath::Clamp(FMath::RadiansToDegrees(2*FMath::Atan2(10500.,(Focus-Position).Size()))*CameraZoom,1.2,55.);
+        Fov=FMath::Clamp(FMath::RadiansToDegrees(2*FMath::Atan2(10500.,(Focus-Position).Size()))*Zoom,1.2,55.);
         break;
     case 2:
         Focus=Base+Up*500;
-        Position=Base+Q.RotateVector(FVector(1800,-2400,-1200)*CameraZoom);
+        Position=Base+Q.RotateVector(FVector(1800,-2400,-1200)*Zoom);
         break;
     case 3:
         Focus=Base+Q.RotateVector((RuntimeProfile->CatchLugPlusM+RuntimeProfile->CatchLugMinusM)*50);
         Position=Site+FVector(6500,-9500,6900);
-        Fov=FMath::Clamp(FMath::RadiansToDegrees(2*FMath::Atan2(2500.,(Focus-Position).Size()))*CameraZoom,1.2,50.);
+        Fov=FMath::Clamp(FMath::RadiansToDegrees(2*FMath::Atan2(2500.,(Focus-Position).Size()))*Zoom,1.2,50.);
         break;
     case 4:
         Focus=Base+Q.RotateVector(FVector(100,0,6380));
-        Position=Focus+Q.RotateVector(FVector(1400,-1850,170)*CameraZoom);
+        Position=Focus+Q.RotateVector(FVector(1400,-1850,170)*Zoom);
         Fov=58;
         break;
     case 5:
-        Position=Base+Up*7050+Q.GetForwardVector()*1100*CameraZoom;
+        Position=Base+Up*7050+Q.GetForwardVector()*1100*Zoom;
         Focus=Base+Up*1300;
         Fov=72;
         break;
     case 6:
     {
-        Position=Focus+(-ChaseDirection*15000+FVector(8000,-11000,5000))*CameraZoom;
+        Position=Focus+(-ChaseDirection*15000+FVector(8000,-11000,5000))*Zoom;
         break;
     }
     case 7:
     {
         if(!bOrbitManuallyAdjusted && (!Settings || Settings->bAutomaticOrbit)) CinematicAzimuth+=ViewDt*0.004*(Settings?Settings->Photography.OrbitSpeed:1.f);
         const double Angle=CinematicAzimuth;
-        const double Radius=FMath::Lerp(42000.,24500.,StageFraming)*CameraZoom;
+        const double Radius=FMath::Lerp(42000.,24500.,StageFraming)*Zoom;
         Position=Focus+FVector(FMath::Cos(Angle)*Radius,FMath::Sin(Angle)*Radius,Radius*0.27);
         Fov=48;
         break;
     }
     case 9:
         Position=Site+FVector(-290000,-80000,2200);
-        Fov=42*CameraZoom;
+        Fov=42*Zoom;
         break;
     case 10:
         Position=Site+FVector(-775000,-200000,3500);
-        Fov=38*CameraZoom;
+        Fov=38*Zoom;
         break;
     case 11:
-        Position=Site+FVector(-65000,-85000,38000)*CameraZoom;
+        Position=Site+FVector(-65000,-85000,38000)*Zoom;
         Focus=Site+FVector(0,0,4000);Fov=58;
         break;
     case 12:
-        Position=Centre+FVector(0,-2000000,1000000)*CameraZoom;
+        Position=Centre+FVector(0,-2000000,1000000)*Zoom;
         Focus=Position+FVector(600000,3000000,-600000);Fov=65;
         break;
     case 13:
         Focus=Site+FVector(0,0,-637100000);
-        Position=Focus+FVector(0,-350000000,1637100000)*CameraZoom;Fov=82;
+        Position=Focus+FVector(0,-350000000,1637100000)*Zoom;Fov=82;
         break;
     default:
         Focus-=Up*(4000*(1-StageFraming));
-        Position=Focus+FMath::Lerp(FVector(37000,-46000,13000),FVector(11000,-15000,6500),StageFraming)*CameraZoom;
+        Position=Focus+FMath::Lerp(FVector(37000,-46000,13000),FVector(11000,-15000,6500),StageFraming)*Zoom;
         break;
     }
     const bool OrbitCamera=CameraMode==0 || CameraMode==2 || CameraMode==4 || CameraMode==6 || CameraMode==7 || CameraMode==11 || CameraMode==13;
@@ -177,10 +180,10 @@ void ASuperHeavyRecoveryDirector::UpdateCamera(double Dt)
         if(AcceptInput && PC->IsInputKeyDown(EKeys::RightMouseButton) && !PC->WasInputKeyJustPressed(EKeys::RightMouseButton))
         {
             float DX=0,DY=0;PC->GetInputMouseDelta(DX,DY);
-            OrbitYaw=FMath::UnwindDegrees(OrbitYaw+DX*Sensitivity);
-            OrbitPitch=FMath::Clamp(OrbitPitch+DY*Sensitivity,-75.,75.);
+            OrbitInput.Add(DX*Sensitivity,DY*Sensitivity*VerticalSign);
             if(FMath::Abs(DX)+FMath::Abs(DY)>0.01) bOrbitManuallyAdjusted=true;
         }
+        OrbitInput.Step(ViewDt);OrbitYaw=OrbitInput.Yaw;OrbitPitch=OrbitInput.Pitch;
         const FVector Offset=Position-Focus;
         FRotator Orbit=Offset.Rotation();Orbit.Yaw+=OrbitYaw;Orbit.Pitch=FMath::Clamp(Orbit.Pitch+OrbitPitch,-85.,85.);
         Position=Focus+Orbit.Vector()*Offset.Size();

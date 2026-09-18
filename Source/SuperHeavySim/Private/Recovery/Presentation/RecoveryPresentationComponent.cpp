@@ -10,6 +10,7 @@
 #include "Vehicle/SuperHeavyVehicleActor.h"
 #include "Components/ChildActorComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -44,6 +45,12 @@ void URecoveryPresentationComponent::Build()
         TInlineComponentArray<UStaticMeshComponent*> Hull(D->Vehicle);
         for(auto* Part:Hull)if(Part->GetName()==TEXT("SH_Body_Mesh"))Part->SetMaterial(0,Steel);
     }
+    NozzleCores=NewObject<UInstancedStaticMeshComponent>(GetOwner());
+    NozzleCores->SetStaticMesh(LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/BasicShapes/Cylinder.Cylinder")));
+    NozzleCores->SetMaterial(0,LoadObject<UMaterialInterface>(nullptr,RecoveryAssets::M_NozzleCore));
+    NozzleCores->NumCustomDataFloats=1;
+    NozzleCores->SetCollisionEnabled(ECollisionEnabled::NoCollision);NozzleCores->SetCastShadow(false);
+    NozzleCores->RegisterComponent();GetOwner()->AddInstanceComponent(NozzleCores);
     TInlineComponentArray<UChildActorComponent*> Children(D->Vehicle);
     for(auto* C:Children)
     {
@@ -69,6 +76,7 @@ void URecoveryPresentationComponent::Build()
         Plume->SetCollisionEnabled(ECollisionEnabled::NoCollision);Plume->SetCastShadow(false);
         Plume->RegisterComponent();GetOwner()->AddInstanceComponent(Plume);
         Plumes.Add(Plume);
+        NozzleCores->AddInstance(FTransform::Identity);
         EngineIndices.Add(D->GetEngines().IndexOfByPredicate([C](const FRecoveryEngineState& E){return E.Id==C->GetFName();}));
         // Small sources reveal the nozzle rim without lighting the entire site 33 times.
         auto* Light=NewObject<UPointLightComponent>(GetOwner(),FName(*(TEXT("ExhaustLight_")+C->GetName())));
@@ -185,13 +193,16 @@ void URecoveryPresentationComponent::TickComponent(float Dt,ELevelTick Type,FAct
         Plumes[I]->SetVisibility(On);
         Plumes[I]->SetWorldLocationAndRotation(Nozzle,Orientation);
         const double Flicker=1+0.035*FMath::Sin(Clock*41+I*2.17)+0.02*FMath::Sin(Clock*73+I);
-        Plumes[I]->SetWorldScale3D(FVector(1.35+Vacuum*4,1.35+Vacuum*4,(20+30*Power)*(1+Vacuum*0.9)*Flicker));
-        EngineLights[I]->SetWorldLocation(Nozzle-Orientation.GetUpVector()*250);
+        Plumes[I]->SetWorldScale3D(FVector(1.,1.,(20+30*Power)*(1+Vacuum*0.9)*Flicker));
+        NozzleCores->UpdateInstanceTransform(I,FTransform(Orientation,Nozzle+Orientation.GetUpVector()*12,On?FVector(.88,.88,.025):FVector::ZeroVector),true,false,true);
+        NozzleCores->SetCustomDataValue(I,0,Power*Flicker,false);
+        EngineLights[I]->SetWorldLocation(Nozzle+Orientation.GetUpVector()*35);
         EngineLights[I]->SetLightColor(FMath::Lerp(FLinearColor(0.48f,0.67f,1.f),FLinearColor(1.f,0.48f,0.2f),float(Power*0.8)));
         EngineLights[I]->SetVisibility(On && LightScale>0);
         EngineLights[I]->SetIntensity(On?12000.*Power*Flicker*LightScale:0.);
         if(EngineLights[I]->IsVisible()) ++LitEngines;
     }
+    NozzleCores->MarkRenderStateDirty();
     if(LitEngines!=LastLitEngineCount)
     {
         UE_LOG(LogTemp,Display,TEXT("RECOVERY_LIGHTS configured=%d expected=%d active=%d throttle=%.3f scale=%.1f"),EngineLights.Num(),D->ActiveEngines,LitEngines,D->Throttle,LightScale);
@@ -210,7 +221,7 @@ void URecoveryPresentationComponent::TickComponent(float Dt,ELevelTick Type,FAct
     }
     MixingPlume->SetWorldLocationAndRotation(Base-Up*900,D->GetBody()->GetComponentQuat());
     const double EngineScale=FMath::Sqrt(BurningEngines/33.);
-    MixingPlume->SetWorldScale3D(FVector((10+Vacuum*18)*EngineScale,(10+Vacuum*18)*EngineScale,(40+45*MeanPower)*(0.5+0.5*EngineScale)));
+    MixingPlume->SetWorldScale3D(FVector((6+Vacuum*10)*EngineScale,(6+Vacuum*10)*EngineScale,(40+45*MeanPower)*(0.5+0.5*EngineScale)));
     MixingPlume->SetVisibility(DeliveredPower>.01);
     MixingMaterial->SetScalarParameterValue(TEXT("Throttle"),MeanPower);
     MixingMaterial->SetScalarParameterValue(TEXT("Vacuum"),Vacuum);

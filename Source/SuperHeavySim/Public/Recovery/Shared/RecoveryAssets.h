@@ -19,6 +19,7 @@ namespace RecoveryAssets
     inline constexpr TCHAR S_EngineRoar[]=TEXT("/Game/Starbase/Audio/S_EngineRoar.S_EngineRoar");
     inline constexpr TCHAR S_CoastalWind[]=TEXT("/Game/Starbase/Audio/S_CoastalWind.S_CoastalWind");
     inline constexpr TCHAR SM_ExhaustEnvelope[]=TEXT("/Game/Starbase/Meshes/SM_ExhaustEnvelope.SM_ExhaustEnvelope");
+    inline constexpr TCHAR M_NozzleCore[]=TEXT("/Game/Starbase/Materials/M_NozzleCore.M_NozzleCore");
     inline constexpr TCHAR M_RaptorPlume[]=TEXT("/Game/Starbase/Materials/M_RaptorPlume.M_RaptorPlume");
     inline constexpr TCHAR M_GridFinAlloy[]=TEXT("/Game/Starbase/Materials/M_GridFinAlloy.M_GridFinAlloy");
     inline constexpr TCHAR M_BoosterFlight[]=TEXT("/Game/Starbase/Materials/M_BoosterFlight.M_BoosterFlight");
@@ -59,6 +60,7 @@ namespace RecoveryAssets
             FSoftObjectPath(S_CoastalWind),
             FSoftObjectPath(SM_ExhaustEnvelope),
             FSoftObjectPath(M_RaptorPlume),
+            FSoftObjectPath(M_NozzleCore),
             FSoftObjectPath(M_GridFinAlloy),
             FSoftObjectPath(M_BoosterFlight),
             FSoftObjectPath(SM_StarshipDetailed),

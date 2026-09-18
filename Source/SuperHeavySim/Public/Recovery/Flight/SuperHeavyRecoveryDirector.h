@@ -180,6 +180,8 @@ private:
     bool bCameraInitialized=false;
     double CameraZoom=1, FreeCameraSpeedMps=50, StageFraming=0;
     double OrbitYaw=0, OrbitPitch=0, CinematicAzimuth=-0.85;
+    FRecoveryOrbitInput OrbitInput;
+    double SmoothedCameraZoom=1;
     bool bOrbitManuallyAdjusted=false;
     FRecoveryChaseTracking ChaseTracking;
     FVector CameraBlendOffset=FVector::ZeroVector, CameraLookBlend=FVector::ZeroVector, LastCameraFocus=FVector::ZeroVector;

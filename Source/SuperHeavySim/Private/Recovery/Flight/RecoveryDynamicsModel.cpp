@@ -1,5 +1,6 @@
 #include "Recovery/Flight/RecoveryDynamicsModel.h"
 #include "Recovery/Flight/RecoveryAtmosphere.h"
+#include "Recovery/Flight/RecoveryWaterContact.h"
 #include "Recovery/Shared/FlightGeometry.h"
 
 void FRecoveryDynamicsModel::Reset(const FRecoveryDynamicsConfiguration& Configuration,
@@ -154,7 +155,7 @@ void FRecoveryDynamicsModel::Aerodynamics(const FRecoveryDynamicsCommand& C,doub
 void FRecoveryDynamicsModel::Propulsion(const FRecoveryDynamicsCommand& C,double Dt)
 {
     FRecoveryEngineCommand Request;
-    Request.RequestedCount=C.EngineCount;Request.FailedEngine=C.Experiment.FailedEngine;
+    Request.RequestedCount=State.bWaterContact?0:C.EngineCount;Request.FailedEngine=C.Experiment.FailedEngine;
     Request.RatedThrustN=Config.EngineThrustN*State.EngineIspS/Config.SpecificImpulseSeaLevelS;
     Request.SpecificImpulseS=State.EngineIspS;
     Request.RequestedThrustN=FMath::Max(0.,FVector::DotProduct(C.ThrustAccelerationMps2,State.Body.Rotation.GetUpVector())*State.Mass.MassKg);
@@ -196,6 +197,8 @@ void FRecoveryDynamicsModel::Step(const FRecoveryBodyKinematics& Body,const FRec
     State.DynamicPressurePa=.5*Air.Density*Relative.SizeSquared();
     Condition(C,Dt);
     State.Mass=RecoveryMass::Booster(Config,State.PropellantKg,State.RcsPropellantKg,!C.bSeparated);
+    State.SubmergedVolumeM3=RecoveryWaterContact::Apply(Body,State.Mass,FlightGeometry::BoosterBaseOffsetM,2,67,4.5,Config.WaterMap.Get(),Dt,State.Forces);
+    State.bWaterContact|=State.SubmergedVolumeM3>.02;
     Propulsion(C,Dt);
     Aerodynamics(C,Height,Relative.Size()/Air.SoundSpeed,Dt);
     const FVector COM=BaseM+Body.Rotation.GetUpVector()*State.Mass.CentreFromBaseM;

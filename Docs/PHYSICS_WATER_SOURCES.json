@@ -1,0 +1,49 @@
+{
+  "output": "Content/Starbase/Data/Water/Surface.bin",
+  "sha256": "11e3d23e84c54b74bad0e516248ae51b6dbe0b03c471138e614b926e58d7b7f9",
+  "sources": [
+    {
+      "source": "Continuity/CoastalHydrology.png",
+      "sha256": "180a6e1e6339b3112b78fb97edb18be019c217ac72b8c060b83ef5527c134013",
+      "size": [
+        1024,
+        1024
+      ],
+      "bounds": [
+        -97.2169338380889,
+        25.943340703644875,
+        -97.09686616191108,
+        26.051259296355123
+      ]
+    },
+    {
+      "source": "WaterCoverage/RegionalOcean.png",
+      "sha256": "86d0e698fab634621e8a6be3a859e60763003ccb9e85f920750507a264574ec8",
+      "size": [
+        1024,
+        1024
+      ],
+      "bounds": [
+        -109.1569,
+        13.9973,
+        -85.1569,
+        37.9973
+      ]
+    },
+    {
+      "source": "WaterCoverage/GlobalOcean.png",
+      "sha256": "dc33f1fe9ea8a5018d08889a755ca12b69dc86b71c9e44671d33afcf0b38fe27",
+      "size": [
+        2048,
+        1024
+      ],
+      "bounds": [
+        -180,
+        -90,
+        180,
+        90
+      ]
+    }
+  ],
+  "limitations": "Closed hull approximation; local classification about 12 m, coarser away from Starbase. No structural breakup or flooding."
+}

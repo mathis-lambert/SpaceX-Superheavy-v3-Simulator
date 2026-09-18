@@ -32,6 +32,8 @@ public:
     void ResumeFlight();
     void ReturnHome();
     void RestartFlight();
+    void OpenMissionControls();
+    void ConfirmRestart();
     void QuitSimulation();
     void SavePreferences();
     void SetReconstruction(int32 Mode);
@@ -67,6 +69,7 @@ public:
     float CameraGrain=0.12f;
     bool bCameraDepthOfField=true;
     float MouseSensitivity=0.65f;
+    bool bInvertVerticalLook=true;
     float PlaybackRate=1.f;
     float EffectivePlaybackRate=1.f;
     float MasterVolume=0.75f;

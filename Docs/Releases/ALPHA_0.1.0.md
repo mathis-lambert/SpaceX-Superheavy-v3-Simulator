@@ -1,6 +1,6 @@
 # Starbase Flight Simulator — Alpha 0.1.0
 
-Version: `0.1.0-alpha.10`. Windows x64, Unreal Engine 5.8.
+Version: `0.1.0-alpha.11`. Windows x64, Unreal Engine 5.8.
 
 ## Start
 
@@ -13,9 +13,15 @@ Use a DirectX 12 / Shader Model 6 capable GPU with current drivers. The local
 validation machine has a GeForce RTX 4070 SUPER. Other hardware has not yet
 been qualified. Graphics and image reconstruction remain configurable.
 
+This version adds physical booster flotation, accessible mission controls, smoother
+orbit input, revised water shading, sharper distant clouds and nozzle cores.
+See `MISSION-AND-MARINE.md` for scope and model limitations.
+
 ## Controls
 
 - Launch: choose a mission from the home screen.
+- Mission / Restart: on-screen controls with restart confirmation.
+- Settings > Controls: saved vertical-look inversion.
 - Mouse: visible pointer; hold right button to orbit; left-click a part to inspect.
 - F: free camera; Tab: camera selector; L: live flight computer.
 - Escape: close an inspection panel, then pause/settings; I: force inspector.

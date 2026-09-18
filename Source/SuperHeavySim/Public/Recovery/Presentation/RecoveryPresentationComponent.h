@@ -3,6 +3,7 @@
 #include "Components/ActorComponent.h"
 #include "RecoveryPresentationComponent.generated.h"
 class UStaticMeshComponent;
+class UInstancedStaticMeshComponent;
 class UMaterialInstanceDynamic;
 class UPointLightComponent;
 class UNiagaraComponent;
@@ -15,6 +16,7 @@ public:
     bool IsReady() const { return bBuilt && Plumes.Num()>0 && PlumeMaterials.Num()==Plumes.Num() && VaporTrail; }
     virtual void TickComponent(float DeltaTime,ELevelTick TickType,FActorComponentTickFunction* TickFunction) override;
 private:
+    UPROPERTY(Transient) TObjectPtr<UInstancedStaticMeshComponent> NozzleCores;
     UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> Plumes;
     UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> PlumeMaterials;
     TArray<double> ExhaustEnvelopes;

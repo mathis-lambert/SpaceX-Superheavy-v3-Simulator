@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 
-enum class ERecoveryForceKind : uint8 { Engine, Aerodynamic, GridFin, ReactionJet, Vent, Gravity };
+enum class ERecoveryForceKind : uint8 { Engine, Aerodynamic, GridFin, ReactionJet, Vent, Gravity, Water };
 
 /** SI data captured where forces are applied; presentation cannot write back. */
 struct FRecoveryForceSample

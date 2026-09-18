@@ -20,7 +20,8 @@ void URecoveryForceDisplayComponent::TickComponent(float Dt,ELevelTick Type,FAct
     // artwork scale must never be applied a second time when rebasing them.
     const FTransform Current(D->GetBody()->GetComponentQuat(),D->GetBody()->GetComponentLocation());
     const auto& Previous=D->GetForceFrame();
-    static const FColor Colors[]={FColor::Cyan,FColor(195,130,255),FColor(255,170,55),FColor::Yellow,FColor(145,225,255),FColor::White};
+    static const FColor Colors[]={FColor::Cyan,FColor(195,130,255),FColor(255,170,55),FColor::Yellow,FColor(145,225,255),FColor::White,FColor(70,175,255)};
+    static_assert(UE_ARRAY_COUNT(Colors)==int(ERecoveryForceKind::Water)+1);
     for(const auto& Sample:D->GetAppliedForces())
     {
         const double Magnitude=Sample.ForceN.Size();
@@ -35,7 +36,7 @@ void URecoveryForceDisplayComponent::TickComponent(float Dt,ELevelTick Type,FAct
         DrawDebugDirectionalArrow(GetWorld(),Start,End,100,Color,false,0,1,2);
         // Engine values are summarized in the panel: 33 overlapping labels hide
         // the vehicle even though the individual force arrows remain useful.
-        if(Sample.Kind!=ERecoveryForceKind::Engine)
+        if(Sample.Kind!=ERecoveryForceKind::Engine && Sample.Kind!=ERecoveryForceKind::Water)
             DrawDebugString(GetWorld(),End,FString::Printf(TEXT("%.2f kN"),Magnitude/1000.),nullptr,Color,0,false,.85f);
     }
     DrawDebugSphere(GetWorld(),D->GetMassCentreCm(),90,12,FColor::White,false,0,1,2);
