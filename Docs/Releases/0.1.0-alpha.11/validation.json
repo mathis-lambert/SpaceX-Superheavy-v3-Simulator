@@ -1,0 +1,45 @@
+{
+  "success": true,
+  "source_commit": "7406682d2f574a85ca6b9076c6268aaaaa6eb684",
+  "version": "0.1.0-alpha.11",
+  "evidence": {
+    "flight": {
+      "file": "flight.json",
+      "sha256": "41e903522af9894b3e363beef2ac78c11b923907cf770ead1bb75f734c8b19e5"
+    },
+    "marine": {
+      "file": "marine.json",
+      "sha256": "7ab6b7305373adb46c95d0626db746f7f3c94e6de4c0647c8a3448cce4276dd2"
+    },
+    "presentation": {
+      "file": "presentation.json",
+      "sha256": "5a142bf4ba963d69d75eb695c20fa55219b44617c53171719627fc8a130c2373"
+    },
+    "audio": {
+      "file": "audio.json",
+      "sha256": "d589bb606e19bbca72824a1ac7483596241c7db1435db0f6ee711468be84eb2e"
+    },
+    "photo_initial": {
+      "file": "photo_initial.json",
+      "sha256": "1916e269bd78953f9ac9e9872b46f9e6c21e5663cab9ad5784d94898570c3904"
+    },
+    "photo_reload": {
+      "file": "photo_reload.json",
+      "sha256": "b3bb0cda1712e888332ff87281d125e7d3e1f75562b1a958612c257ae0b03e80"
+    }
+  },
+  "configuration": "Development",
+  "engine": "Unreal Engine 5.8.2",
+  "scope": "Mission controls, physical sealed-hull booster flotation, smooth orbit input, improved water/cloud/nozzle presentation. Mean spherical sea level, no hull damage/flooding model. Packaged UFS water classification validated by unpowered flotation.",
+  "physical_checks": {
+    "first_contact_speed_mps": 0.39729511718484417,
+    "first_contact_vertical_speed_mps": -0.24066381454467775,
+    "first_contact_tilt_deg": 0.21822798814352942
+  },
+  "water_checks": {
+    "final_speed_mps": 0,
+    "water_contact": true,
+    "mass_kg": 292000,
+    "submerged_volume_m3": 284.8710120454618
+  }
+}
