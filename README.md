@@ -21,6 +21,8 @@ Settings → Display → Hardware ray tracing optionally enables hardware Lumen 
 
 Build and validate:
 
+GitHub CI and tagged S3 releases are described in [CI and binary releases](Docs/CI_RELEASES.md).
+
 ```powershell
 ./Tools/Runtime/build_simulator.ps1
 ./Tools/Tests/test_experience.ps1

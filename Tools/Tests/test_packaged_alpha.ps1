@@ -1,6 +1,7 @@
 param(
     [string]$EngineRoot='D:/Engines/UE_5.8',
-    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.9'
+    [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.11',
+    [string]$ResultFile
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -68,3 +69,4 @@ if($render.reconstruction -notmatch 'NVIDIA'){throw 'This DLSS-capable validatio
 @{success=$true;version=$Version;source_commit=$manifest.source_commit;executable_sha256=(Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant();startup_seconds=$startup.engine_elapsed_seconds;startup_assets=$startup.assets_loaded;controls_checks=$controls.checks.Count;rendered_frames=$render.frames;capture=$flight.success;front_ingress=$flight.front_ingress_verified;support_mask=$flight.solver_support_mask;support_drift_m=$flight.restraint_drift_m;chase_offset_step_cm=$render.chase_contact_max_offset_step_cm;reconstruction=$render.reconstruction;evidence_directory=$audit;visual_review_required=$true} |
     ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 -LiteralPath "$audit/result.json"
 Write-Host "Packaged alpha PASS. Inspect screenshots in $saved. Result: $audit/result.json"
+if ($ResultFile) { Copy-Item -LiteralPath "$audit/result.json" -Destination $ResultFile }

@@ -39,7 +39,7 @@ Copy-Item -LiteralPath "$root/Docs/Audio/NASA-CREDITS.json" -Destination "$archi
 Copy-Item -LiteralPath "$root/Docs/Audio/PROPULSION-CREDITS.json" -Destination "$archive/ThirdParty/ORIGINAL-AUDIO.json"
 Copy-Item -LiteralPath "$root/Docs/WATER_COVERAGE_SOURCES.json" -Destination "$archive/ThirdParty/WATER-COVERAGE.json"
 Copy-Item -LiteralPath "$root/Docs/PHYSICS_WATER_SOURCES.json" -Destination "$archive/ThirdParty/PHYSICS-WATER.json"
-$nvidiaLicense=Join-Path $root '../ArtSource/ThirdParty/NVIDIA/LICENSE.txt'
+$nvidiaLicense=Join-Path $root 'Plugins/NVIDIA/DLSS/Source/ThirdParty/NGX/LICENSE.txt'
 if(Test-Path -LiteralPath $nvidiaLicense){
     $null=New-Item -ItemType Directory -Path "$archive/ThirdParty" -Force
     Copy-Item -LiteralPath $nvidiaLicense -Destination "$archive/ThirdParty/NVIDIA-LICENSE.txt"
