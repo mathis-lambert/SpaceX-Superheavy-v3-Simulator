@@ -1,7 +1,7 @@
 """Read-only final material and Niagara asset audit, suitable for commandlets."""
 import sys
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"Shared"))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/"Tools"/"Shared"))
 from project_paths import PROJECT_ROOT, ART_ROOT
 
 import unreal as u, json, struct

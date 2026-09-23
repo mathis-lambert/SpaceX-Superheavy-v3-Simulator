@@ -2,7 +2,7 @@
 import tempfile
 import unittest
 from pathlib import Path
-from analyze_performance import analyze
+from Tools.Analysis.analyze_performance import analyze
 
 
 class PerformanceAnalysisTest(unittest.TestCase):

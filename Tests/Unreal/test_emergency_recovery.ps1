@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $saved=Join-Path $root 'Saved/Recovery'
 $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
-. (Join-Path $root 'Tools/Shared/validation_evidence.ps1')
+. (Join-Path $root 'Tests/Shared/validation_evidence.ps1')
 Write-RecoveryBuildEvidence -Root $root -Destination "$saved/$Prefix-source.json" -EngineRoot $EngineRoot
 $results=@()
 foreach($hz in $Cadences){

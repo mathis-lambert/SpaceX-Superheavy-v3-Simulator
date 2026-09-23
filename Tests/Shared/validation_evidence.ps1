@@ -17,7 +17,7 @@ function Test-RecoveryGentleContact {
 function Write-RecoveryBuildEvidence {
     param([string]$Root,[string]$Destination,[string]$EngineRoot)
     $files=@(Get-Item -LiteralPath (Join-Path $Root 'SuperHeavySim.uproject'),(Join-Path $Root 'Binaries/Win64/UnrealEditor-SuperHeavySim.dll'))
-    foreach($folder in @('Source','Content','Config','Tools')) {
+    foreach($folder in @('Source','Content','Config','Tools','Tests')) {
         $files+=Get-ChildItem -LiteralPath (Join-Path $Root $folder) -File -Recurse |
             Where-Object { $_.Extension -notin @('.pyc','.pyo') }
     }
@@ -32,7 +32,7 @@ function Write-RecoveryBuildEvidence {
         engine=(Get-Content -Raw -LiteralPath (Join-Path $EngineRoot 'Engine/Build/Build.version') | ConvertFrom-Json)
         user_settings=if(Test-Path -LiteralPath "$Root/Saved/Config/WindowsEditor/GameUserSettings.ini"){Get-Content -Raw -LiteralPath "$Root/Saved/Config/WindowsEditor/GameUserSettings.ini"}else{$null}
         files=$entries
-        scope='Project source, authored content, config, tools, project descriptor and loaded game-module DLL. Engine and vendor binaries are not hashed.'
+        scope='Project source, authored content, config, tools, tests, project descriptor and loaded game-module DLL. Engine and vendor binaries are not hashed.'
     }
     $evidence | ConvertTo-Json -Depth 8 | Set-Content -Encoding utf8 -LiteralPath $Destination
 }

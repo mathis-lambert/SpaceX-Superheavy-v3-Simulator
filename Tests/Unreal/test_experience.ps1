@@ -9,7 +9,7 @@ $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 $project=Join-Path $root 'SuperHeavySim.uproject'
 $saved=Join-Path $root 'Saved/Recovery'
-. (Join-Path $root 'Tools/Shared/validation_evidence.ps1')
+. (Join-Path $root 'Tests/Shared/validation_evidence.ps1')
 $settings=Join-Path $root 'Saved/Config/WindowsEditor/GameUserSettings.ini'
 $previous=[IO.File]::ReadAllText($settings)
 function Confirm-Report([string]$Name,[datetime]$Started){
@@ -23,7 +23,7 @@ function Confirm-Report([string]$Name,[datetime]$Started){
 try {
     if(!$SkipAssets){
         $started=Get-Date
-        & $engine $project -run=PythonScript "-script=$root/Tools/Tests/audit_experience_assets.py" -AllowCommandletRendering -unattended -nosplash -SCCProvider=None "-abslog=$saved/experience-asset-audit.log" *> "$saved/experience-asset-audit-console.log"
+        & $engine $project -run=PythonScript "-script=$root/Tests/Unreal/audit_experience_assets.py" -AllowCommandletRendering -unattended -nosplash -SCCProvider=None "-abslog=$saved/experience-asset-audit.log" *> "$saved/experience-asset-audit-console.log"
         $null=Confirm-Report 'experience-asset-audit.json' $started
     }
     if(!$SkipMatrix){ & (Join-Path $PSScriptRoot 'test_physical_recovery.ps1') -EngineRoot $EngineRoot }
@@ -48,6 +48,6 @@ try {
     $null=Confirm-Report 'experience-flight-audit.json' $started
     $audio=Get-Item -LiteralPath "$saved/Audio/LaunchMix.wav"
     if($audio.LastWriteTime -lt $started){throw 'No fresh audio recording'}
-    & (Join-Path $EngineRoot 'Engine/Binaries/ThirdParty/Python3/Win64/python.exe') "$root/Tools/Tests/audit_audio_capture.py" $audio.FullName
+    & (Join-Path $EngineRoot 'Engine/Binaries/ThirdParty/Python3/Win64/python.exe') "$root/Tools/Analysis/audit_audio_capture.py" $audio.FullName
     if($LASTEXITCODE -ne 0){throw 'Silent or clipped launch audio'}
 } finally {[IO.File]::WriteAllText($settings,$previous)}

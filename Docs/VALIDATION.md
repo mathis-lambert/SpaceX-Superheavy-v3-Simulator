@@ -4,7 +4,7 @@
 
 Hosted CI checks Python syntax and regression fixtures, PowerShell syntax and
 tracked files that violate `.gitignore`. Run the commands in
-[Tools](../Tools/README.md) locally. The tool suite does not validate Unreal graphics.
+[Tests](../Tests/README.md) locally. The tool suite does not validate Unreal graphics.
 
 Build the editor, then use `test_physics_models.ps1` for model automation,
 `test_physical_recovery.ps1` for flight scenarios and `test_experience.ps1` for

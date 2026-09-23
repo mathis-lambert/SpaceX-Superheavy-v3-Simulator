@@ -35,7 +35,8 @@ pauses. Settings group camera, environment, graphics and audio controls.
 | `Content/` | Authored levels, Blueprints, profiles and runtime assets |
 | `Config/` | Unreal project and packaging configuration |
 | `Plugins/` | Required vendor files and provenance for optional NVIDIA DLSS |
-| `Tools/` | Build, test and asset-authoring entry points |
+| `Tools/` | Builds, asset authoring and offline analysis |
+| `Tests/` | Automation runners, offline fixtures and shared test helpers |
 | `Docs/` | Architecture, sources, release notes and measured validation |
 | `.github/` | CI and release workflows |
 
@@ -48,10 +49,10 @@ centralized. See [project structure](Docs/PROJECT_STRUCTURE.md).
 ## Validation and releases
 
 ```powershell
-python -m pip install -r Tools/Tests/requirements-ci.txt
-python -m unittest discover -s Tools/Tests -p 'test_*.py' -v
-./Tools/Tests/test_physics_models.ps1
-./Tools/Tests/test_experience.ps1
+python -m pip install -r Tests/Python/requirements-ci.txt
+python -m unittest discover -s Tests/Python -p 'test_*.py' -v
+./Tests/Unreal/test_physics_models.ps1
+./Tests/Unreal/test_experience.ps1
 ./Tools/Runtime/package_alpha.ps1
 ```
 

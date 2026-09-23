@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from PIL import Image
-from compare_visual_reviews import compare
+from Tools.Analysis.compare_visual_reviews import compare
 
 
 class MovingViewComparisonTest(unittest.TestCase):

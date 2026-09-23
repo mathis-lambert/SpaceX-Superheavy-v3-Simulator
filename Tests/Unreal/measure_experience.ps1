@@ -25,7 +25,7 @@ $prefs=Join-Path $root 'Saved/Config/WindowsEditor/GameUserSettings.ini'
 $before=if(Test-Path -LiteralPath $prefs){[IO.File]::ReadAllBytes($prefs)}else{$null}
 $saved=Join-Path $root 'Saved/Recovery'
 $null=New-Item -ItemType Directory -Force -Path $saved
-. (Join-Path $root 'Tools/Shared/validation_evidence.ps1')
+. (Join-Path $root 'Tests/Shared/validation_evidence.ps1')
 Write-RecoveryBuildEvidence -Root $root -Destination "$saved/$Prefix-source.json" -EngineRoot $EngineRoot
 try {
   foreach($mode in $Modes){

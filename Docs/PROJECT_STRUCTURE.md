@@ -23,7 +23,10 @@ The playable project is `SuperHeavySim.uproject`. The default level is `/Game/St
 | `Tools/Shared` | Material graph helpers, project paths and geographic transforms |
 | `Tools/Runtime` | Launch/build entry points |
 | `Plugins/NVIDIA` | Unmodified official optional DLSS runtime plugins and provenance |
-| `Tools/Tests` | Asset audits, flight tests and performance analysis |
+| `Tests/Unreal` | Unreal automation runners, scenario checks and asset audits |
+| `Tests/Python` | Offline tool regression fixtures |
+| `Tests/Shared` | Shared scenario assertions and evidence capture |
+| `Tools/Analysis` | Offline performance, audio and image analysis |
 | `../ArtSource` | Original 3D files, Earth imagery, generated flight artwork and credited audio |
 | `Saved/Recovery` | Local reports, CSV captures and verified recovery snapshots |
 

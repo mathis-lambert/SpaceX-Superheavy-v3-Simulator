@@ -1,5 +1,5 @@
 import unittest
-from analyze_physics_convergence import compare, interpolate
+from Tools.Analysis.analyze_physics_convergence import compare, interpolate
 
 
 def analytic_flight(hz, error):

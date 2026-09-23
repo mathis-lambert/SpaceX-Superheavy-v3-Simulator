@@ -27,7 +27,7 @@ have separate provenance files. Requested pixel size is not native survey accura
 
 ## Dependency discipline
 
-Run `Tools/Tests/inventory_unused_assets.py` in Unreal to inspect hard, soft,
+Run `Tests/Unreal/inventory_unused_assets.py` in Unreal to inspect hard, soft,
 management and code references before retiring packages. Cook-directory inclusion
 is not proof of use. Keep runtime file data such as `Data/Water/Surface.bin`, which
 is not a UObject package. Follow removals with `audit_experience_assets.py` and

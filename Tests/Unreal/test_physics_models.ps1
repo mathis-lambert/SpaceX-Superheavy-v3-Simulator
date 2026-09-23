@@ -8,7 +8,7 @@ $saved=Join-Path $root 'Saved/Recovery'
 $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 $export=Join-Path $saved "$Prefix-Unit"
 $null=New-Item -ItemType Directory -Force -Path $saved
-. (Join-Path $root 'Tools/Shared/validation_evidence.ps1')
+. (Join-Path $root 'Tests/Shared/validation_evidence.ps1')
 Write-RecoveryBuildEvidence -Root $root -Destination "$saved/$Prefix-source.json" -EngineRoot $EngineRoot
 $started=Get-Date
 & $engine "$root/SuperHeavySim.uproject" -nullrhi -unattended -nosplash -DisablePython -SCCProvider=None '-ExecCmds=Automation RunTests Recovery.' '-TestExit=Automation Test Queue Empty' "-ReportExportPath=$export" "-abslog=$saved/$Prefix-unit.log" *> "$saved/$Prefix-unit-console.log"

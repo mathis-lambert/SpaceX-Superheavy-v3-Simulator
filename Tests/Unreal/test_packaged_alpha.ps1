@@ -12,7 +12,7 @@ foreach($entry in $manifest.files){
     $path=Join-Path $archive $entry.path
     if(!(Test-Path -LiteralPath $path) -or (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() -ne $entry.sha256){throw "Package checksum mismatch: $($entry.path)"}
 }
-. (Join-Path $root 'Tools/Shared/validation_evidence.ps1')
+. (Join-Path $root 'Tests/Shared/validation_evidence.ps1')
 $audit=Join-Path $root "Saved/Recovery/Alpha-$Version-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
 $userDir=Join-Path $audit 'User'
 $saved=Join-Path $userDir 'Saved/Recovery'
@@ -56,7 +56,7 @@ foreach($frame in $cloudFrames){
 }
 $audio=Get-Item -LiteralPath "$saved/Audio/LaunchMix.wav"
 if($audio.LastWriteTime -lt $start){throw 'No fresh packaged audio recording'}
-& (Join-Path $EngineRoot 'Engine/Binaries/ThirdParty/Python3/Win64/python.exe') "$root/Tools/Tests/audit_audio_capture.py" $audio.FullName
+& (Join-Path $EngineRoot 'Engine/Binaries/ThirdParty/Python3/Win64/python.exe') "$root/Tools/Analysis/audit_audio_capture.py" $audio.FullName
 if($LASTEXITCODE -ne 0){throw 'Packaged launch audio is silent or clipped'}
 if(!(Test-RecoveryFrontApproach -Report $flight) -or $flight.solver_support_mask -ne 3 -or !$flight.contact_engine_shutdown -or $flight.unpowered_thrust_violation -or $flight.structural_contacts -ne 0){throw 'Packaged physical capture contract failed'}
 if(!$flight.tower_dynamic -or $flight.tower_broken_rail_mask -ne 0 -or $flight.tower_broken_hinge_mask -ne 0 -or !$render.turbulent_volume_budget_pass){throw 'Packaged tower or turbulent volume contract failed'}

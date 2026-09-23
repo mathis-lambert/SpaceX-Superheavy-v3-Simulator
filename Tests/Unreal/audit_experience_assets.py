@@ -1,7 +1,7 @@
 """Validate the reorganized runtime dependency graph and visual/physics contracts."""
 import sys,json,re
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'Shared'))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'Tools'/'Shared'))
 from project_paths import PROJECT_ROOT,CONTENT_ROOT
 import unreal as u
 A=u.EditorAssetLibrary;R=u.AssetRegistryHelpers.get_asset_registry()

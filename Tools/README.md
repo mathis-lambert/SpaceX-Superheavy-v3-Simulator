@@ -20,32 +20,11 @@ See [CI and releases](../Docs/CI_RELEASES.md) for runner requirements and public
 Packaging uses committed assets; it does not regenerate the world or require
 the external authoring sources.
 
-## Validation
+## Tests and analysis
 
-```powershell
-python -m pip install -r Tools/Tests/requirements-ci.txt
-python -m unittest discover -s Tools/Tests -p 'test_*.py' -v
-./Tools/Tests/test_physics_models.ps1
-./Tools/Tests/test_experience.ps1
-```
-
-The Python suite runs without Unreal. Physics and experience tests require a
-built editor. `test_physical_recovery.ps1` exercises the flight matrix;
-`test_contact_fixtures.ps1`, `test_resilience.ps1`,
-`test_emergency_recovery.ps1`, `test_ground_sequence.ps1` and
-`test_marine_contact.ps1` cover their respective systems.
-`test_packaged_alpha.ps1` validates the actual packaged application.
-
-Use `test_experience.ps1 -SkipMatrix -SkipAssets -SkipFlight -MenuAudits RecoveryUIAudit`
-for the interface, or `RecoveryEarthAudit` for cameras. These use the same
-maintained runner as the complete experience audit.
-
-`measure_experience.ps1`, `measure_clouds.ps1` and `review_clouds.ps1` capture
-performance and visual evidence. The `analyze_*.py` tools consume those captures;
-`compare_visual_reviews.py` compares images. Asset audits and inspection scripts
-run inside Unreal's Python environment. `inventory_unused_assets.py` reports
-package reachability, including soft references and code loads; it does not
-delete assets.
+Test runners and fixtures live in [Tests](../Tests/README.md).
+`Analysis/` contains offline CSV, audio and image comparison tools; these do not
+launch the simulator or generate assets.
 
 ## Asset authoring
 
@@ -54,7 +33,7 @@ delete assets.
 | `Editor/` | Unreal Python: import assets, build materials, update authored scenes |
 | `Art/` | Blender or Python, as specified in each script: meshes, volume data, audio |
 | `Data/` | Python: geographic downloads and preprocessing |
-| `Shared/` | Shared paths, coordinates, material graphs and validation helpers |
+| `Shared/` | Shared paths, coordinates and material graphs |
 
 `Editor/build_visual_renewal.py` is the canonical visual rebuild entry point.
 Use [asset authoring](../Docs/AUTHORING.md) for its scope and prerequisites;
