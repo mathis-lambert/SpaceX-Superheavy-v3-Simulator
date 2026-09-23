@@ -5,7 +5,7 @@ atmospheric return and physical tower capture. Includes interactive failures,
 flight telemetry, orbital cameras and a configurable Starbase environment.
 
 Current source version: **0.1.0-alpha.11**. See the
-[release notes](Docs/Releases/ALPHA_0.1.0.md) for controls and known limitations.
+[release notes](Docs/RELEASE_NOTES.md) for controls and known limitations.
 
 ## Getting started
 
@@ -63,7 +63,7 @@ versioned S3 publication. Portable binaries are distributed separately from Git.
 
 The force model resolves individual engines, gimbals, reaction jets, propellant
 consumption and changing mass properties. Starship becomes an independent body
-at separation. Physical fittings and compliant, torque-driven tower arms provide
+at separation. Physical fittings and compliant rails on torque-driven tower arms provide
 capture contact. The flight computer exposes actuator failures and wind changes.
 
 Flight coefficients are estimates, not SpaceX engineering data. This is an
@@ -74,7 +74,5 @@ and [provenance](Plugins/NVIDIA/provenance.json).
 
 - [Flight model](Docs/FLIGHT_MODEL.md)
 - [Measurements and validation](Docs/VALIDATION.md)
-- [Canonical visual authoring](Docs/VISUAL_RENEWAL.md)
-- [Geography and photographic settings](Docs/SITE_PHOTOGRAPHY.md)
-- [Terrain, volume flow and tower mechanics](Docs/COAST_VOLUMES_TOWER.md)
-- [Remaining realism work](Docs/REALISM_PROGRAM.md)
+- [Asset authoring](Docs/AUTHORING.md)
+- [Resource credits](Docs/Credits/)

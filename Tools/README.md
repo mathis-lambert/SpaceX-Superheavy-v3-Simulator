@@ -57,12 +57,13 @@ delete assets.
 | `Shared/` | Shared paths, coordinates, material graphs and validation helpers |
 
 `Editor/build_visual_renewal.py` is the canonical visual rebuild entry point.
-Use [visual renewal](../Docs/VISUAL_RENEWAL.md) for its scope and prerequisites;
+Use [asset authoring](../Docs/AUTHORING.md) for its scope and prerequisites;
 individual builders are deliberately retained for targeted reimports. Do not
 execute every authoring script as a setup step. The committed map and packages
 are authoritative, and authoring may need source data under `../ArtSource`.
 
 Completed migrations and version-specific report collectors have been retired.
-Historical evidence under `Docs/Validation` and `Docs/Releases` describes the
-revision at which it was captured; paths and hashes in those reports are not
-instructions to regenerate the current project.
+Keep generated reports and comparison baselines outside the source tree. Pass
+`--baseline-prefix` explicitly to `analyze_dynamic_return.py`; old report sets
+remain available in Git history. Current validation guidance is in
+[Validation](../Docs/VALIDATION.md).

@@ -1,6 +1,6 @@
 # Flight model
 
-Updated 2026-09-09. Chaos integrates the rigid bodies. Guidance commands bounded actuators; presentation reads their resulting physical state. Starship becomes an independent physical body at separation. The default return near 97 km is an estimated scenario, not a telemetry replay.
+Current source model: 0.1.0-alpha.11. Chaos integrates the rigid bodies. Guidance commands bounded actuators; presentation reads their resulting physical state. Starship becomes an independent physical body at separation. The default return near 97 km is an estimated scenario, not a telemetry replay.
 
 ## Configuration and units
 
@@ -24,9 +24,8 @@ at every fixed 120 Hz Chaos step through `RecoveryPhysicsComponent`.
 commands in that same callback. `RecoveryUpperStageModel` integrates Starship
 propulsion, fuel and passive loads on the same clock. A post-solve observer reads
 fitting/rail manifolds directly; support does not depend on game-frame hit events.
-Ground sequencing, operator commands, proxy allocation and the kinematic tower
-still involve game frames. See the [fixed clock, atomic separation and support
-boundary](Validation/FIXED_PHYSICS_CLOCK.md).
+Ground sequencing, operator commands and proxy allocation
+still involve game frames. The fixed physics clock does not imply a fully independent ground-system scheduler.
 
 Landing guidance uses separate switch-down/switch-up thresholds for the three- and thirteen-engine groups. This prevents consecutive-frame command chatter near one thrust threshold. It does not add thrust or constrain the body. Hardware restart counts, settling requirements and minimum stable operating duration still need a calibrated model.
 
@@ -34,14 +33,13 @@ Terminal descent follows a retained, sampled quintic reference with an optional
 sixth-order crossrange correction, aerodynamic
 inversion, valve anticipation and an angular-rate demand to the physical moment
 controller. Fitting load transfer holds the current rail command and waits for
-linear/angular settling before declaring support secured. See [terminal tracking
-and its limitations](Validation/TERMINAL_REFERENCE_GUIDANCE.md); this remains an
+linear/angular settling before declaring support secured. This remains an
 estimated point-mass planner, not an optimal six-degree-of-freedom solver.
 
 Boostback and entry now reserve braking distance ahead of the arm opening,
 with an estimated upwind allowance. Candidate trajectories and the actual
 recovering body must stay in front of the mast and inside the final approach
-corridor. See [front approach geometry, tests and limits](Validation/FRONT_APPROACH.md).
+corridor.
 These conditions constrain the guidance plan and mission success criteria;
 they do not constrain or reposition the physical body.
 
@@ -78,13 +76,23 @@ Linear and angular momentum mismatches are recorded before subsequent engine int
 6. Approach through the tower opening with a position/heading/tilt target corridor.
 7. Shut down on acceptable fitting support contact and settle on the rails under gravity.
 
-The corridor changes guidance demands, not vehicle pose. The controller can fail. The long terminal burn and high dynamic pressure in current successful trajectories still need calibration; a successful catch alone does not validate them.
+The corridor changes guidance demands, not vehicle pose. The controller can fail. Trajectory timing and dynamic pressure still need calibration; a successful catch alone does not validate them.
 
 Measured catch fittings sit approximately at `(±4.99, 0.0079, 62.7978)` metres from the booster base. Required heading is 90° relative to the tower. Launch and catch share an axis 24 m in front of the tower. The reference mesh, three-fin arrangement and generation labels still need one consistent documented vehicle-generation decision.
 
 Two fitting collision boxes are welded into the booster body. Arm and rail colliders obstruct it. A slow, correctly aligned first support contact shuts off engine and attitude commands; residual thrust follows finite valve closure. Capture requires both supports to settle, followed by eight seconds of passive support. There is no pose snap, velocity reset, active holding force or added catch constraint. Incorrect alignment and lateral impacts remain collisions.
 
-The tower is static and arm positioning remains kinematic. Force-limited arm actuators, rail compliance, overload damage and bearing stresses are not yet modelled. This boundary is explicit: the flying vehicle uses physical forces, while complete mechanical fidelity of the tower remains unfinished.
+The mast remains static. Tower arms use torque-driven hinges; rails include springs, damping, travel limits and overload failure. Hardware parameters are estimates and the carriage is an ideal fixed bearing, not a complete structural model.
+
+## Marine contact
+
+The booster receives distributed buoyancy and dissipative drag from 80 quadrature
+cells approximating a sealed hull. Water contact cuts propulsion and ends tower
+recovery, while Chaos continues integrating the hull without water-position clamps.
+`Content/Starbase/Data/Water/Surface.bin` supplies immutable geographic water
+classification. The model uses mean sea level; breakup, flooding and individual
+wave forces are not represented. Independent upper-stage marine behavior is not
+covered by this booster model.
 
 ## Verification and code boundary
 

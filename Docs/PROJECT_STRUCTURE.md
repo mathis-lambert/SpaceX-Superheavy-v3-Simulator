@@ -38,10 +38,10 @@ available in Git history, rather than maintained as alternative workflows.
 
 Machine-local MCP configuration (`.codex/`), editor state, Python environments,
 environment overrides and raw Unreal logs are not versioned. CI rejects tracked
-files covered by `.gitignore`, including accidental force-adds. Curated reports,
-CSV measurements, checksums and visual comparisons under `Docs/Validation` and
-`Docs/Releases` remain versioned evidence; generated executables and portable
-archives belong in `Releases/` and release storage. NVIDIA runtime DLLs and import
+files covered by `.gitignore`, including accidental force-adds. Reports, CSV measurements and visual captures belong in `Saved/Recovery` and
+release artifacts. `Docs` contains current guides and resource credits; historical
+evidence remains in Git history. Executables and portable archives belong in
+`Releases/` and release storage. NVIDIA runtime DLLs and import
 libraries are required vendor dependencies and intentionally remain tracked.
 
 `RecoveryPropulsion.cpp`, `RecoveryMassProperties.cpp`, `RecoveryStageDynamics.cpp` and `RecoveryGroundSystems.cpp` separate actuator forces, analytical mass properties, stage/launch connections and ground conditioning. Blueprint visual actuator commands are issued only by `RecoveryPresentationComponent`. Headless flights use the same force model. `RecoverySiteDetailsComponent` builds bounded, instanced decorative geometry without adding physical contacts.
@@ -60,4 +60,4 @@ The current visual rebuild entry point is `Tools/Editor/build_visual_renewal.py`
 map and referenced source assets are authoritative; deleted prototype scene
 builders must not be replayed. `RecoverySurfaceHistory` supplies optical wetness
 and residue through `MPC_SurfaceState`, without modifying the flight model.
-See [visual renewal](VISUAL_RENEWAL.md) for replacement and validation details.
+See [asset authoring](AUTHORING.md) for replacement and validation details.

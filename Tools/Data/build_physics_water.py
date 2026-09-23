@@ -31,5 +31,5 @@ with out.open('wb') as stream:
         sources.append({'source': path.relative_to(ART).as_posix(), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'size': [width, height], 'bounds': bounds})
 manifest = {'output': out.relative_to(ROOT).as_posix(), 'sha256': hashlib.sha256(out.read_bytes()).hexdigest(), 'sources': sources,
             'limitations': 'Closed hull approximation; local classification about 12 m, coarser away from Starbase. No structural breakup or flooding.'}
-(ROOT/'Docs/PHYSICS_WATER_SOURCES.json').write_text(json.dumps(manifest, indent=2)+'\n', encoding='utf-8')
+(ROOT/'Docs/Credits/PHYSICS_WATER_SOURCES.json').write_text(json.dumps(manifest, indent=2)+'\n', encoding='utf-8')
 print(out, out.stat().st_size)

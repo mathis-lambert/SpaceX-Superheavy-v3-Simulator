@@ -22,23 +22,10 @@ $log=Join-Path $evidence "Alpha-$Version-package.log"
 if($LASTEXITCODE -ne 0){Get-Content -LiteralPath $log -Tail 50;throw "Alpha packaging failed. See $log"}
 $executable=Join-Path $archive 'Windows/SuperHeavySim.exe'
 if(!(Test-Path -LiteralPath $executable) -or (Get-Item -LiteralPath $executable).LastWriteTime -lt $started){throw 'Packaging produced no fresh standalone executable'}
-Copy-Item -LiteralPath "$root/Docs/Releases/ALPHA_0.1.0.md" -Destination "$archive/README.md"
-Copy-Item -LiteralPath "$root/Docs/SITE_PHOTOGRAPHY.md" -Destination "$archive/PHOTOGRAPHY.md"
-Copy-Item -LiteralPath "$root/Docs/DYNAMIC_RETURN.md" -Destination "$archive/FLIGHT.md"
-Copy-Item -LiteralPath "$root/Docs/PROPULSION_AND_STARTUP.md" -Destination "$archive/PROPULSION.md"
-Copy-Item -LiteralPath "$root/Docs/COAST_VOLUMES_TOWER.md" -Destination "$archive/COAST-VOLUMES-TOWER.md"
-Copy-Item -LiteralPath "$root/Docs/INTERACTIVE_RECOVERY.md" -Destination "$archive/INTERACTIVE-RECOVERY.md"
-Copy-Item -LiteralPath "$root/Docs/CLOUD_RENDERING.md" -Destination "$archive/CLOUDS.md"
-Copy-Item -LiteralPath "$root/Docs/VISUAL_RENEWAL.md" -Destination "$archive/VISUAL-RENEWAL.md"
-Copy-Item -LiteralPath "$root/Docs/MISSION_AND_MARINE.md" -Destination "$archive/MISSION-AND-MARINE.md"
+Copy-Item -LiteralPath "$root/Docs/RELEASE_NOTES.md" -Destination "$archive/README.md"
+Copy-Item -LiteralPath "$root/Docs/FLIGHT_MODEL.md" -Destination "$archive/FLIGHT_MODEL.md"
 $null=New-Item -ItemType Directory -Path "$archive/ThirdParty" -Force
-Copy-Item -LiteralPath "$root/Docs/Research/CoastVolumes/regional-sources.json" -Destination "$archive/ThirdParty/REGIONAL-IMAGERY.json"
-Copy-Item -LiteralPath "$root/Docs/Research/CoastVolumes/lidar-sources.json" -Destination "$archive/ThirdParty/LIDAR.json"
-Copy-Item -LiteralPath "$root/Docs/Research/CoastVolumes/flow-sources.json" -Destination "$archive/ThirdParty/ORIGINAL-FLOW.json"
-Copy-Item -LiteralPath "$root/Docs/Audio/NASA-CREDITS.json" -Destination "$archive/ThirdParty/NASA-AUDIO.json"
-Copy-Item -LiteralPath "$root/Docs/Audio/PROPULSION-CREDITS.json" -Destination "$archive/ThirdParty/ORIGINAL-AUDIO.json"
-Copy-Item -LiteralPath "$root/Docs/WATER_COVERAGE_SOURCES.json" -Destination "$archive/ThirdParty/WATER-COVERAGE.json"
-Copy-Item -LiteralPath "$root/Docs/PHYSICS_WATER_SOURCES.json" -Destination "$archive/ThirdParty/PHYSICS-WATER.json"
+Get-ChildItem -LiteralPath "$root/Docs/Credits" -Filter *.json -File | Copy-Item -Destination "$archive/ThirdParty"
 $nvidiaLicense=Join-Path $root 'Plugins/NVIDIA/DLSS/Source/ThirdParty/NGX/LICENSE.txt'
 if(Test-Path -LiteralPath $nvidiaLicense){
     $null=New-Item -ItemType Directory -Path "$archive/ThirdParty" -Force

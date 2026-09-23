@@ -8,7 +8,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('reports', type=Path, nargs='+')
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--baseline-prefix', type=Path, default=Path('Docs/Validation/DynamicReturn/Baseline'))
+    parser.add_argument('--baseline-prefix', type=Path, required=True, help='Prefix of explicitly selected baseline reports (outside the source tree)')
     args = parser.parse_args()
     results = []
     for path in args.reports:

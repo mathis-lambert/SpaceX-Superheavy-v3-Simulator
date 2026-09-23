@@ -1,7 +1,0 @@
-{
-	"success": true,
-	"checks": [
-		"Look survives application restart: PASS",
-		"Reloaded optics and environment remain exact: PASS"
-	]
-}
