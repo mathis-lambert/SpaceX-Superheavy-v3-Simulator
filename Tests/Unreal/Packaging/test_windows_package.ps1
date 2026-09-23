@@ -4,7 +4,7 @@ param(
     [string]$ResultFile
 )
 $ErrorActionPreference='Stop'
-$root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $archive=Join-Path $root "Releases/Starbase-$Version"
 $exe=Join-Path $archive 'Windows/SuperHeavySim.exe'
 $manifest=Get-Content -Raw -LiteralPath "$archive/build-manifest.json" | ConvertFrom-Json

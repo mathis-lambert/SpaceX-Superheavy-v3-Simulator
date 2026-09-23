@@ -1,7 +1,7 @@
 """Check imagery registration, shared edges and the site's east/north convention."""
 import sys,json,hashlib,math
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'Tools'/'Shared'))
+sys.path.insert(0,str(Path(__file__).resolve().parents[3]/'Tools'/'Shared'))
 from project_paths import ART_ROOT,SAVED_ROOT
 from earth_geography import point,geo,height
 from site_landscape import dune_height,ROAD

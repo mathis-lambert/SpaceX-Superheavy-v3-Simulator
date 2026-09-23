@@ -5,7 +5,7 @@ param(
     [ValidateRange(0,24)][double]$Hour=14
 )
 $ErrorActionPreference='Stop'
-$root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $saved=Join-Path $root 'Saved/Recovery'
 $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 $prefs=Join-Path $root 'Saved/Config/WindowsEditor/GameUserSettings.ini'

@@ -1,7 +1,7 @@
 """Read exported FBXs back into Blender and measure actual neighbouring edges."""
 import sys,json
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'Tools'/'Shared'))
+sys.path.insert(0,str(Path(__file__).resolve().parents[3]/'Tools'/'Shared'))
 from project_paths import ART_ROOT,SAVED_ROOT
 import bpy,numpy as np
 root=ART_ROOT/'Earth/LidarCoast/Meshes';edges={};counts={}

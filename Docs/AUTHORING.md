@@ -27,10 +27,10 @@ have separate provenance files. Requested pixel size is not native survey accura
 
 ## Dependency discipline
 
-Run `Tests/Unreal/inventory_unused_assets.py` in Unreal to inspect hard, soft,
+Run `Tests/Unreal/Assets/inventory_dependencies.py` in Unreal to inspect hard, soft,
 management and code references before retiring packages. Cook-directory inclusion
 is not proof of use. Keep runtime file data such as `Data/Water/Surface.bin`, which
-is not a UObject package. Follow removals with `audit_experience_assets.py` and
+is not a UObject package. Follow removals with `audit_runtime.py` and
 appropriate rendered/package tests; never bulk-delete assets by folder name.
 
 The 2026-09-23 inventory found 171 reachable packages, no unreachable packages

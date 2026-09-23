@@ -8,10 +8,10 @@ if (!(Test-Path "$EngineRoot/Engine/Build/BatchFiles/Build.bat")) { throw 'Unrea
 git -C $root lfs fsck
 if ($LASTEXITCODE) { throw 'Git LFS verification failed' }
 & "$PSScriptRoot/build_simulator.ps1" -EngineRoot $EngineRoot
-& "$root/Tests/Unreal/test_physics_models.ps1" -EngineRoot $EngineRoot -Prefix CIPhysics
+& "$root/Tests/Unreal/Automation/run_model_tests.ps1" -EngineRoot $EngineRoot -Prefix CIPhysics
 & "$PSScriptRoot/package_alpha.ps1" -EngineRoot $EngineRoot -Version $Version
 $validation = "$root/Saved/Recovery/Alpha-$Version-validation.json"
-& "$root/Tests/Unreal/test_packaged_alpha.ps1" -EngineRoot $EngineRoot -Version $Version -ResultFile $validation
+& "$root/Tests/Unreal/Packaging/test_windows_package.ps1" -EngineRoot $EngineRoot -Version $Version -ResultFile $validation
 python "$PSScriptRoot/archive_alpha.py" "$root/Releases/Starbase-$Version" --validation $validation
 if ($LASTEXITCODE) { throw 'Release archive validation failed' }
 $upload = "$root/Releases/upload"

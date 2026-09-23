@@ -1,6 +1,6 @@
 param([string]$EngineRoot='D:/Engines/UE_5.8')
 $ErrorActionPreference='Stop'
-$root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $saved=Join-Path $root 'Saved/Recovery'
 $started=Get-Date
 $parameters=@('-game','-windowed','-ForceRes','-ResX=1920','-ResY=1080','-RecoveryStartupAudit','-RecoveryReconstruction=3','-nosplash','-DisablePython','-SCCProvider=None',"-abslog=$saved/startup-audit.log")

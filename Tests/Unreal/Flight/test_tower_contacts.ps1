@@ -1,6 +1,6 @@
 param([string]$EngineRoot='D:/Engines/UE_5.8',[ValidatePattern('^[A-Za-z0-9_-]+$')][string]$Prefix='Contact')
 $ErrorActionPreference='Stop'
-$root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 $saved=Join-Path $root 'Saved/Recovery'
 . (Join-Path $root 'Tests/Shared/validation_evidence.ps1')

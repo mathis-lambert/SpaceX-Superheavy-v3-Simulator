@@ -1,7 +1,7 @@
 
 import sys
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[2]/"Tools"/"Shared"))
+sys.path.insert(0,str(Path(__file__).resolve().parents[3]/"Tools"/"Shared"))
 from project_paths import PROJECT_ROOT, ART_ROOT
 import bpy, json, os
 from mathutils import Vector

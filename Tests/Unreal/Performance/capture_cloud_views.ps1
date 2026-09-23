@@ -6,7 +6,7 @@ param(
     [ValidateRange(0,24)][double]$Hour=14
 )
 $ErrorActionPreference='Stop'
-$root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 . (Join-Path $root 'Tests/Shared/validation_evidence.ps1')
 $saved=Join-Path $root 'Saved/Recovery'
 $null=New-Item -ItemType Directory -Force -Path $saved

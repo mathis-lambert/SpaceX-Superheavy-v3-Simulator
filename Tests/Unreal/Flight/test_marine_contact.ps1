@@ -1,6 +1,6 @@
 param([string]$EngineRoot='D:/Engines/UE_5.8',[int[]]$Cadences=@(30,60))
 $ErrorActionPreference='Stop'
-$root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 foreach($hz in $Cadences){foreach($fixture in @('WaterVertical','WaterHorizontal','WaterFast')){
     $name="Marine-$fixture-$hz";$started=Get-Date

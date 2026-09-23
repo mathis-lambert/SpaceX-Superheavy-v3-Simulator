@@ -10,7 +10,7 @@ param(
     [int]$Weather=2
 )
 $ErrorActionPreference='Stop'
-$root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $engine='D:/Engines/UE_5.8/Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 $saved=Join-Path $root 'Saved/Recovery'
 $preferences=Join-Path $root 'Saved/Config/WindowsEditor/GameUserSettings.ini'

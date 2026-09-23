@@ -5,7 +5,7 @@ param(
     [string[]]$MenuAudits=@('RecoveryControlsAudit','RecoveryOverhaulAudit','RecoveryUIAudit','RecoveryEarthAudit')
 )
 $ErrorActionPreference='Stop'
-$root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 $project=Join-Path $root 'SuperHeavySim.uproject'
 $saved=Join-Path $root 'Saved/Recovery'
@@ -23,10 +23,10 @@ function Confirm-Report([string]$Name,[datetime]$Started){
 try {
     if(!$SkipAssets){
         $started=Get-Date
-        & $engine $project -run=PythonScript "-script=$root/Tests/Unreal/audit_experience_assets.py" -AllowCommandletRendering -unattended -nosplash -SCCProvider=None "-abslog=$saved/experience-asset-audit.log" *> "$saved/experience-asset-audit-console.log"
+        & $engine $project -run=PythonScript "-script=$root/Tests/Unreal/Assets/audit_runtime.py" -AllowCommandletRendering -unattended -nosplash -SCCProvider=None "-abslog=$saved/experience-asset-audit.log" *> "$saved/experience-asset-audit-console.log"
         $null=Confirm-Report 'experience-asset-audit.json' $started
     }
-    if(!$SkipMatrix){ & (Join-Path $PSScriptRoot 'test_physical_recovery.ps1') -EngineRoot $EngineRoot }
+    if(!$SkipMatrix){ & (Join-Path $root 'Tests/Unreal/Flight/test_return_scenarios.ps1') -EngineRoot $EngineRoot }
     foreach($case in @(@{Flag='RecoveryControlsAudit';Report='ControlsAudit/result.json'},@{Flag='RecoveryOverhaulAudit';Report='Overhaul/result.json'},@{Flag='RecoveryUIAudit';Report='InterfaceAudit/result.json'},@{Flag='RecoveryEarthAudit';Report='EarthAudit/result.json'},@{Flag='RecoveryWorldAudit';Report='WorldAudit/result.json'})){
         if($case.Flag -notin $MenuAudits){continue}
         $started=Get-Date

@@ -51,8 +51,8 @@ centralized. See [project structure](Docs/PROJECT_STRUCTURE.md).
 ```powershell
 python -m pip install -r Tests/Python/requirements-ci.txt
 python -m unittest discover -s Tests/Python -p 'test_*.py' -v
-./Tests/Unreal/test_physics_models.ps1
-./Tests/Unreal/test_experience.ps1
+./Tests/Unreal/Automation/run_model_tests.ps1
+./Tests/Unreal/Presentation/test_viewer.ps1
 ./Tools/Runtime/package_alpha.ps1
 ```
 

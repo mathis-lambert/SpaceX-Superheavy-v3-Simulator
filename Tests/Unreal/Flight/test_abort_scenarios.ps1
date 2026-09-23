@@ -1,6 +1,6 @@
 param([int[]]$Cadences=@(60,15),[string]$Prefix='Emergency',[string]$EngineRoot='D:/Engines/UE_5.8')
 $ErrorActionPreference='Stop'
-$root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $saved=Join-Path $root 'Saved/Recovery'
 $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 . (Join-Path $root 'Tests/Shared/validation_evidence.ps1')

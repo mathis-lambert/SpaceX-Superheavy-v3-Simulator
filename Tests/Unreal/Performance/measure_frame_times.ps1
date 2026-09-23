@@ -11,7 +11,7 @@ param(
     [ValidateSet(30,60)][int]$SimulationHz=60
 )
 $ErrorActionPreference='Stop'
-$root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
 $runtimeSaved=Join-Path $root 'Saved'
 $runtimeArguments=@("$root/SuperHeavySim.uproject",'/Game/Starbase/Maps/L_RecoveryLab','-game')

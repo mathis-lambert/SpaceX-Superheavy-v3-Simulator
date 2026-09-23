@@ -5,7 +5,7 @@ with a verified recovery copy, then checked by a fresh editor dependency audit.
 """
 import sys,re,json
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'Tools'/'Shared'))
+sys.path.insert(0,str(Path(__file__).resolve().parents[3]/'Tools'/'Shared'))
 from project_paths import PROJECT_ROOT,SAVED_ROOT
 import unreal as u
 A=u.EditorAssetLibrary;R=u.AssetRegistryHelpers.get_asset_registry();R.search_all_assets(True)

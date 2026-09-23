@@ -6,11 +6,11 @@ Hosted CI checks Python syntax and regression fixtures, PowerShell syntax and
 tracked files that violate `.gitignore`. Run the commands in
 [Tests](../Tests/README.md) locally. The tool suite does not validate Unreal graphics.
 
-Build the editor, then use `test_physics_models.ps1` for model automation,
-`test_physical_recovery.ps1` for flight scenarios and `test_experience.ps1` for
+Build the editor, then use `run_model_tests.ps1` for model automation,
+`test_return_scenarios.ps1` for flight scenarios and `test_viewer.ps1` for
 assets, interface and rendered flights. Dedicated contact, resilience, emergency,
 ground-sequence and marine tests live beside them. Packaged acceptance uses
-`test_packaged_alpha.ps1`; publication only follows passing release gates.
+`test_windows_package.ps1`; publication only follows passing release gates.
 
 Reports, CSVs, logs and captures belong in ignored `Saved/Recovery` and release
 artifacts, not source documentation. Keep comparison baselines externally and

@@ -1,6 +1,6 @@
 param([string]$EngineRoot='D:/Engines/UE_5.8',[string]$GameExecutable='')
 $ErrorActionPreference='Stop'
-$root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $run=Join-Path $root ('Saved/Recovery/Photography-'+(Get-Date -Format 'yyyyMMdd-HHmmss'))
 $null=New-Item -ItemType Directory -Force -Path $run
 $engine=Join-Path $EngineRoot 'Engine/Binaries/Win64/UnrealEditor-Cmd.exe'
