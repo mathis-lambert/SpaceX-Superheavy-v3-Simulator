@@ -45,6 +45,8 @@ Scripts accept `-EngineRoot` for an installation other than `D:/Engines/UE_5.8`.
 Use `Unreal/Flight/test_return_scenarios.ps1` for the flight matrix. Contact, resilience,
 emergency, ground sequence, photography, startup and marine scripts exercise
 separate scenarios. `Unreal/Packaging/test_windows_package.ps1` checks the actual packaged binary.
+Packaged checks require Python 3.12 on PATH and a DLSS-capable Windows machine;
+they do not require the Unreal editor. Use the same source commit as the package.
 They retain their current report contracts and are not Gauntlet tests.
 
 For a focused UI check:

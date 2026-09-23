@@ -46,8 +46,12 @@ def release_files(directory, repository, tag, commit, base_url):
         'sha256': digest(directory / name),
         'url': f'{base_url.rstrip("/")}/{quote(prefix + name, safe="/")}',
     } for name in names]
+    gpu_validation = evidence.get('gpu_validation')
+    if gpu_validation not in ('passed', 'not_run'):
+        raise ValueError('Missing or invalid GPU validation status')
     return {'schema_version': 1, 'repository': repository, 'tag': tag,
-            'source_commit': commit, 'platform': 'Windows x64', 'files': files}
+            'source_commit': commit, 'platform': 'Windows x64',
+            'gpu_validation': gpu_validation, 'files': files}
 
 
 class S3:

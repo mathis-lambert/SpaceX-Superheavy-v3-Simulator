@@ -1,5 +1,4 @@
 param(
-    [string]$EngineRoot='D:/Engines/UE_5.8',
     [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$')][string]$Version='0.1.0-alpha.11',
     [string]$ResultFile
 )
@@ -8,8 +7,12 @@ $root=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $archive=Join-Path $root "Releases/Starbase-$Version"
 $exe=Join-Path $archive 'Windows/SuperHeavySim.exe'
 $manifest=Get-Content -Raw -LiteralPath "$archive/build-manifest.json" | ConvertFrom-Json
+$manifestHash=(Get-FileHash -LiteralPath "$archive/build-manifest.json" -Algorithm SHA256).Hash.ToLowerInvariant()
+$commit=(& git -C $root rev-parse HEAD).Trim()
+if($LASTEXITCODE -ne 0 -or $manifest.source_commit -ne $commit -or $manifest.version -ne $Version){throw 'Package source/version does not match this validation checkout'}
 foreach($entry in $manifest.files){
-    $path=Join-Path $archive $entry.path
+    $path=[IO.Path]::GetFullPath((Join-Path $archive $entry.path))
+    if(!$path.StartsWith([IO.Path]::GetFullPath($archive)+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Package manifest path escapes release directory'}
     if(!(Test-Path -LiteralPath $path) -or (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() -ne $entry.sha256){throw "Package checksum mismatch: $($entry.path)"}
 }
 . (Join-Path $root 'Tests/Shared/validation_evidence.ps1')
@@ -56,7 +59,7 @@ foreach($frame in $cloudFrames){
 }
 $audio=Get-Item -LiteralPath "$saved/Audio/LaunchMix.wav"
 if($audio.LastWriteTime -lt $start){throw 'No fresh packaged audio recording'}
-& (Join-Path $EngineRoot 'Engine/Binaries/ThirdParty/Python3/Win64/python.exe') "$root/Tools/Analysis/audit_audio_capture.py" $audio.FullName
+python "$root/Tools/Analysis/audit_audio_capture.py" $audio.FullName
 if($LASTEXITCODE -ne 0){throw 'Packaged launch audio is silent or clipped'}
 if(!(Test-RecoveryFrontApproach -Report $flight) -or $flight.solver_support_mask -ne 3 -or !$flight.contact_engine_shutdown -or $flight.unpowered_thrust_violation -or $flight.structural_contacts -ne 0){throw 'Packaged physical capture contract failed'}
 if(!$flight.tower_dynamic -or $flight.tower_broken_rail_mask -ne 0 -or $flight.tower_broken_hinge_mask -ne 0 -or !$render.turbulent_volume_budget_pass){throw 'Packaged tower or turbulent volume contract failed'}
@@ -66,7 +69,7 @@ foreach($log in @("$audit/startup.log","$audit/controls.log","$audit/flight.log"
     if(Select-String -Quiet -LiteralPath $log -Pattern 'Fatal error:|Handled ensure|Ensure condition failed|LogDLSSBlueprint: Error:|Failed to compile Material|Couldn.t find file for package|Failed to find object.*(/Game/|/Starbase/)'){throw "Packaged content failure: $log"}
 }
 if($render.reconstruction -notmatch 'NVIDIA'){throw 'This DLSS-capable validation machine did not activate DLSS in the packaged game'}
-@{success=$true;version=$Version;source_commit=$manifest.source_commit;executable_sha256=(Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant();startup_seconds=$startup.engine_elapsed_seconds;startup_assets=$startup.assets_loaded;controls_checks=$controls.checks.Count;rendered_frames=$render.frames;capture=$flight.success;front_ingress=$flight.front_ingress_verified;support_mask=$flight.solver_support_mask;support_drift_m=$flight.restraint_drift_m;chase_offset_step_cm=$render.chase_contact_max_offset_step_cm;reconstruction=$render.reconstruction;evidence_directory=$audit;visual_review_required=$true} |
+@{success=$true;version=$Version;source_commit=$manifest.source_commit;manifest_sha256=$manifestHash;executable_sha256=(Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant();startup_seconds=$startup.engine_elapsed_seconds;startup_assets=$startup.assets_loaded;controls_checks=$controls.checks.Count;rendered_frames=$render.frames;capture=$flight.success;front_ingress=$flight.front_ingress_verified;support_mask=$flight.solver_support_mask;support_drift_m=$flight.restraint_drift_m;chase_offset_step_cm=$render.chase_contact_max_offset_step_cm;reconstruction=$render.reconstruction;evidence_directory=$audit;visual_review_required=$true} |
     ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 -LiteralPath "$audit/result.json"
 Write-Host "Packaged alpha PASS. Inspect screenshots in $saved. Result: $audit/result.json"
 if ($ResultFile) { Copy-Item -LiteralPath "$audit/result.json" -Destination $ResultFile }

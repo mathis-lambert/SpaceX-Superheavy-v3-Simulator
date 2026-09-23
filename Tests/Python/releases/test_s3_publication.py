@@ -43,7 +43,7 @@ class ReleaseTests(unittest.TestCase):
         (self.directory / (self.stem + '-artifacts.json')).write_text(json.dumps({
             'version': '0.1.0-alpha.12', 'source_commit': 'a' * 40,
             'archive': self.name, 'archive_sha256': checksum,
-            'archive_bytes': len(data), 'zip_crc_verified': True,
+            'archive_bytes': len(data), 'zip_crc_verified': True, 'gpu_validation': 'not_run',
         }))
 
     def manifest(self, **kwargs):
@@ -55,6 +55,7 @@ class ReleaseTests(unittest.TestCase):
 
     def test_urls_and_idempotent_publication(self):
         manifest = self.manifest()
+        self.assertEqual(manifest['gpu_validation'], 'not_run')
         self.assertIn('/SpaceX-Superheavy-v3-Simulator/v0.1.0-alpha.12/', manifest['files'][0]['url'])
         store = Store()
         publish(self.directory, manifest, store)

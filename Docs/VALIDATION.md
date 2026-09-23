@@ -10,7 +10,8 @@ Build the editor, then use `run_model_tests.ps1` for model automation,
 `test_return_scenarios.ps1` for flight scenarios and `test_viewer.ps1` for
 assets, interface and rendered flights. Dedicated contact, resilience, emergency,
 ground-sequence and marine tests live beside them. Packaged acceptance uses
-`test_windows_package.ps1`; publication only follows passing release gates.
+`test_windows_package.ps1` locally. CI gates publication on native model tests and
+package integrity, not GPU acceptance; release metadata records `gpu_validation`.
 
 Reports, CSVs, logs and captures belong in ignored `Saved/Recovery` and release
 artifacts, not source documentation. Keep comparison baselines externally and
