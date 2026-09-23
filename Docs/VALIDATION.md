@@ -107,7 +107,7 @@ Implementation and remaining priorities: [controls and cleanup](CONTROLS_AND_CLE
 
 ## Previous wave: world continuity and flight inspection
 
-The world-continuity and flight-inspection wave builds with Unreal Engine 5.8.2. Combined evidence: `Saved/Recovery/world-validation-summary.json`, including source hashes. Earlier measurements are retained in [the preceding validation report](Archive/VALIDATION_STRICT_PHYSICS_2026_09_08.md).
+The world-continuity and flight-inspection wave builds with Unreal Engine 5.8.2. Combined evidence: `Saved/Recovery/world-validation-summary.json`, including source hashes. Earlier measurements from the retired strict-physics report remain available in Git history.
 
 ## Physics and Chase orbit
 

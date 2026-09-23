@@ -24,19 +24,17 @@ The playable project is `SuperHeavySim.uproject`. The default level is `/Game/St
 | `Tools/Runtime` | Launch/build entry points |
 | `Plugins/NVIDIA` | Unmodified official optional DLSS runtime plugins and provenance |
 | `Tools/Tests` | Asset audits, flight tests and performance analysis |
-| `Tools/Migrations` | Historical one-time transformations; not part of normal rebuilding |
 | `../ArtSource` | Original 3D files, Earth imagery, generated flight artwork and credited audio |
 | `Saved/Recovery` | Local reports, CSV captures and verified recovery snapshots |
-| `Saved/Recovery/UnusedContent` | SHA256-verified copies of removed prototype, template and unused packages |
-| `Docs/Archive` | Historical reports and documentation from earlier iterations |
 
-Unreal packages were moved with AssetTools, preserving object references. Source/import paths were updated separately. Runtime asset strings are centralized in `RecoveryAssets.h`; class names were retained, so moving C++ headers does not rename serialized Unreal classes.
+Runtime asset references are centralized in `RecoveryAssets.h`. The active mission
+configuration is `DA_RecoveryMission`. Render meshes use Nanite; dedicated hull,
+catch-fitting and rail shapes supply physical contact rather than decorative
+triangle meshes.
 
-The vehicle's render meshes use Nanite and simple collision policy. Dedicated primitive hull, catch fitting and tower rail shapes define physical contact. The decorative meshes do not provide detailed triangle collision to the flight solver.
-
-The former `DA_SuperHeavy_PhaseProfile` uses the deleted class `SuperHeavyFlightPhaseProfile`; its original bytes are preserved for historical recovery. It is not a usable modern flight profile. The active configuration is `DA_RecoveryMission`.
-
-The complete pre-migration snapshot is in `Saved/Recovery/BeforeRestructure`, with SHA256 hashes for 537 files. `filesystem-migration.json` records filesystem moves. These local recovery files are intentionally excluded from Git.
+See [tooling entry points](../Tools/README.md) for builds, tests and asset authoring.
+Completed migration scripts, superseded test wrappers and old design notes are
+available in Git history, rather than maintained as alternative workflows.
 
 Machine-local MCP configuration (`.codex/`), editor state, Python environments,
 environment overrides and raw Unreal logs are not versioned. CI rejects tracked
