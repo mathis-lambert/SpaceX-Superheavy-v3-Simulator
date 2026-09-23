@@ -38,6 +38,14 @@ The former `DA_SuperHeavy_PhaseProfile` uses the deleted class `SuperHeavyFlight
 
 The complete pre-migration snapshot is in `Saved/Recovery/BeforeRestructure`, with SHA256 hashes for 537 files. `filesystem-migration.json` records filesystem moves. These local recovery files are intentionally excluded from Git.
 
+Machine-local MCP configuration (`.codex/`), editor state, Python environments,
+environment overrides and raw Unreal logs are not versioned. CI rejects tracked
+files covered by `.gitignore`, including accidental force-adds. Curated reports,
+CSV measurements, checksums and visual comparisons under `Docs/Validation` and
+`Docs/Releases` remain versioned evidence; generated executables and portable
+archives belong in `Releases/` and release storage. NVIDIA runtime DLLs and import
+libraries are required vendor dependencies and intentionally remain tracked.
+
 `RecoveryPropulsion.cpp`, `RecoveryMassProperties.cpp`, `RecoveryStageDynamics.cpp` and `RecoveryGroundSystems.cpp` separate actuator forces, analytical mass properties, stage/launch connections and ground conditioning. Blueprint visual actuator commands are issued only by `RecoveryPresentationComponent`. Headless flights use the same force model. `RecoverySiteDetailsComponent` builds bounded, instanced decorative geometry without adding physical contacts.
 
 Earth tile downloads and imports have separate entry points (`Tools/Data/fetch_earth_detail.py`, `Tools/Editor/import_earth_detail.py`). Source imagery lives under `ArtSource/Earth/Detail4000`; the geographic tile names remain stable in Unreal. Re-import backups and source hashes are preserved separately from runtime packages.

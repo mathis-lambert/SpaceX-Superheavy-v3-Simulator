@@ -1,10 +1,22 @@
+# Unreal-generated output
 Binaries
 DerivedDataCache
 Intermediate
 Saved
 /Releases/
+
+# Machine-local assistant, editor and Python environments
+/.codex/
 .vscode
 .vs
+.idea/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 *.VC.db
 *.opensdf
 *.opendb
@@ -16,9 +28,22 @@ Saved
 *.xcworkspace
 .vsconfig
 *.log
+*.tmp
+*.bak
+*.orig
 .DS_Store
+Thumbs.db
+Desktop.ini
 __pycache__/
 *.py[cod]
+
+# Local credentials and environment overrides; explicit examples may be shared.
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.local.ini
 
 # Vendor runtime libraries are dependencies, not generated Unreal binaries.
 !/Plugins/NVIDIA/DLSS/Binaries/
