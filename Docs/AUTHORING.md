@@ -27,6 +27,17 @@ have separate provenance files. Requested pixel size is not native survey accura
 
 ## Dependency discipline
 
+After rebaking `Tools/Art/bake_turbulent_volumes.py` and
+`Tools/Art/bake_vapor_atlas.py`, build the editor with
+`Tools/Runtime/build_simulator.ps1`, then run
+`Tools/Editor/import_coast_volumes.py` through Unreal's Python commandlet with
+`-VolumesOnly -AllowCommandletRendering -unattended -SCCProvider=None`.
+The importer verifies the VDB source checksums, reimports existing volume and
+atlas assets through Unreal's native reimport handler, and rebuilds the shared
+interpolated steam material. Copy the updated volume `sources.json` from
+`../ArtSource/Effects/TurbulentDeluge` to `Docs/Credits/flow-sources.json`.
+Validate with the asset audit and a rendered flight before committing packages.
+
 Run `Tests/Unreal/Assets/inventory_dependencies.py` in Unreal to inspect hard, soft,
 management and code references before retiring packages. Cook-directory inclusion
 is not proof of use. Keep runtime file data such as `Data/Water/Surface.bin`, which

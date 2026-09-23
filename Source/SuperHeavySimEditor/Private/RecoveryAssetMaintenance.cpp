@@ -1,4 +1,6 @@
 #include "RecoveryAssetMaintenance.h"
+#include "EditorReimportHandler.h"
+#include "Misc/Paths.h"
 #include "Engine/Blueprint.h"
 #include "EdGraph/EdGraph.h"
 #include "K2Node_InputAction.h"
@@ -22,4 +24,11 @@ int32 URecoveryAssetMaintenance::RemoveLegacyInputEvents(UBlueprint* Blueprint)
     }
     if(Removed)FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
     return Removed;
+}
+
+bool URecoveryAssetMaintenance::ReimportAsset(UObject* Asset, const FString& SourceFile)
+{
+    if (!Asset || !FPaths::FileExists(SourceFile)) return false;
+    return FReimportManager::Instance()->Reimport(Asset, false, false,
+        FPaths::ConvertRelativePathToFull(SourceFile), nullptr, INDEX_NONE, false, true);
 }

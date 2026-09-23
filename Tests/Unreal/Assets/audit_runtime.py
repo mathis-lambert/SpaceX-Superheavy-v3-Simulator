@@ -47,6 +47,11 @@ flow_material=u.load_asset(root+'/Materials/Effects/M_TurbulentDeluge')
 assert flow_material and flow_material.get_editor_property('material_domain')==u.MaterialDomain.MD_VOLUME
 assert flow_material.get_editor_property('blend_mode')==u.BlendMode.BLEND_ADDITIVE
 assert flow_material.get_editor_property('used_with_heterogeneous_volumes')
+expressions=u.MaterialEditingLibrary.get_material_expressions(flow_material)
+volume_parameters={str(n.get_editor_property('parameter_name')) for n in expressions if isinstance(n,u.MaterialExpressionSparseVolumeTextureSampleParameter)}
+assert volume_parameters=={'DensityVolume','DensityNext'},'Steam interpolation requires two frame samplers'
+assert 'FrameBlend' in {str(n) for n in u.MaterialEditingLibrary.get_scalar_parameter_names(flow_material)},'Steam frame interpolation parameter missing'
+
 report['turbulent_flow_frames']=flow.get_num_frames()
 extinction=u.MaterialEditingLibrary.get_material_property_input_node(vapor,u.MaterialProperty.MP_SUBSURFACE_COLOR)
 assert extinction and extinction.get_editor_property('description')=='Vapor extinction / inverse centimetres','Vapor extinction is not connected to the RGB volume output'
