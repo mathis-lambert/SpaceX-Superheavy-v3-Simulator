@@ -8,8 +8,8 @@ public class SuperHeavySimEditorTarget : TargetRules
 	public SuperHeavySimEditorTarget( TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
-		DefaultBuildSettings = BuildSettingsVersion.V6;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_7;
-		ExtraModuleNames.AddRange( new string[] { "SuperHeavySim" } );
+		DefaultBuildSettings = BuildSettingsVersion.V7;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_8;
+		ExtraModuleNames.AddRange( new string[] { "SuperHeavySim", "SuperHeavySimEditor" } );
 	}
 }

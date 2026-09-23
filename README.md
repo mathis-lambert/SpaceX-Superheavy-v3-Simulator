@@ -1,337 +1,79 @@
-# SuperHeavySim
+# Starbase Flight Simulator
 
-`SuperHeavySim` is an Unreal Engine project focused on modeling and commanding a **Super Heavy V3** booster.
+An Unreal Engine 5.8 simulator of Super Heavy launch, stage separation, boostback,
+atmospheric return and physical tower capture. Includes interactive failures,
+flight telemetry, orbital cameras and a configurable Starbase environment.
 
-The project provides a modular vehicle foundation with:
+Current source version: **0.1.0-alpha.11**. See the
+[release notes](Docs/RELEASE_NOTES.md) for controls and known limitations.
 
-- one main vehicle actor
-- individually encapsulated engines
-- individually encapsulated grid fins
-- a clear actuator command API
+## Getting started
 
-The goal is to expose a booster that can be driven cleanly by an external control layer through a:
+The supported build workflow targets Windows and requires Unreal Engine 5.8,
+its C++ build toolchain, and Git LFS. After cloning:
 
-```text
-Guidance -> Navigation -> Control
-```
-
-architecture.
-
-## Goals
-
-- represent a Super Heavy V3 booster inside Unreal Engine
-- expose a stable command API for engines and grid fins
-- keep mesh, pivot, and local-axis details inside the Blueprints
-- prepare the project for propulsion, aerodynamics, and control law integration
-
-## Requirements
-
-- Unreal Engine `5.7`
-- `git`
-- `git-lfs`
-
-## Installation
-
-Clone the repository, then fetch Unreal assets through Git LFS:
-
-```bash
-git clone git@github.com:mathis-lambert/SpaceX-Superheavy-v3-Simulator.git
-cd SpaceX-Superheavy-v3-Simulator
-git lfs install
+```powershell
 git lfs pull
+./Tools/Runtime/build_simulator.ps1
+./Tools/Runtime/launch_recovery.ps1
 ```
 
-Then open:
+Scripts accept `-EngineRoot` when Unreal is installed somewhere other than
+`D:/Engines/UE_5.8`. Open `SuperHeavySim.uproject` to work in the editor;
+the default map is `/Game/Starbase/Maps/L_RecoveryLab`.
 
-- [SuperHeavySim.uproject](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/SuperHeavySim.uproject)
+Select **Launch** to start a mission. Hold the right mouse button to orbit and
+left-click vehicle parts to inspect them. **Tab** selects cameras, **F** enables
+free flight, **I** displays forces, **L** opens the flight computer, and **Escape**
+pauses. Settings group camera, environment, graphics and audio controls.
 
-## Important: Git LFS
+## Repository
 
-Unreal asset files (`.uasset`, `.umap`) are tracked through Git LFS.
+| Directory | Purpose |
+|---|---|
+| `Source/` | C++ simulation, presentation, interface and editor modules |
+| `Content/` | Authored levels, Blueprints, profiles and runtime assets |
+| `Config/` | Unreal project and packaging configuration |
+| `Plugins/` | Required vendor files and provenance for optional NVIDIA DLSS |
+| `Tools/` | Builds, asset authoring and offline analysis |
+| `Tests/` | Automation runners, offline fixtures and shared test helpers |
+| `Docs/` | Architecture, sources, release notes and measured validation |
+| `.github/` | CI and release workflows |
 
-Without `git-lfs`, Unreal will not load assets correctly. Asset files will appear as text files containing LFS pointers instead of binary data.
+Generated files stay in ignored `Saved/`, `Intermediate/`, `Binaries/` and
+`Releases/` directories. External authoring inputs live in `../ArtSource`;
+they are not required to package committed assets. Runtime physics and visual
+presentation are separated; asset references and shared conventions are
+centralized. See [project structure](Docs/PROJECT_STRUCTURE.md).
 
-Quick check:
+## Validation and releases
 
-```bash
-file Content/Maps/Test/L_Test_SuperHeavy.umap
+```powershell
+python -m pip install -r Tests/Python/requirements-ci.txt
+python -m unittest discover -s Tests/Python -p 'test_*.py' -v
+./Tests/Unreal/Automation/run_model_tests.ps1
+./Tests/Unreal/Presentation/test_viewer.ps1
+./Tools/Runtime/package_alpha.ps1
 ```
 
-The result must not be `ASCII text`.
-
-## Enabled Plugins
-
-The project currently enables:
-
-- `ModelingToolsEditorMode`
-- `SunPosition`
-- `GeoReferencing`
-
-## Repository Structure
-
-```text
-Config/
-Content/
-  Maps/
-    Test/
-  SimBlank/
-  SuperHeavy/
-    Blueprints/
-    Data/
-    Materials/
-    Meshes/
-    Textures/
-Source/
-SuperHeavySim.uproject
-```
-
-## Important Directories
-
-- [Docs/GNC_ARCHITECTURE.md](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Docs/GNC_ARCHITECTURE.md)
-  C++/Blueprint contract for the vehicle GNC stack.
-
-- [Content/SuperHeavy/Blueprints](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Content/SuperHeavy/Blueprints)
-  Main vehicle Blueprints.
-
-- [Content/Maps/Test/L_Test_SuperHeavy.umap](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Content/Maps/Test/L_Test_SuperHeavy.umap)
-  Main booster test map.
-
-- [Content/SuperHeavy/Meshes/Imported_Clean](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Content/SuperHeavy/Meshes/Imported_Clean)
-  Cleaned and renamed meshes prepared for Unreal integration.
-
-- [Source/SuperHeavySim](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim)
-  Unreal C++ gameplay, vehicle API, and GNC code.
-
-## Architecture
-
-### BP_SuperHeavy
-
-[BP_SuperHeavy.uasset](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Content/SuperHeavy/Blueprints/BP_SuperHeavy.uasset)
-
-`BP_SuperHeavy` is the main vehicle actor.
-
-Responsibilities:
-
-- own the engines
-- own the grid fins
-- initialize child actors
-- route commands to actuators
-- expose the vehicle API
-- host the `SuperHeavyGncComponent`
-
-Main functions:
-
-- `InitializeEngines()`
-- `GetEngine(EngineId)`
-- `SetEngineGimbal(EngineId, Pitch, Roll)`
-- `SetEngineThrottle(EngineId, Throttle)`
-- `InitializeGridFins()`
-- `GetGridFin(GridFinId)`
-- `SetGridFinAngle(GridFinId, Angle)`
-
-For C++ GNC integration, `BP_SuperHeavy` should be parented to `SuperHeavyVehicleActor` and implement:
-
-- `SetEngineThrottleCommand(EngineId, Throttle)`
-- `SetEngineGimbalCommand(EngineId, PitchDeg, RollDeg)`
-- `SetGridFinAngleCommand(GridFinId, AngleDeg)`
-
-The C++ base expands collective group commands to individual engine and grid-fin IDs.
-
-### BP_RaptorEngine
-
-[BP_RaptorEngine.uasset](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Content/SuperHeavy/Blueprints/BP_RaptorEngine.uasset)
-
-`BP_RaptorEngine` represents a single engine.
-
-Logical structure:
-
-```text
-Root
-└── GimbalPivot
-    ├── EngineMesh
-    └── ThrustSocket
-```
-
-Main variables:
-
-- `EngineId`
-- `IsGimbaled`
-- `TargetThrottle`
-- `ActualThrottle`
-- `TargetPitch`
-- `ActualPitch`
-- `TargetRoll`
-- `ActualRoll`
-- `MaxGimbalAngle`
-- `GimbalRateDegSec`
-- `ThrottleRatePerSec`
-
-Main functions:
-
-- `SetGimbal(Pitch, Roll)`
-- `SetThrottle(Throttle)`
-- `UpdateActuator(DeltaTime)`
-
-Principles:
-
-- `SetGimbal` writes a command target
-- `SetThrottle` writes a command target
-- `UpdateActuator` interpolates the actual state
-- `GimbalPivot` applies engine rotation
-
-### BP_GridFin
-
-[BP_GridFin.uasset](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Content/SuperHeavy/Blueprints/BP_GridFin.uasset)
-
-`BP_GridFin` represents a single grid fin.
-
-Logical structure:
-
-```text
-Root
-└── FinPivot
-    ├── AeroReference
-    └── FinMesh
-```
-
-Main variables:
-
-- `GridFinId`
-- `TargetAngle`
-- `ActualAngle`
-- `MaxDeflectionAngle`
-- `DeflectionRateDegSec`
-- `InvertSign`
-- `ReferenceArea`
-- `DragCoefficient`
-- `LiftCoefficient`
-- `AeroEnabled`
-
-Main functions:
-
-- `SetAngle(AngleCmd)`
-- `UpdateActuator(DeltaTime)`
-
-Principles:
-
-- `SetAngle` clamps the requested command
-- `InvertSign` absorbs local direction differences
-- `UpdateActuator` interpolates the actual fin angle
-- `FinPivot` applies fin rotation
-
-## Naming Conventions
-
-### Grid fins
-
-- `GF_XP`
-- `GF_XM`
-- `GF_YM`
-
-### Engines
-
-- `R01..R20`: fixed outer engines
-- `RGI01..RGI10`: gimbaled inner engines
-- `RGC01..RGC03`: gimbaled center engines
-
-## Current Integration State
-
-- `BP_SuperHeavy` drives engines and grid fins through child actors
-- all `33` engines are integrated through `BP_RaptorEngine`
-- the `3` grid fins are integrated through `BP_GridFin`
-- initialization and lookup functions are in place
-- propulsion is applied through the vehicle physics body
-- engine exhaust VFX are driven by engine throttle
-- the C++ GNC foundation is in place
-- the test map is usable to validate actuators
-
-## Unreal Workflow
-
-### Working map
-
-The main test map is:
-
-- [L_Test_SuperHeavy.umap](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Content/Maps/Test/L_Test_SuperHeavy.umap)
-
-### Note about Child Actor Templates
-
-When a child Blueprint changes, Unreal may keep stale data on an instance already placed in the map.
-
-Typical symptoms:
-
-- `EngineId` or `GridFinId` stay `None` at runtime
-- initialization finds actors but not their identifiers
-
-Recommended fix:
-
-1. compile the affected Blueprints
-2. save them
-3. delete the existing `BP_SuperHeavy` instance from the map
-4. place a fresh instance in the scene
-
-## C++ GNC Base
-
-The project includes a C++ GNC foundation:
-
-- [SuperHeavyGncComponent.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/GNC/SuperHeavyGncComponent.h)
-  Fixed-rate guidance/control component with telemetry.
-
-- [SuperHeavyGncTypes.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/GNC/SuperHeavyGncTypes.h)
-  Shared state, target, actuator command, telemetry, and phase types.
-
-- [SuperHeavyFlightPhaseProfile.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/GNC/SuperHeavyFlightPhaseProfile.h)
-  DataAsset-based flight phase configuration and transition sequencing.
-
-- [SuperHeavyVehicleControlInterface.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/GNC/SuperHeavyVehicleControlInterface.h)
-  Stable command interface between GNC and vehicle actor.
-
-- [SuperHeavyVehicleActor.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/Vehicle/SuperHeavyVehicleActor.h)
-  C++ vehicle base that routes grouped actuator commands.
-
-- [SuperHeavyScenarioProfile.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/Scenarios/SuperHeavyScenarioProfile.h)
-  DataAsset-based playable scenario definitions.
-
-- [SuperHeavyScenarioComponent.h](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/Source/SuperHeavySim/Public/Scenarios/SuperHeavyScenarioComponent.h)
-  Runtime scenario launcher that resets vehicle state, assigns GNC phase profiles, starts phase sequences, and selects cameras.
-
-## Assets
-
-The repository contains:
-
-- booster meshes
-- engine meshes
-- grid fin meshes
-- textures and materials
-- imported and cleaned Unreal assets
-
-## Next Steps
-
-- create a `SuperHeavyScenarioProfile` with `LandingBurn`, `Liftoff`, and `Hover`
-- configure automatic phase transitions in the profile
-- add aerodynamics
-- expand guidance beyond vertical speed / altitude / attitude hold
-- add LQR/MPC controllers behind the same actuator command interface
-
-## Current Limitations
-
-- grid fin aerodynamics are not yet connected
-- lateral landing guidance is not yet implemented
-
-## Git
-
-Unreal assets are tracked through Git LFS:
-
-- [`.gitattributes`](/Users/mathis.lambert/Documents/_PERSO/Projets.nosync/superheavy_sim/.gitattributes)
-
-Active rule:
-
-```text
-Content/** filter=lfs diff=lfs merge=lfs -text
-```
-
-The repository ignores, among others:
-
-- `Binaries`
-- `DerivedDataCache`
-- `Intermediate`
-- `Saved`
-- `.DS_Store`
+[Tooling](Tools/README.md) describes focused checks and authoring entry points.
+[CI and releases](Docs/CI_RELEASES.md) covers hosted checks, Unreal runners and
+versioned S3 publication. Portable binaries are distributed separately from Git.
+
+## Simulation and rendering
+
+The force model resolves individual engines, gimbals, reaction jets, propellant
+consumption and changing mass properties. Starship becomes an independent body
+at separation. Physical fittings and compliant rails on torque-driven tower arms provide
+capture contact. The flight computer exposes actuator failures and wind changes.
+
+Flight coefficients are estimates, not SpaceX engineering data. This is an
+experimental simulator, not flight-certified software. Rendering includes
+spherical Earth scenery, volumetric effects, optional hardware Lumen and
+TSR/DLAA/DLSS reconstruction. NVIDIA dependencies retain their vendor licenses
+and [provenance](Plugins/NVIDIA/provenance.json).
+
+- [Flight model](Docs/FLIGHT_MODEL.md)
+- [Measurements and validation](Docs/VALIDATION.md)
+- [Asset authoring](Docs/AUTHORING.md)
+- [Resource credits](Docs/Credits/)

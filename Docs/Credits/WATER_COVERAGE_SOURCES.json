@@ -1,0 +1,37 @@
+{
+  "source": "https://naturalearth.s3.amazonaws.com/10m_physical/ne_10m_land.zip",
+  "source_sha256": "e547d749445eaa0964aba76738090ec88f5e63c4585122170f98c67a7ea922dc",
+  "license": "Natural Earth public domain",
+  "reference": "https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-land/",
+  "limitations": "Cartographic coastline; not surveyed tidal or bathymetric data",
+  "outputs": [
+    {
+      "file": "GlobalOcean.png",
+      "bounds": [
+        -180,
+        -90,
+        180,
+        90
+      ],
+      "size": [
+        8192,
+        4096
+      ],
+      "sha256": "dc33f1fe9ea8a5018d08889a755ca12b69dc86b71c9e44671d33afcf0b38fe27"
+    },
+    {
+      "file": "RegionalOcean.png",
+      "bounds": [
+        -109.1569,
+        13.9973,
+        -85.1569,
+        37.9973
+      ],
+      "size": [
+        4096,
+        4096
+      ],
+      "sha256": "86d0e698fab634621e8a6be3a859e60763003ccb9e85f920750507a264574ec8"
+    }
+  ]
+}

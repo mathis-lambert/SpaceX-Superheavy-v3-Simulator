@@ -1,0 +1,106 @@
+{
+  "source": "USGS 3DEP / TX_LowerRioGrande_D22",
+  "vertical_datum": "NAVD88",
+  "pad_offset_m": 4.5,
+  "bounds_wgs84": [
+    -97.2169338380889,
+    25.943340703644875,
+    -97.09686616191108,
+    26.051259296355123
+  ],
+  "output_shape": [
+    6144,
+    6144
+  ],
+  "output_pixel_m": 1.953125,
+  "source_pixel_m": 1,
+  "coverage": 0.505791876051161,
+  "range_m": [
+    -1.0135782957077026,
+    0.17000000178813934,
+    2.753674042224877,
+    12.093632698059082
+  ],
+  "records": [
+    {
+      "file": "USGS_1M_14_x67y288_TX_LowerRioGrande_D22.tif",
+      "url": "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/1m/Projects/TX_LowerRioGrande_D22/TIFF/USGS_1M_14_x67y288_TX_LowerRioGrande_D22.tif",
+      "title": "USGS 1 Meter 14 x67y288 TX_LowerRioGrande_D22",
+      "published": "2024-09-24",
+      "metadata": "https://www.sciencebase.gov/catalog/item/66f4c2bad34e791ae5dfcac3",
+      "sha256": "463f8d74ed36cddca14fbc73841ad1aec496ce745fb16c80ef187372af9d69e3",
+      "crs": "EPSG:26914",
+      "source_pixel_m": [
+        1.0,
+        1.0
+      ],
+      "source_bounds": [
+        669993.9999581545,
+        2869994.0000379463,
+        680005.9999581545,
+        2880006.0000379463
+      ],
+      "nodata": -999999.0
+    },
+    {
+      "file": "USGS_1M_14_x67y289_TX_LowerRioGrande_D22.tif",
+      "url": "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/1m/Projects/TX_LowerRioGrande_D22/TIFF/USGS_1M_14_x67y289_TX_LowerRioGrande_D22.tif",
+      "title": "USGS 1 Meter 14 x67y289 TX_LowerRioGrande_D22",
+      "published": "2024-09-24",
+      "metadata": "https://www.sciencebase.gov/catalog/item/66f4c2b8d34e791ae5dfcac1",
+      "sha256": "9af09b0ac306166ddcb7ba089cf6aa53b7aff66e0f2da057da04ba57e462a72b",
+      "crs": "EPSG:26914",
+      "source_pixel_m": [
+        1.0,
+        1.0
+      ],
+      "source_bounds": [
+        669993.9999581545,
+        2879993.9999533044,
+        680005.9999581545,
+        2890005.9999533044
+      ],
+      "nodata": -999999.0
+    },
+    {
+      "file": "USGS_1M_14_x68y288_TX_LowerRioGrande_D22.tif",
+      "url": "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/1m/Projects/TX_LowerRioGrande_D22/TIFF/USGS_1M_14_x68y288_TX_LowerRioGrande_D22.tif",
+      "title": "USGS 1 Meter 14 x68y288 TX_LowerRioGrande_D22",
+      "published": "2024-09-24",
+      "metadata": "https://www.sciencebase.gov/catalog/item/66f4c2b2d34e791ae5dfcabb",
+      "sha256": "1fec020f54586560fe6c6b83bab6f170effc212432de514ecc122b64b1ad94b9",
+      "crs": "EPSG:26914",
+      "source_pixel_m": [
+        1.0,
+        1.0
+      ],
+      "source_bounds": [
+        679993.9999833588,
+        2869994.000048164,
+        690005.9999833588,
+        2880006.000048164
+      ],
+      "nodata": -999999.0
+    },
+    {
+      "file": "USGS_1M_14_x68y289_TX_LowerRioGrande_D22.tif",
+      "url": "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/1m/Projects/TX_LowerRioGrande_D22/TIFF/USGS_1M_14_x68y289_TX_LowerRioGrande_D22.tif",
+      "title": "USGS 1 Meter 14 x68y289 TX_LowerRioGrande_D22",
+      "published": "2024-09-24",
+      "metadata": "https://www.sciencebase.gov/catalog/item/66f4c2afd34e791ae5dfcab9",
+      "sha256": "feda44da96f9e2320e6c3f2fa678b98071ce194bbe4ea571ef459e8f5107f5c7",
+      "crs": "EPSG:26914",
+      "source_pixel_m": [
+        1.0,
+        1.0
+      ],
+      "source_bounds": [
+        679993.999959664,
+        2879993.9999864222,
+        690005.999959664,
+        2890005.9999864222
+      ],
+      "nodata": -999999.0
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+#include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
+#include "Recovery/Presentation/RecoveryStartupSubsystem.h"
+#include "Recovery/Shared/RecoveryAssets.h"
+#include "Recovery/Diagnostics/RecoveryDiagnosticsComponent.h"
+#include "Recovery/Diagnostics/RecoveryPhysicsAuditComponent.h"
+#include "Recovery/Flight/RecoveryPhysicsComponent.h"
+#include "Recovery/Flight/RecoveryAtmosphere.h"
+#include "Recovery/Presentation/RecoveryPresentationComponent.h"
+#include "Recovery/Presentation/RecoverySkyComponent.h"
+#include "Recovery/Presentation/RecoveryVaporComponent.h"
+#include "Recovery/Presentation/RecoverySiteDetailsComponent.h"
+#include "Recovery/Presentation/RecoverySiteActivityComponent.h"
+#include "Recovery/Presentation/RecoveryAudioComponent.h"
+#include "Recovery/Presentation/RecoveryForceDisplayComponent.h"
+#include "Recovery/Shared/FlightGeometry.h"
+#include "Recovery/Interface/RecoveryPlayerController.h"
+#include "Recovery/Flight/SuperHeavyLaunchTower.h"
+#include "Vehicle/SuperHeavyVehicleActor.h"
+#include "Components/PrimitiveComponent.h"
+#include "Components/BoxComponent.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
+#include "Components/ChildActorComponent.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerInput.h"
+#include "Kismet/GameplayStatics.h"
+#include "EngineUtils.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "HAL/PlatformFileManager.h"
+#include "Serialization/JsonSerializer.h"
+#include "UObject/ConstructorHelpers.h"
+#include "PhysicsEngine/PhysicsSettings.h"
+
+#include "Recovery/Shared/RecoveryLog.h"
+
+ASuperHeavyRecoveryDirector::ASuperHeavyRecoveryDirector()
+{
+    PrimaryActorTick.bCanEverTick=true;
+    PrimaryActorTick.TickGroup=TG_PrePhysics;
+    RootComponent=CreateDefaultSubobject<USceneComponent>(TEXT("MissionOrigin"));
+    Viewer=CreateDefaultSubobject<URecoveryCameraComponent>(TEXT("ViewerCamera"));
+    CreateDefaultSubobject<URecoveryPresentationComponent>(TEXT("FlightPresentation"));
+    CreateDefaultSubobject<URecoverySkyComponent>(TEXT("SkyAndCamera"));
+    CreateDefaultSubobject<URecoveryVaporComponent>(TEXT("ParticipatingVapor"));
+    CreateDefaultSubobject<URecoverySiteDetailsComponent>(TEXT("IndustrialSiteDetails"));
+    CreateDefaultSubobject<URecoverySiteActivityComponent>(TEXT("SiteActivity"));
+    CreateDefaultSubobject<URecoveryAudioComponent>(TEXT("FlightAcoustics"));
+    CreateDefaultSubobject<URecoveryDiagnosticsComponent>(TEXT("FlightDiagnostics"));
+    PhysicsModel=CreateDefaultSubobject<URecoveryPhysicsComponent>(TEXT("FlightPhysics"));
+    PhysicsAudit=CreateDefaultSubobject<URecoveryPhysicsAuditComponent>(TEXT("PhysicsCadenceAudit"));
+    CreateDefaultSubobject<URecoveryForceDisplayComponent>(TEXT("ForceInspection"));
+    static ConstructorHelpers::FClassFinder<ASuperHeavyVehicleActor> Booster(RecoveryAssets::BP_SuperHeavy);
+    VehicleClass=Booster.Class;
+}
+
+void ASuperHeavyRecoveryDirector::BeginPlay()
+{
+    Super::BeginPlay();
+    for(auto* Component:GetComponents())
+        if(Component!=PhysicsModel && Component->PrimaryComponentTick.TickGroup==TG_PostPhysics)Component->AddTickPrerequisiteComponent(PhysicsModel);
+    RuntimeProfile=MissionProfile ? DuplicateObject<USuperHeavyRecoveryProfile>(MissionProfile,this) : NewObject<USuperHeavyRecoveryProfile>(this);
+    if(!Tower) for(TActorIterator<ASuperHeavyLaunchTower> It(GetWorld()); It; ++It) { Tower=*It; break; }
+    if(!Tower) Tower=GetWorld()->SpawnActor<ASuperHeavyLaunchTower>();
+    bExitAfterTest=FParse::Param(FCommandLine::Get(),TEXT("RecoveryAutoExit"));
+    FParse::Value(FCommandLine::Get(),TEXT("RecoveryReportName="),ReportName);
+    FString TestScenario;
+    if(FParse::Value(FCommandLine::Get(),TEXT("RecoveryScenario="),TestScenario))
+        ScenarioIndex=TestScenario==TEXT("Crosswind") ? 1 : TestScenario==TEXT("Offset") ? 2 : 0;
+    InitializeVehicle();
+    if(!bInitialized) { SetPhase(ERecoveryPhase::Aborted,StatusMessage); WriteResult(false,StatusMessage); return; }
+    SelectScenario(ScenarioIndex);
+    Viewer->UpdateCamera(0);
+    if(auto* PC=GetWorld()->GetFirstPlayerController())
+    {
+        // Disable development view-mode shortcuts on the game player only.
+        if(PC->PlayerInput) PC->PlayerInput->DebugExecBindings.RemoveAll([](const FKeyBind& Bind)
+        { return Bind.Key==EKeys::F1 || Bind.Key==EKeys::F2 || Bind.Key==EKeys::F3; });
+        // All viewer input is owned by ARecoveryPlayerController.
+    }
+    FParse::Value(FCommandLine::Get(),TEXT("RecoveryContactFixture="),ContactFixture);
+    if(!ContactFixture.IsEmpty()) InitializeContactFixture();
+    else if(bAutoStart && !ARecoveryPlayerController::ShouldShowFrontend() && !FParse::Param(FCommandLine::Get(),TEXT("RecoveryManualStart"))) StartMission();
+}
+
+void ASuperHeavyRecoveryDirector::InitializeVehicle()
+{
+    if(!VehicleClass || !Tower) { StatusMessage=TEXT("Vehicle or tower missing"); return; }
+    const FVector Start=Tower->GetActorTransform().TransformPosition(RuntimeProfile->LaunchOffsetM*100)+FVector(0,0,3544);
+    const FTransform Xform(Tower->GetActorQuat(),Start,FVector(22.5,22.5,80));
+    Vehicle=GetWorld()->SpawnActorDeferred<ASuperHeavyVehicleActor>(VehicleClass,Xform,this,nullptr,ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+    if(!Vehicle) { StatusMessage=TEXT("Vehicle could not be spawned"); return; }
+    Vehicle->FinishSpawning(Xform);
+    // Reuse the original visual assembly and atomic commands. Only this director applies propulsion.
+    Vehicle->SetActorTickEnabled(false);
+    for(auto* C : Vehicle->GetComponents())
+    {
+        if(C->GetFName()==TEXT("COL_Body_Main")) Body=Cast<UPrimitiveComponent>(C);
+    }
+    if(!Body) { StatusMessage=TEXT("Physics body missing"); return; }
+    Body->SetMassOverrideInKg(NAME_None,RuntimeProfile->LaunchMassKg(),true);
+    Body->SetLinearDamping(0);
+    Body->SetAngularDamping(0);
+    Body->BodyInstance.bUseCCD=true;
+    Body->BodyInstance.SetPositionSolverIterationCount(16);
+    Body->BodyInstance.SetVelocitySolverIterationCount(8);
+    Body->SetNotifyRigidBodyCollision(true);
+    Body->OnComponentHit.AddDynamic(this,&ASuperHeavyRecoveryDirector::OnVehicleContact);
+    auto* ContactMaterial=NewObject<UPhysicalMaterial>(this);
+    ContactMaterial->Friction=0.85f;ContactMaterial->Restitution=0;
+    Body->SetPhysMaterialOverride(ContactMaterial);
+    Tower->LeftRail->SetPhysMaterialOverride(ContactMaterial);Tower->RightRail->SetPhysMaterialOverride(ContactMaterial);
+    // These two contact volumes follow the measured fitting centres. Welding
+    // makes them shapes of the same Chaos body, never separately posed bodies.
+    for(const FVector Lug : {RuntimeProfile->CatchLugPlusM,RuntimeProfile->CatchLugMinusM})
+    {
+        auto* Collider=NewObject<UBoxComponent>(Vehicle);
+        Collider->SetBoxExtent(FVector(60,45,18));Collider->SetCollisionProfileName(TEXT("PhysicsActor"));
+        Collider->SetNotifyRigidBodyCollision(true);Collider->SetGenerateOverlapEvents(false);
+        Collider->SetPhysMaterialOverride(ContactMaterial);Collider->BodyInstance.bUseCCD=true;
+        Collider->BodyInstance.MassScale=0.0001f;
+        Collider->SetWorldLocationAndRotation(Body->GetComponentLocation()+Body->GetComponentQuat().RotateVector((Lug-FVector(0,0,BaseOffsetM))*100),Body->GetComponentQuat());
+        Collider->RegisterComponent();Vehicle->AddInstanceComponent(Collider);
+        Collider->AttachToComponent(Body,FAttachmentTransformRules::KeepWorldTransform);
+        Collider->WeldTo(Body,NAME_None,true);
+        Collider->OnComponentHit.AddDynamic(this,&ASuperHeavyRecoveryDirector::OnVehicleContact);
+        CatchColliders.Add(Collider);
+    }
+    // Child artwork must not contribute mass, contacts or unintended welds to the flight body.
+    TArray<AActor*> VehicleChildren;
+    Vehicle->GetAllChildActors(VehicleChildren,true);
+    for(AActor* Child:VehicleChildren)
+    {
+        TInlineComponentArray<UPrimitiveComponent*> Primitives(Child);
+        for(auto* P:Primitives) { P->SetSimulatePhysics(false); P->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
+    }
+    InitializePhysicalActuators();
+    bInitialized=Engines.Num()==33;
+    if(!bInitialized)StatusMessage=TEXT("Expected 33 measured engine sockets");
+}
+
+void ASuperHeavyRecoveryDirector::SelectScenario(int32 Index)
+{
+    bStartWhenReady=false;
+    if(!bInitialized) return;
+    ScenarioIndex=FMath::Clamp(Index,0,2);
+    ReleaseLaunchHoldDown();
+    Tower->Release();Tower->ResetMechanism(0);
+    RuntimeProfile=MissionProfile ? DuplicateObject<USuperHeavyRecoveryProfile>(MissionProfile,this) : NewObject<USuperHeavyRecoveryProfile>(this);
+    ScenarioName=ScenarioIndex==1 ? TEXT("Crosswind") : ScenarioIndex==2 ? TEXT("Offset") : TEXT("Nominal");
+    if(ScenarioIndex==1) RuntimeProfile->WindVelocityMps=FVector(0,14,0);
+    if(ScenarioIndex==2) { RuntimeProfile->DryMassKg*=1.05; }
+    // One launch/catch axis. The mount is directly between the tower arms.
+    RuntimeProfile->LaunchOffsetM.X=Tower->CaptureOffsetM.X;
+    RuntimeProfile->LaunchOffsetM.Y=Tower->CaptureOffsetM.Y;
+    CaptureWorldM=Tower->GetCaptureBaseWorld()/100;
+    LaunchWorldM=Tower->GetActorTransform().TransformPosition(RuntimeProfile->LaunchOffsetM*100)/100;
+    Body->SetSimulatePhysics(false);
+    Vehicle->SetActorLocationAndRotation((LaunchWorldM+FVector(0,0,BaseOffsetM))*100,Tower->GetActorQuat(),false,nullptr,ETeleportType::TeleportPhysics);
+    Body->SetWorldLocationAndRotation((LaunchWorldM+FVector(0,0,BaseOffsetM))*100,Tower->GetActorQuat(),false,nullptr,ETeleportType::TeleportPhysics);
+    PropellantKg=RuntimeProfile->PropellantMassKg; RcsPropellantKg=RuntimeProfile->ReactionControlPropellantKg; bSeparated=false;
+    UpdateMass(); InitialMassKg=MassKg;
+    Body->SetPhysicsLinearVelocity(FVector::ZeroVector);
+    Body->SetPhysicsAngularVelocityInRadians(FVector::ZeroVector);
+    MissionTime=0; PhaseTime=0; CaptureDwell=0; ActualThrustN=0; Throttle=0; ActiveEngines=0;
+    AppliedGimbal=FVector::ZeroVector;
+    PeakAltitudeM=0; PeakTiltDeg=0; SampleClock=0; bResultWritten=false;
+    CaptureErrorAtLatch=0; CaptureSpeedAtLatch=0; CaptureTiltAtLatch=0; LatchPositionM=FVector::ZeroVector;
+    InitializeFlightCsv();
+    Trace.Reset(); PhaseEvents.Reset();
+    MainFuelConsumedKg=0; SeparationMassKg=0; CaptureHeadingAtLatch=0; CaptureLugAtLatch=0;
+    LandingIgnitionAltitudeM=0; UnpoweredSeconds=0; BoostbackIgnitionAltitudeM=0; PeakDynamicPressurePa=0;
+    LandingBurnSeconds=0; BoostbackSeconds=0; FinControlSeconds=0; PeakDownrangeM=0; PeakSpeedMps=0;
+    bUnpoweredViolation=false; GridFinAnglesDeg=FVector::ZeroVector; AeroForceN=FVector::ZeroVector;
+    bContactShutdown=false;SupportContactCount=0;SupportImpulseNs=FVector2D::ZeroVector;
+    EverSupportContact[0]=EverSupportContact[1]=false;
+    StructuralContactCount=0;
+    GridFinAuthority=0; PredictedMissM=0; TimeToImpactS=0; PredictedImpactM=FVector::ZeroVector;
+    ResetPhysicalActuators();
+    ++MissionGeneration;
+    LaunchSequence=FRecoveryLaunchSequence();DelugeFlow=0;
+    Experiment=FRecoveryFlightExperiment();
+    FString FaultTimeline;
+    if(FParse::Value(FCommandLine::Get(),TEXT("RecoveryFaults="),FaultTimeline))
+    {
+        TArray<FString> Items;FaultTimeline.ParseIntoArray(Items,TEXT(";"),true);
+        for(const auto& Item:Items)
+        {
+            TArray<FString> Fields;Item.ParseIntoArray(Fields,TEXT(":"),false);
+            if(Fields.Num()!=4)continue;
+            FRecoveryScheduledFault Fault;Fault.Kind=FCString::Atoi(*Fields[0]);Fault.Index=FCString::Atoi(*Fields[1]);
+            Fault.StartS=FCString::Atod(*Fields[2]);Fault.DurationS=FCString::Atod(*Fields[3]);
+            if(Fault.Kind>=1 && Fault.Kind<=3 && FMath::IsFinite(Fault.StartS) && Fault.StartS>=0 && FMath::IsFinite(Fault.DurationS) && Fault.DurationS>0)
+                Experiment.Schedule.Add(Fault);
+        }
+    }
+    SetPhase(ERecoveryPhase::Ready,TEXT("RTLS / estimated mass & aero / SPACE to launch"));
+    InitializeDynamics();
+}
+
+void ASuperHeavyRecoveryDirector::StartMission()
+{
+    if(!bInitialized || Phase!=ERecoveryPhase::Ready) return;
+    if(!URecoveryStartupSubsystem::IsReady(GetWorld())){bStartWhenReady=true;return;}
+    bStartWhenReady=false;
+    FString Reason;
+    if(!RuntimeProfile->Validate(Reason)) { SetPhase(ERecoveryPhase::Aborted,Reason); WriteResult(false,Reason); return; }
+    if(!Tower->GetActorScale3D().Equals(FVector::OneVector,0.001) || Tower->GetActorUpVector().Z<0.9999 ||
+        Tower->CaptureOffsetM.Z+Tower->ArmContactHeightAboveBaseM>Tower->TowerHeightM-2 ||
+        RuntimeProfile->ApogeeM<Tower->TowerHeightM+30)
+    { SetPhase(ERecoveryPhase::Aborted,TEXT("Tower requires unit scale, vertical rails and 30 m of flight clearance")); WriteResult(false,StatusMessage); return; }
+    LaunchSequence.Start();MissionTime=-LaunchSequence.RemainingS;
+    SetPhase(ERecoveryPhase::Countdown,LaunchSequence.Label());
+}
+
+void ASuperHeavyRecoveryDirector::RestartMission() { SelectScenario(ScenarioIndex); StartMission(); }
+void ASuperHeavyRecoveryDirector::AbortMission()
+{
+    bStartWhenReady=false;
+    if(Phase==ERecoveryPhase::Captured || Phase==ERecoveryPhase::Aborted) return;
+    LaunchSequence.Abort();
+    SetPhase(ERecoveryPhase::Aborted,TEXT("Operator abort / engines shut down"));
+    ActiveEngines=0; WriteResult(false,StatusMessage);
+}
+
+FString ASuperHeavyRecoveryDirector::GetPhaseLabel() const
+{
+    static const TCHAR* Labels[]={TEXT("READY"),TEXT("COUNTDOWN"),TEXT("ASCENT"),TEXT("SEPARATION"),TEXT("BOOSTBACK"),TEXT("COAST"),TEXT("ENTRY"),TEXT("LANDING BURN"),TEXT("CAPTURE"),TEXT("SECURED"),TEXT("ABORTED")};
+    return Labels[static_cast<int>(Phase)];
+}
+
+void ASuperHeavyRecoveryDirector::SetPhase(ERecoveryPhase NewPhase,const FString& Message)
+{
+    RecordPhase(NewPhase,Message,MissionTime,AltitudeM,MassKg);
+}
+
+void ASuperHeavyRecoveryDirector::RecordPhase(ERecoveryPhase NewPhase,const FString& Message,double TimeS,double EventAltitudeM,double EventMassKg)
+{
+    Phase=NewPhase; PhaseTime=0; StatusMessage=Message;
+    if(NewPhase!=ERecoveryPhase::Aborted) LastFlightPhase=NewPhase;
+    PhaseEvents.Add(FString::Printf(TEXT("%s %.2fs %.0fm %.0fkg"),*GetPhaseLabel(),TimeS,EventAltitudeM,EventMassKg));
+    UE_LOG(LogRecovery,Display,TEXT("RECOVERY phase=%s t=%.2f %s"),*GetPhaseLabel(),TimeS,*Message);
+}
+
+void ASuperHeavyRecoveryDirector::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+    if(bStartWhenReady && URecoveryStartupSubsystem::IsReady(GetWorld()))StartMission();
+    if(!bInitialized) return;
+    // Match FChaosScene::SetUpForFrame: the solver caps long frames, notably when
+    // the editor is throttled in the background. Mission time and actuator lag
+    // must advance by simulated time, not by the discarded wall-clock interval.
+    const auto* Physics=UPhysicsSettings::Get();
+    const double PhysicsBudget=Physics->bSubstepping ? Physics->MaxSubstepDeltaTime*Physics->MaxSubsteps : Physics->MaxPhysicsDeltaTime;
+    const double Dt=PhysicsBudget>0 ? FMath::Min(double(DeltaSeconds),PhysicsBudget) : double(DeltaSeconds);
+    if(Dt<=0) return;
+    PhysicsAudit->RecordGameStep(Dt);
+    ConsumeDynamicsState();
+    DynamicsCommand=FRecoveryDynamicsCommand();
+    if(!GuidanceState.bFlightStarted)PhaseTime+=Dt;
+    if(!GuidanceState.bFlightStarted && Phase!=ERecoveryPhase::Ready && Phase!=ERecoveryPhase::Countdown && !bResultWritten) MissionTime+=Dt;
+    UpdateNavigation();
+    if((Phase==ERecoveryPhase::Ready || Phase==ERecoveryPhase::Countdown) && Experiment.AdvanceGroundFaults(Dt))RecordExperiment(TEXT("TIMED_RESTORE"));
+    if(Phase==ERecoveryPhase::Countdown) TickLaunchSequence(Dt);
+    PrepareGroundCommand();
+    PeakAltitudeM=FMath::Max(PeakAltitudeM,AltitudeM); PeakTiltDeg=FMath::Max(PeakTiltDeg,TiltDeg);
+    if(Phase==ERecoveryPhase::Ready || Phase==ERecoveryPhase::Countdown)
+    {
+        if(Phase==ERecoveryPhase::Countdown && LaunchSequence.IsIgnitionCommanded())
+        {
+            ActiveEngines=33;
+            SetFlightCommand(Body->GetUpVector()*(33*RuntimeProfile->EngineThrustN/MassKg),Body->GetUpVector());
+        }
+    }
+    else if(!ContactFixture.IsEmpty() && Phase==ERecoveryPhase::Capture)TickContactFixture(Dt);
+    if(Phase==ERecoveryPhase::Aborted)
+    {
+        ActiveEngines=0;
+        SetFlightCommand(FVector::ZeroVector,Body->GetUpVector());
+    }
+    SubmitDynamicsCommand();
+
+    SampleClock+=Dt;
+    if(SampleClock>=0.1 && !bResultWritten)
+    {
+        SampleClock=0;
+        Trace.Add(FVector2D(MissionTime,AltitudeM));
+        if(Trace.Num()>8000) Trace.RemoveAt(0);
+        RecordFlightCsvSample();
+    }
+}
+
+
+void ASuperHeavyRecoveryDirector::EndPlay(const EEndPlayReason::Type Reason)
+{
+    if(bInitialized && !bResultWritten && MissionTime>0) WriteResult(false,TEXT("Session ended before capture"));
+    Super::EndPlay(Reason);
+}

@@ -1,0 +1,37 @@
+name: Unreal validation
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: unreal-windows
+  cancel-in-progress: false
+jobs:
+  physics:
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, Windows, X64, unreal-5.8-nvidia]
+    timeout-minutes: 120
+    env:
+      UE_ROOT: ${{ vars.UE_ROOT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+          persist-credentials: false
+      - name: Check engine
+        shell: pwsh
+        run: |
+          if (!$env:UE_ROOT -or !(Test-Path "$env:UE_ROOT/Engine/Build/BatchFiles/Build.bat")) { throw 'Set UE_ROOT to the installed Unreal Engine 5.8 directory' }
+          git lfs fsck
+          if ($LASTEXITCODE) { throw 'Git LFS verification failed' }
+      - name: Build and test physical models
+        shell: pwsh
+        run: |
+          ./Tools/Runtime/build_simulator.ps1 -EngineRoot $env:UE_ROOT
+          ./Tests/Unreal/Automation/run_model_tests.ps1 -EngineRoot $env:UE_ROOT -Prefix CIPhysics
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: physics-evidence-${{ github.run_id }}
+          path: Saved/Recovery/CIPhysics*
+          retention-days: 14
