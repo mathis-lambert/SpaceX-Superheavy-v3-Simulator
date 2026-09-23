@@ -1,9 +1,9 @@
 """Install measured coastal geometry and the original animated gas volume."""
-import sys,json
+import sys,json,runpy
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'Shared'))
 from project_paths import ART_ROOT,SAVED_ROOT
-from unreal_materials import u,E,A,prop,material,expression,scalar,custom,color,connect,save
+from unreal_materials import u,A,prop
 from unreal_imports import import_scenery_mesh
 
 root='/Game/Starbase';tools=u.AssetToolsHelpers.get_asset_tools()
@@ -26,16 +26,9 @@ if not svt:
         if A.does_asset_exist(generated_path):A.delete_asset(generated_path)
     svt=u.load_asset(svt_path)
 assert svt and svt.get_num_frames()==64,(svt,svt.get_num_frames() if svt else 0)
-m=material(root+'/Materials/Effects/M_TurbulentDeluge')
-prop(m,'blend_mode',u.BlendMode.BLEND_ADDITIVE);prop(m,'material_domain',u.MaterialDomain.MD_VOLUME)
-prop(m,'used_with_heterogeneous_volumes',True)
-field=expression(m,u.MaterialExpressionSparseVolumeTextureSampleParameter)
-prop(field,'parameter_name','DensityVolume');prop(field,'sparse_volume_texture',svt)
-strength=scalar(m,'DensityScale',1.);voxel=scalar(m,'MetersPerVoxel',.15625)
-d=custom(m,{'A':(field,'Attributes A'),'S':strength,'V':voxel},'return max(A.r,0)*S*V*3.0;',u.CustomMaterialOutputType.CMOT_FLOAT1)
-connect(m,d,u.MaterialProperty.MP_SUBSURFACE_COLOR)
-connect(m,color(m,(.92,.95,.975)),u.MaterialProperty.MP_BASE_COLOR)
-connect(m,color(m,(0,0,0)),u.MaterialProperty.MP_EMISSIVE_COLOR);save(m)
+# The canonical builder owns frame interpolation and boundary fading.
+# Imports must not recreate the superseded single-frame material.
+runpy.run_path(str(Path(__file__).with_name('build_continuous_steam.py')), run_name='__main__')
 report=dict(success=True,volume_frames=svt.get_num_frames(),volume_resolution=[svt.get_size_x(),svt.get_size_y(),svt.get_size_z()],frame_transform=str(svt.get_frame_transform()),terrain=[])
 if '-VolumesOnly' not in u.SystemLibrary.get_command_line():
     for j in range(4):
