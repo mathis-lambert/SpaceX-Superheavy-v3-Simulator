@@ -1,4 +1,4 @@
-#include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
+#include "Recovery/Diagnostics/RecoveryDiagnosticsComponent.h"
 #include "Recovery/Presentation/RecoveryAudioComponent.h"
 #include "Recovery/Presentation/RecoveryStartupSubsystem.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
@@ -82,7 +82,7 @@ void URecoveryDiagnosticsComponent::TickComponent(float Dt,ELevelTick Type,FActo
         MaxAngleErrorDeg=FMath::Max(MaxAngleErrorDeg,FMath::RadiansToDegrees(PC->PlayerCameraManager->GetCameraRotation().Quaternion().AngularDistance(PC->GetViewTarget()->GetActorQuat())));
     }
     bCaptured|=D->Phase==ERecoveryPhase::Captured;
-    if(D->Phase==ERecoveryPhase::Captured && D->GetCameraMode()==6)
+    if(D->Phase==ERecoveryPhase::Captured && D->Viewer->GetCameraMode()==6)
     {
         const FVector Offset=PC->PlayerCameraManager->GetCameraLocation()-D->GetBody()->GetComponentLocation();
         const FQuat Rotation=PC->PlayerCameraManager->GetCameraRotation().Quaternion();

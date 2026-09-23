@@ -3,8 +3,7 @@ import sys,math,json
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'Shared'))
 from project_paths import ART_ROOT
-from earth_geography import point,geo,height,LIDAR
-from site_landscape import ROAD,dune_height,road_height
+from site_landscape import ROAD,road_height
 import bpy
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
 
@@ -20,33 +19,6 @@ def mesh(name,vertices,faces,uv):
     bpy.ops.object.select_all(action='DESELECT');obj.select_set(True);bpy.context.view_layer.objects.active=obj
     bpy.ops.export_scene.fbx(filepath=str(OUT/(name+'.fbx')),use_selection=True,object_types={'MESH'},axis_forward='-Y',axis_up='Z',mesh_smooth_type='FACE')
     reports.append(dict(name=name,vertices=len(vertices),faces=len(faces)))
-
-def grid(name,nx,ny,fn):
-    vertices=[];uv=[];faces=[]
-    for j in range(ny+1):
-        for i in range(nx+1):
-            p,t=fn(i/nx,j/ny);vertices.append(p);uv.append(t)
-    for j in range(ny):
-        for i in range(nx):
-            a=j*(nx+1)+i;faces.append((a,a+1,a+nx+2,a+nx+1))
-    mesh(name,vertices,faces,uv)
-
-# Legacy fallback only. The surveyed build_lidar_terrain.py owns all sixteen
-# terrain tiles when LiDAR is available; this builder then authors roads only.
-for j in (() if LIDAR is not None else (1,2)):
-    for i in (1,2):
-        def terrain(u,v,i=i,j=j):
-            x,y=-6000+3000*(i+u),-6000+3000*(j+v)
-            if abs(x)==3000 or abs(y)==3000:
-                axis=y if abs(x)==3000 else x
-                a=math.floor((axis+3000)/(3000/256))*(3000/256)-3000;b=a+3000/256
-                p0=point(*geo(x,a),height(x,a)) if abs(x)==3000 else point(*geo(a,y),height(a,y))
-                p1=point(*geo(x,b),height(x,b)) if abs(x)==3000 else point(*geo(b,y),height(b,y))
-                t=(axis-a)/(b-a)
-                p=tuple(aa+(bb-aa)*t for aa,bb in zip(p0,p1))
-            else:p=point(*geo(x,y),dune_height(x,y))
-            return p,(u,v)
-        grid(f'SM_BocaChica_{i}_{j}',512,512,terrain)
 
 # Each segment shares a mitered boundary; shoulders carry the surface into gravel.
 def ribbon(name,half_width,offset):

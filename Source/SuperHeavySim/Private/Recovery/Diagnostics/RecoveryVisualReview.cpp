@@ -1,4 +1,4 @@
-#include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
+#include "Recovery/Diagnostics/RecoveryDiagnosticsComponent.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Interface/RecoveryPlayerController.h"
 #include "Camera/PlayerCameraManager.h"
@@ -28,7 +28,7 @@ void URecoveryDiagnosticsComponent::TickVisualReview()
             for(double At:{1.,3.,5.})
                 if(PreviousReviewTime<At && Time>=At)Name=FString::Printf(TEXT("VFX_Close_%03d"),int(At));
     }
-    if(D->GetCameraMode()==12 && PreviousReviewTime<210. && Time>=210.)Name=TEXT("EarthHorizon");
+    if(D->Viewer->GetCameraMode()==12 && PreviousReviewTime<210. && Time>=210.)Name=TEXT("EarthHorizon");
     if(FParse::Param(FCommandLine::Get(),TEXT("RecoveryDetailReview")))
     {
         double PeakReaction=0;
@@ -65,7 +65,7 @@ void URecoveryDiagnosticsComponent::TickVisualReview()
     Frame->SetNumberField(TEXT("altitude_m"),D->AltitudeM);
     Frame->SetNumberField(TEXT("solar_hour"),PC->TimeOfDay);
     Frame->SetStringField(TEXT("phase"),D->GetPhaseLabel());
-    Frame->SetNumberField(TEXT("camera"),D->GetCameraMode());
+    Frame->SetNumberField(TEXT("camera"),D->Viewer->GetCameraMode());
     Frame->SetNumberField(TEXT("fov_deg"),PC->PlayerCameraManager->GetFOVAngle());
     double PeakReaction=0;
     for(const auto& Force:D->GetReactionForcesBodyN())PeakReaction=FMath::Max(PeakReaction,Force.Size());

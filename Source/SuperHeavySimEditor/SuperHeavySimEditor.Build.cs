@@ -5,6 +5,6 @@ public class SuperHeavySimEditor : ModuleRules
     {
         PCHUsage=PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicDependencyModuleNames.AddRange(new[]{"Core","CoreUObject","Engine"});
-        PrivateDependencyModuleNames.AddRange(new[]{"UnrealEd","BlueprintGraph","Kismet"});
+        PrivateDependencyModuleNames.AddRange(new[]{"UnrealEd"});
     }
 }

@@ -23,7 +23,7 @@ void ARecoveryPlayerController::TickInteractiveAudit()
     {
         if(AuditStage==0)
         {
-            bAtHome=false;SetMenuVisible(false);D->SetCameraMode(8);
+            bAtHome=false;SetMenuVisible(false);D->Viewer->SetCameraMode(8);
             bAutomaticOrbit=false;CameraGrain=0;MotionBlur=0;bCameraDepthOfField=false;
             float Height=80000,Pitch=-45,Hour=12;
             FParse::Value(FCommandLine::Get(),TEXT("CloudHeight="),Height);
@@ -56,7 +56,7 @@ void ARecoveryPlayerController::TickInteractiveAudit()
     const auto Check=[&](const TCHAR* Name,bool Passed){bAuditPassed&=Passed;AuditChecks.Add(FString::Printf(TEXT("%s: %s"),Name,Passed?TEXT("PASS"):TEXT("FAIL")));};
     const auto Planet=[&](double Altitude)
     {
-        D->SetCameraMode(8);
+        D->Viewer->SetCameraMode(8);
         if(auto* Camera=Cast<ACameraActor>(GetViewTarget()))
         {
             const FVector P(0,0,Altitude*100);
@@ -68,7 +68,7 @@ void ARecoveryPlayerController::TickInteractiveAudit()
     switch(AuditStage)
     {
     case 0:
-        bAtHome=false;SetMenuVisible(false);D->SetCameraMode(0);TimeOfDay=12;CameraGrain=0;MotionBlur=0;bAutomaticOrbit=false;
+        bAtHome=false;SetMenuVisible(false);D->Viewer->SetCameraMode(0);TimeOfDay=12;CameraGrain=0;MotionBlur=0;bAutomaticOrbit=false;
         Photography.bAutomaticFraming=true;bCameraDepthOfField=false;AuditDeadline=Now+8;
         if(FParse::Param(FCommandLine::Get(),TEXT("RecoverySteamOnly"))){AuditStage=11;return;}break;
     case 1:
@@ -89,7 +89,7 @@ void ARecoveryPlayerController::TickInteractiveAudit()
     case 10:Shot(TEXT("Horizon80km.png"));AuditDeadline=Now+1;break;
     case 11:
         if(FParse::Param(FCommandLine::Get(),TEXT("RecoverySkyOnly"))){FPlatformMisc::RequestExitWithStatus(false,bAuditPassed?0:1);++AuditStage;return;}
-        SelectPart({});D->SetCameraMode(8);D->ResetExperiments();
+        SelectPart({});D->Viewer->SetCameraMode(8);D->ResetExperiments();
         if(auto* Camera=Cast<ACameraActor>(GetViewTarget()))
         {
             const FVector Base=D->GetBody()->GetComponentLocation();

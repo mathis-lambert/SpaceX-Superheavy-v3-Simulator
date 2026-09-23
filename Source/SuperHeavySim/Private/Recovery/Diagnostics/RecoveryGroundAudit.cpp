@@ -1,4 +1,4 @@
-#include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
+#include "Recovery/Diagnostics/RecoveryDiagnosticsComponent.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Interface/RecoveryPlayerController.h"
 #include "Recovery/Presentation/RecoveryVaporComponent.h"

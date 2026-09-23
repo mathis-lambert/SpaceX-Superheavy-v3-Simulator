@@ -71,7 +71,7 @@ void ARecoveryPlayerController::BeginPlay()
     GConfig->GetInt(TEXT("Recovery.Interface"),TEXT("Camera"),StartingCamera,GGameUserSettingsIni);
     GConfig->GetBool(TEXT("Recovery.Interface"),TEXT("Telemetry"),bTelemetry,GGameUserSettingsIni);
     GConfig->GetFloat(TEXT("Recovery.Interface"),TEXT("EngineLightScale"),EngineLightScale,GGameUserSettingsIni);
-    SelectedScenario=FMath::Clamp(SelectedScenario,0,2);StartingCamera=FMath::Clamp(StartingCamera,0,ASuperHeavyRecoveryDirector::CameraCount-1);
+    SelectedScenario=FMath::Clamp(SelectedScenario,0,2);StartingCamera=FMath::Clamp(StartingCamera,0,URecoveryCameraComponent::CameraCount-1);
     EngineLightScale=FMath::Clamp(EngineLightScale,0.f,2.f);
 }
 void ARecoveryPlayerController::SetupInputComponent()
@@ -99,8 +99,8 @@ void ARecoveryPlayerController::HandleViewerAction(RecoveryInput::EAction Action
     switch(Action)
     {
     case EAction::Cameras:ToggleCameraPicker();break;
-    case EAction::NextCamera:D->CycleCamera();break;
-    case EAction::FreeCamera:D->ToggleFreeCamera();break;
+    case EAction::NextCamera:D->Viewer->CycleCamera();break;
+    case EAction::FreeCamera:D->Viewer->ToggleFreeCamera();break;
     case EAction::Telemetry:SetTelemetry(!D->bShowTelemetry);break;
     case EAction::Inspect:ToggleForceOverlay();break;
     case EAction::Computer:ToggleFlightComputer();break;
@@ -114,7 +114,7 @@ void ARecoveryPlayerController::PlayerTick(float Dt)
 {
     Super::PlayerTick(Dt);
     if(bOrbitDragging && (!IsInputKeyDown(EKeys::RightMouseButton) || !FSlateApplication::Get().IsActive()))EndOrbitDrag();
-    if(IsPaused())if(auto* D=GetDirector())D->RefreshViewerCamera(FApp::GetDeltaTime());
+    if(IsPaused())if(auto* D=GetDirector())D->Viewer->UpdateCamera(FApp::GetDeltaTime());
     if(!bReconstructionInitialized && RecoveryRenderSettings::IsReconstructionReady())
     {
         ReconstructionMode=RecoveryRenderSettings::ApplyReconstruction(ReconstructionMode);
@@ -130,7 +130,7 @@ void ARecoveryPlayerController::PlayerTick(float Dt)
         EffectivePlaybackRate=FMath::Min(PlaybackRate,Maximum);
         UGameplayStatics::SetGlobalTimeDilation(this,EffectivePlaybackRate);
     }
-    // Wait for the director's BeginPlay, including removal of legacy widgets.
+    // Attach the frontend once the physical vehicle is initialized.
     if(!bFrontendInitialized && ShouldShowFrontend() && GetDirector() && GetDirector()->GetBody() && GEngine->GameViewport)
     {
         bFrontendInitialized=true;
@@ -158,7 +158,7 @@ void ARecoveryPlayerController::SetMenuVisible(bool bVisible)
     if(auto* D=GetDirector())
     {
         if(bVisible && !bAtHome) bTelemetry=D->bShowTelemetry;
-        D->bFrontendView=bAtHome;
+        D->Viewer->bFrontendView=bAtHome;
     }
     if(bVisible && Menu)
     {
@@ -196,7 +196,7 @@ void ARecoveryPlayerController::LaunchFlight()
         if(D->Phase!=ERecoveryPhase::Ready || D->ScenarioName!=ExpectedScenario)D->SelectScenario(SelectedScenario);
         Selection={};bFlightComputer=false;
         SetWeatherPreset(WeatherPreset);
-        D->SetCameraMode(StartingCamera);
+        D->Viewer->SetCameraMode(StartingCamera);
         D->bShowTelemetry=bTelemetry;bAtHome=false;SetMenuVisible(false);D->StartMission();SavePreferences();
     }
 }
@@ -204,11 +204,11 @@ void ARecoveryPlayerController::ToggleCameraPicker()
 {
     if(bAtHome || !Menu || bVideoConfirmation) return;
     if(bMenuOpen && !IsPaused()) { ResumeFlight();return; }
-    Menu->ShowPage(6);SetMenuVisible(true);
+    Menu->ShowPage(ERecoveryMenuPage::Cameras);SetMenuVisible(true);
 }
 void ARecoveryPlayerController::ChooseCamera(int32 Mode)
 {
-    if(auto* D=GetDirector()) { if(Mode==8 && D->GetCameraMode()!=8) D->ToggleFreeCamera();else D->SetCameraMode(Mode); }
+    if(auto* D=GetDirector()) { if(Mode==8 && D->Viewer->GetCameraMode()!=8) D->Viewer->ToggleFreeCamera();else D->Viewer->SetCameraMode(Mode); }
     ResumeFlight();
 }
 void ARecoveryPlayerController::ResumeFlight()
@@ -229,12 +229,12 @@ void ARecoveryPlayerController::RestartFlight()
 void ARecoveryPlayerController::OpenMissionControls()
 {
     if(bAtHome || !Menu)return;
-    SetPause(true);Menu->ShowPage(10);SetMenuVisible(true);
+    SetPause(true);Menu->ShowPage(ERecoveryMenuPage::Mission);SetMenuVisible(true);
 }
 void ARecoveryPlayerController::ConfirmRestart()
 {
     if(bAtHome || !Menu)return;
-    SetPause(true);Menu->ShowPage(16);SetMenuVisible(true);
+    SetPause(true);Menu->ShowPage(ERecoveryMenuPage::RestartConfirmation);SetMenuVisible(true);
 }
 void ARecoveryPlayerController::SetPlaybackRate(float Rate)
 {
@@ -295,12 +295,12 @@ void ARecoveryPlayerController::SetHardwareRayTracing(bool Enabled)
 void ARecoveryPlayerController::BeginVideoConfirmation(FIntPoint PreviousResolution,int32 PreviousWindowMode)
 {
     PreviousVideoResolution=PreviousResolution;PreviousVideoWindowMode=PreviousWindowMode;
-    bVideoConfirmation=true;VideoConfirmDeadline=FPlatformTime::Seconds()+15;if(Menu) Menu->ShowPage(4);
+    bVideoConfirmation=true;VideoConfirmDeadline=FPlatformTime::Seconds()+15;if(Menu) Menu->ShowPage(ERecoveryMenuPage::VideoConfirmation);
 }
 void ARecoveryPlayerController::ConfirmVideo()
 {
     if(auto* S=GEngine->GetGameUserSettings()) { S->ConfirmVideoMode();S->SaveSettings(); }
-    bVideoConfirmation=false;if(Menu) Menu->ShowPage(2);
+    bVideoConfirmation=false;if(Menu) Menu->ShowPage(ERecoveryMenuPage::Display);
 }
 void ARecoveryPlayerController::RevertVideo()
 {
@@ -312,7 +312,7 @@ void ARecoveryPlayerController::RevertVideo()
         S->ApplyResolutionSettings(false);S->ConfirmVideoMode();S->SaveSettings();
         UE_LOG(LogTemp,Display,TEXT("RECOVERY_UI display restored=%dx%d mode=%d"),PreviousVideoResolution.X,PreviousVideoResolution.Y,PreviousVideoWindowMode);
     }
-    bVideoConfirmation=false;if(Menu) Menu->ShowPage(2);
+    bVideoConfirmation=false;if(Menu) Menu->ShowPage(ERecoveryMenuPage::Display);
 }
 void ARecoveryPlayerController::EndPlay(const EEndPlayReason::Type Reason)
 {

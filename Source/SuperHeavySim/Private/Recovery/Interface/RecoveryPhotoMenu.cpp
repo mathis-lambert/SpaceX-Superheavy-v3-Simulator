@@ -30,22 +30,22 @@ void SRecoveryMenu::PhotoPage(TSharedRef<SVerticalBox> Rows)
 {
     auto* PC=Controller.Get();if(!PC)return;
     auto& P=PC->Photography;
-    if(Page==7)
+    if(Page==ERecoveryMenuPage::Photography)
     {
         TArray<FString> Names={TEXT("Choose a look")};for(const auto& Preset:RecoveryPhotography::Presets())Names.Add(Preset.Name);
-        Choice(Rows,TEXT("Photographic preset"),Names,0,[PC,this](int32 I){if(I>0){PC->ApplyPhotoPreset(I-1);ShowPage(7);}});
-        for(const auto& Item:TArray<TPair<FString,int32>>{{TEXT("Camera optics"),18},{TEXT("Color & exposure"),19},{TEXT("Environment"),20},{TEXT("Saved looks"),21}})
+        Choice(Rows,TEXT("Photographic preset"),Names,0,[PC,this](int32 I){if(I>0){PC->ApplyPhotoPreset(I-1);ShowPage(ERecoveryMenuPage::Photography);}});
+        for(const auto& Item:TArray<TPair<FString,ERecoveryMenuPage>>{{TEXT("Camera optics"),ERecoveryMenuPage::Optics},{TEXT("Color & exposure"),ERecoveryMenuPage::Color},{TEXT("Environment"),ERecoveryMenuPage::Environment},{TEXT("Saved looks"),ERecoveryMenuPage::SavedLooks}})
             Rows->AddSlot().AutoHeight().Padding(0,0,0,10)[Button(Item.Key,[this,Id=Item.Value](){ShowPage(Id);})];
     }
-    else if(Page==18)
+    else if(Page==ERecoveryMenuPage::Optics)
     {
-        Toggle(Rows,TEXT("Automatic framing"),P.bAutomaticFraming,[PC,this](bool V){PC->Photography.bAutomaticFraming=V;PC->SavePreferences();ShowPage(18);});
+        Toggle(Rows,TEXT("Automatic framing"),P.bAutomaticFraming,[PC,this](bool V){PC->Photography.bAutomaticFraming=V;PC->SavePreferences();ShowPage(ERecoveryMenuPage::Optics);});
         if(!P.bAutomaticFraming)PhotoSlider(Rows,TEXT("Focal length / 36 mm sensor"),&P.FocalLengthMm,12,600,TEXT("mm"),true);
-        Toggle(Rows,TEXT("Depth of field"),PC->bCameraDepthOfField,[PC,this](bool V){PC->bCameraDepthOfField=V;PC->SavePreferences();ShowPage(18);});
+        Toggle(Rows,TEXT("Depth of field"),PC->bCameraDepthOfField,[PC,this](bool V){PC->bCameraDepthOfField=V;PC->SavePreferences();ShowPage(ERecoveryMenuPage::Optics);});
         if(PC->bCameraDepthOfField)
         {
             PhotoSlider(Rows,TEXT("Aperture"),&P.Aperture,1.4f,22,TEXT("f-stop"),true);
-            Toggle(Rows,TEXT("Track camera subject"),P.bAutomaticFocus,[PC,this](bool V){PC->Photography.bAutomaticFocus=V;PC->SavePreferences();ShowPage(18);});
+            Toggle(Rows,TEXT("Track camera subject"),P.bAutomaticFocus,[PC,this](bool V){PC->Photography.bAutomaticFocus=V;PC->SavePreferences();ShowPage(ERecoveryMenuPage::Optics);});
             if(!P.bAutomaticFocus)PhotoSlider(Rows,TEXT("Focus distance"),&P.FocusDistanceM,2,20000,TEXT("m"),true);
         }
         PhotoSlider(Rows,TEXT("Camera vibration"),&P.MotionStrength,0,1,TEXT(""));
@@ -55,7 +55,7 @@ void SRecoveryMenu::PhotoPage(TSharedRef<SVerticalBox> Rows)
         Toggle(Rows,TEXT("Automatic cinematic orbit"),PC->bAutomaticOrbit,[PC](bool V){PC->bAutomaticOrbit=V;PC->SavePreferences();});
         PhotoSlider(Rows,TEXT("Orbit speed"),&P.OrbitSpeed,0,3,TEXT("x"));
     }
-    else if(Page==19)
+    else if(Page==ERecoveryMenuPage::Color)
     {
         PhotoSlider(Rows,TEXT("Exposure compensation"),&P.ExposureBiasEV,-3,3,TEXT("EV"));
         PhotoSlider(Rows,TEXT("White balance"),&P.WhiteBalanceK,2500,10000,TEXT("K"));
@@ -64,11 +64,11 @@ void SRecoveryMenu::PhotoPage(TSharedRef<SVerticalBox> Rows)
         PhotoSlider(Rows,TEXT("Contrast"),&P.Contrast,.7f,1.3f,TEXT(""));
         PhotoSlider(Rows,TEXT("Film grain"),&PC->CameraGrain,0,.35f,TEXT(""));
     }
-    else if(Page==21)
+    else if(Page==ERecoveryMenuPage::SavedLooks)
     {
-        Choice(Rows,TEXT("Saved look"),{TEXT("Look 1"),TEXT("Look 2"),TEXT("Look 3")},PhotoSlot,[this](int32 I){PhotoSlot=I;ShowPage(21);});
-        Rows->AddSlot().AutoHeight().Padding(0,0,0,10)[Button(TEXT("Save current look"),[PC,this](){PC->SavePhotoLook(PhotoSlot);ShowPage(21);},true)];
-        if(PC->HasPhotoLook(PhotoSlot))Rows->AddSlot().AutoHeight()[Button(TEXT("Load saved look"),[PC,this](){PC->LoadPhotoLook(PhotoSlot);ShowPage(21);})];
+        Choice(Rows,TEXT("Saved look"),{TEXT("Look 1"),TEXT("Look 2"),TEXT("Look 3")},PhotoSlot,[this](int32 I){PhotoSlot=I;ShowPage(ERecoveryMenuPage::SavedLooks);});
+        Rows->AddSlot().AutoHeight().Padding(0,0,0,10)[Button(TEXT("Save current look"),[PC,this](){PC->SavePhotoLook(PhotoSlot);ShowPage(ERecoveryMenuPage::SavedLooks);},true)];
+        if(PC->HasPhotoLook(PhotoSlot))Rows->AddSlot().AutoHeight()[Button(TEXT("Load saved look"),[PC,this](){PC->LoadPhotoLook(PhotoSlot);ShowPage(ERecoveryMenuPage::SavedLooks);})];
         else Rows->AddSlot().AutoHeight()[Text(TEXT("Empty slot"),14,RecoveryUI::Muted)];
     }
 }

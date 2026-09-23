@@ -30,7 +30,7 @@ void ARecoveryPlayerController::TickControlsAudit()
     {
         if(AuditStage==0)
         {
-            bAtHome=false;SetMenuVisible(false);D->SetCameraMode(8);TimeOfDay=12;SetReconstruction(0);bTelemetry=false;D->bShowTelemetry=false;
+            bAtHome=false;SetMenuVisible(false);D->Viewer->SetCameraMode(8);TimeOfDay=12;SetReconstruction(0);bTelemetry=false;D->bShowTelemetry=false;
             const FVector Base=FlightGeometry::BoosterBaseCm(*D->GetBody());
             if(auto* C=Cast<ACameraActor>(GetViewTarget())){const FVector P=Base+FVector(3000,-1800,3800);C->SetActorLocationAndRotation(P,(Base+FVector(445,0,4000)-P).Rotation());C->GetCameraComponent()->SetFieldOfView(60);}
             AuditStage=1;AuditDeadline=Now+12;return;
@@ -58,12 +58,12 @@ void ARecoveryPlayerController::TickControlsAudit()
     if(AuditStage==1){Shot(TEXT("Home.png"));AuditDeadline=Now+1;AuditStage=2;return;}
     if(AuditStage==2)
     {
-        SelectedScenario=1;ReturnHome();bAtHome=false;SetMenuVisible(false);D->SetCameraMode(4);D->SetWindScale(2);
+        SelectedScenario=1;ReturnHome();bAtHome=false;SetMenuVisible(false);D->Viewer->SetCameraMode(4);D->SetWindScale(2);
         bForceOverlay=false;bTelemetry=true;D->bShowTelemetry=true;SetPlaybackRate(1);
         AuditMissionTime=D->MissionTime;AuditDeadline=Now+5;AuditStage=3;return;
     }
     if(AuditStage==3){Shot(TEXT("CryogenicClose.png"));AuditStage=4;AuditDeadline=Now+1;return;}
-    if(AuditStage==4){Menu->ShowPage(3);SetMenuVisible(true);Shot(TEXT("Controls.png"));AuditStage=5;AuditDeadline=Now+1;return;}
+    if(AuditStage==4){Menu->ShowPage(ERecoveryMenuPage::Controls);SetMenuVisible(true);Shot(TEXT("Controls.png"));AuditStage=5;AuditDeadline=Now+1;return;}
     if(AuditStage==5){ResumeFlight();AuditPendingCamera=0;AuditStage=10;return;}
     if(AuditStage==10 || AuditStage==11)
     {
@@ -114,7 +114,7 @@ void ARecoveryPlayerController::TickControlsAudit()
     if(AuditStage==14)
     {
         Check(TEXT("Pause freezes the existing physical flight"),IsPaused() && D->MissionTime==AuditMissionTime && D->GetBody()->GetComponentLocation().Equals(AuditPosition,.01));
-        Menu->ShowPage(8);Shot(TEXT("Settings.png"));AuditStage=15;AuditDeadline=Now+1;return;
+        Menu->ShowPage(ERecoveryMenuPage::Settings);Shot(TEXT("Settings.png"));AuditStage=15;AuditDeadline=Now+1;return;
     }
     if(AuditStage==15){ResumeFlight();ToggleFlightComputer();Shot(TEXT("Lab.png"));AuditStage=16;AuditDeadline=Now+1;return;}
     if(AuditStage==16)

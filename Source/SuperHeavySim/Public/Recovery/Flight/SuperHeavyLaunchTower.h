@@ -28,7 +28,6 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Tower") TObjectPtr<USceneComponent> Carriage;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Tower") TObjectPtr<UStaticMeshComponent> LeftArm;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Tower") TObjectPtr<UStaticMeshComponent> RightArm;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Tower") TObjectPtr<UPhysicsConstraintComponent> CaptureConstraint;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Tower") TObjectPtr<UInstancedStaticMeshComponent> Structure;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Tower") TObjectPtr<UStaticMeshComponent> ArchitecturalDetails;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Contacts") TObjectPtr<UBoxComponent> LeftRail;

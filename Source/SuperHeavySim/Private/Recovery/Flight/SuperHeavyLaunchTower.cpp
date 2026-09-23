@@ -27,9 +27,6 @@ ASuperHeavyLaunchTower::ASuperHeavyLaunchTower()
     RightArm = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightCaptureArm"));
     for (auto* Arm : {LeftArm.Get(), RightArm.Get()})
     { Arm->SetupAttachment(Carriage); Arm->SetStaticMesh(Cube.Object); Arm->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
-    CaptureConstraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("CaptureRestraint"));
-    CaptureConstraint->SetupAttachment(RootComponent);
-    // Retained only for old Blueprint serialization. It is never connected.
     LeftRail=CreateDefaultSubobject<UBoxComponent>(TEXT("LeftLoadBearingRail"));
     RightRail=CreateDefaultSubobject<UBoxComponent>(TEXT("RightLoadBearingRail"));
     LeftArmCollider=CreateDefaultSubobject<UBoxComponent>(TEXT("LeftArmContactVolume"));
@@ -258,4 +255,4 @@ bool ASuperHeavyLaunchTower::IsSupport(const UPrimitiveComponent* Component,int3
     return false;
 }
 
-void ASuperHeavyLaunchTower::Release() { CaptureConstraint->BreakConstraint(); SetArmClosure(0); }
+void ASuperHeavyLaunchTower::Release() { SetArmClosure(0); }

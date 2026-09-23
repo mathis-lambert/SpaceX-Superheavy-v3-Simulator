@@ -9,14 +9,12 @@
 #include "Recovery/Flight/RecoveryFlightPhase.h"
 #include "Recovery/Flight/RecoveryFlightInspection.h"
 #include "Recovery/Flight/RecoveryLaunchSequence.h"
-#include "Recovery/Presentation/RecoveryCameraTracking.h"
+#include "Recovery/Presentation/RecoveryCameraComponent.h"
 #include "SuperHeavyRecoveryDirector.generated.h"
-class UExponentialHeightFogComponent;
 
 class ASuperHeavyLaunchTower;
 class ASuperHeavyVehicleActor;
 class UPrimitiveComponent;
-class ACameraActor;
 class UBoxComponent;
 class UPhysicsConstraintComponent;
 class URecoveryPhysicsAuditComponent;
@@ -29,6 +27,7 @@ class SUPERHEAVYSIM_API ASuperHeavyRecoveryDirector : public AActor
     GENERATED_BODY()
 public:
     ASuperHeavyRecoveryDirector();
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Presentation") TObjectPtr<URecoveryCameraComponent> Viewer;
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
@@ -76,22 +75,12 @@ public:
     UFUNCTION(BlueprintCallable, Category="Recovery") void RestartMission();
     UFUNCTION(BlueprintCallable, Category="Recovery") void AbortMission();
     UFUNCTION(BlueprintCallable, Category="Recovery") void SelectScenario(int32 Index);
-    UFUNCTION(BlueprintCallable, Category="Recovery") void CycleCamera();
-    UFUNCTION(BlueprintCallable, Category="Recovery") void ToggleFreeCamera();
     UFUNCTION(BlueprintCallable, Category="Recovery") void ToggleTelemetry() { bShowTelemetry=!bShowTelemetry; }
-    UFUNCTION(BlueprintPure, Category="Recovery") FString GetCameraLabel() const;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Presentation") bool bShowTelemetry=true;
-    bool bFrontendView=false;
     bool bStartWhenReady=false;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Contacts") bool bContactShutdown=false;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Contacts") int32 SupportContactCount=0;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Contacts") FVector2D SupportImpulseNs=FVector2D::ZeroVector;
-    static constexpr int32 CameraCount=14;
-    static TArray<FString> GetCameraNames();
-    int32 GetCameraMode() const { return CameraMode; }
-    void RefreshViewerCamera(double DeltaSeconds) { UpdateCamera(DeltaSeconds); }
-    FVector GetViewerFocus() const { return LastCameraFocus; }
-    void SetCameraMode(int32 Mode) { CameraMode=FMath::Clamp(Mode,0,CameraCount-1);CameraZoom=1; }
     UFUNCTION(BlueprintPure, Category="Recovery") FString GetPhaseLabel() const;
     const TArray<FVector2D>& GetTrace() const { return Trace; }
     UPrimitiveComponent* GetBody() const { return Body; }
@@ -115,6 +104,7 @@ public:
     void ResetExperiments();
     void SetTimedFault(int32 Kind,int32 Index,double DurationS);
     const TArray<FVector>& GetReactionForcesBodyN() const { return ReactionForcesBodyN; }
+    double GetEngineSpecificImpulseS() const { return EngineIspS; }
     double GetUpperStageThrustN() const { return UpperStageThrustN; }
     FVector2D GetConditioningFlowKgS() const { return ConditioningFlowKgS; }
     const FRecoveryLaunchSequence& GetLaunchSequence() const { return LaunchSequence; }
@@ -125,7 +115,6 @@ public:
     bool IsLaunchMountReleased() const { return bLaunchHoldReleased; }
     const USuperHeavyRecoveryProfile* GetProfile() const { return RuntimeProfile; }
 private:
-    friend class URecoveryPresentationComponent;
     friend class URecoveryPhysicsComponent;
     void ConsumeDynamicsState();
     void InitializeDynamics();
@@ -160,7 +149,6 @@ private:
     uint32 MissionGeneration=0;
     double DelugeFlow=0;
     void TickLaunchSequence(double Dt);
-    UPROPERTY(Transient) TObjectPtr<ACameraActor> Camera;
     UPROPERTY(Transient) TArray<TObjectPtr<UBoxComponent>> CatchColliders;
     UFUNCTION() void OnVehicleContact(UPrimitiveComponent* HitComponent,AActor* OtherActor,UPrimitiveComponent* OtherComponent,FVector NormalImpulse,const FHitResult& Hit);
     bool EverSupportContact[2]={false,false};
@@ -173,21 +161,9 @@ private:
     double PhaseTime=0, ActualThrustN=0, BaseOffsetM=35.44, SampleClock=0, PeakAltitudeM=0, PeakTiltDeg=0;
     double CaptureErrorAtLatch=0, CaptureSpeedAtLatch=0, CaptureTiltAtLatch=0;
     bool bExitAfterTest=false, bResultWritten=false, bInitialized=false;
-    int32 CameraMode=0, ScenarioIndex=0;
-    int32 PreviousCameraMode=0, LastCameraMode=-1;
-    double CameraTransitionRemaining=0;
-    TWeakObjectPtr<UExponentialHeightFogComponent> LocalHeightFog;
-    bool bCameraInitialized=false;
-    double CameraZoom=1, FreeCameraSpeedMps=50, StageFraming=0;
-    double OrbitYaw=0, OrbitPitch=0, CinematicAzimuth=-0.85;
-    FRecoveryOrbitInput OrbitInput;
-    double SmoothedCameraZoom=1;
-    bool bOrbitManuallyAdjusted=false;
-    FRecoveryChaseTracking ChaseTracking;
-    FVector CameraBlendOffset=FVector::ZeroVector, CameraLookBlend=FVector::ZeroVector, LastCameraFocus=FVector::ZeroVector;
+    int32 ScenarioIndex=0;
     FString Csv;
     FString ReportName;
-    bool bChaseReview=false,bEarthReview=false,bIgnoreCameraInput=false;
     TArray<FVector2D> Trace;
     void InitializeVehicle();
     void InitializePhysicalActuators();
@@ -208,7 +184,6 @@ private:
     bool bUnpoweredViolation=false;
     FVector AeroForceN=FVector::ZeroVector, RcsTorqueBody=FVector::ZeroVector;
     TArray<FString> PhaseEvents;
-    void UpdateCamera(double Dt);
     void WriteResult(bool bSuccess, const FString& Reason);
     void InitializeFlightCsv();
     void RecordFlightCsvSample();

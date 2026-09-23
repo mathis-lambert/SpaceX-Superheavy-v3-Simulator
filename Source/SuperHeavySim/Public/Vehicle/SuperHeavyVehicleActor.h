@@ -2,61 +2,38 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Control/SuperHeavyControlTypes.h"
-#include "Vehicle/SuperHeavyVehicleControlInterface.h"
 #include "SuperHeavyVehicleActor.generated.h"
 
 UCLASS(Blueprintable)
-class SUPERHEAVYSIM_API ASuperHeavyVehicleActor : public AActor, public ISuperHeavyVehicleControlInterface
+class SUPERHEAVYSIM_API ASuperHeavyVehicleActor : public AActor
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	ASuperHeavyVehicleActor();
+    ASuperHeavyVehicleActor();
 
-	virtual void ApplyActuatorCommand_Implementation(const FSuperHeavyActuatorCommand& Command) override;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Heavy|Vehicle API")
+    bool bWarnOnUnhandledActuatorCommands = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Heavy|Vehicle API")
-	FName GridFinXPId = TEXT("GF_XP");
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Super Heavy|Vehicle API")
+    void SetEngineThrottleCommand(FName EngineId, double Throttle);
+    virtual void SetEngineThrottleCommand_Implementation(FName EngineId, double Throttle);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Heavy|Vehicle API")
-	FName GridFinXMId = TEXT("GF_XM");
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Super Heavy|Vehicle API")
+    void SetEngineGimbalCommand(FName EngineId, double PitchDeg, double RollDeg);
+    virtual void SetEngineGimbalCommand_Implementation(FName EngineId, double PitchDeg, double RollDeg);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Heavy|Vehicle API")
-	FName GridFinYMId = TEXT("GF_YM");
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Super Heavy|Vehicle API")
-	bool bWarnOnUnhandledActuatorCommands = true;
-
-	UFUNCTION(BlueprintCallable, Category = "Super Heavy|Vehicle API")
-	void ConfigureDefaultActuatorIds();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Super Heavy|Vehicle API")
-	void SetEngineThrottleCommand(FName EngineId, double Throttle);
-	virtual void SetEngineThrottleCommand_Implementation(FName EngineId, double Throttle);
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Super Heavy|Vehicle API")
-	void SetEngineGimbalCommand(FName EngineId, double PitchDeg, double RollDeg);
-	virtual void SetEngineGimbalCommand_Implementation(FName EngineId, double PitchDeg, double RollDeg);
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Super Heavy|Vehicle API")
-	void SetGridFinAngleCommand(FName GridFinId, double AngleDeg);
-	virtual void SetGridFinAngleCommand_Implementation(FName GridFinId, double AngleDeg);
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Super Heavy|Vehicle API")
-	void SetActiveCameraByIndexCommand(int32 CameraIndex);
-	virtual void SetActiveCameraByIndexCommand_Implementation(int32 CameraIndex);
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Super Heavy|Vehicle API")
+    void SetGridFinAngleCommand(FName GridFinId, double AngleDeg);
+    virtual void SetGridFinAngleCommand_Implementation(FName GridFinId, double AngleDeg);
 
 protected:
-	UPROPERTY(Transient)
-	bool bWarnedUnhandledThrottleCommand = false;
+    UPROPERTY(Transient)
+    bool bWarnedUnhandledThrottleCommand = false;
 
-	UPROPERTY(Transient)
-	bool bWarnedUnhandledGimbalCommand = false;
+    UPROPERTY(Transient)
+    bool bWarnedUnhandledGimbalCommand = false;
 
-	UPROPERTY(Transient)
-	bool bWarnedUnhandledGridFinCommand = false;
-
-	UPROPERTY(Transient)
-	bool bWarnedUnhandledCameraCommand = false;
+    UPROPERTY(Transient)
+    bool bWarnedUnhandledGridFinCommand = false;
 };

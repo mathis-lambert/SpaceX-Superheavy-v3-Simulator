@@ -29,14 +29,6 @@
       ]
     },
     {
-      "Name": "SunPosition",
-      "Enabled": true
-    },
-    {
-      "Name": "GeoReferencing",
-      "Enabled": true
-    },
-    {
       "Name": "VisualStudioTools",
       "Enabled": false,
       "SupportedTargetPlatforms": [

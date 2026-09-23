@@ -1,8 +1,8 @@
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Recovery/Presentation/RecoveryStartupSubsystem.h"
 #include "Recovery/Shared/RecoveryAssets.h"
-#include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
-#include "Recovery/Tests/RecoveryPhysicsAuditComponent.h"
+#include "Recovery/Diagnostics/RecoveryDiagnosticsComponent.h"
+#include "Recovery/Diagnostics/RecoveryPhysicsAuditComponent.h"
 #include "Recovery/Flight/RecoveryPhysicsComponent.h"
 #include "Recovery/Flight/RecoveryAtmosphere.h"
 #include "Recovery/Presentation/RecoveryPresentationComponent.h"
@@ -16,7 +16,6 @@
 #include "Recovery/Interface/RecoveryPlayerController.h"
 #include "Recovery/Flight/SuperHeavyLaunchTower.h"
 #include "Vehicle/SuperHeavyVehicleActor.h"
-#include "Autopilot/SuperHeavyAutopilotComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/BoxComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
@@ -26,7 +25,6 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerInput.h"
 #include "Kismet/GameplayStatics.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
 #include "EngineUtils.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -44,6 +42,7 @@ ASuperHeavyRecoveryDirector::ASuperHeavyRecoveryDirector()
     PrimaryActorTick.bCanEverTick=true;
     PrimaryActorTick.TickGroup=TG_PrePhysics;
     RootComponent=CreateDefaultSubobject<USceneComponent>(TEXT("MissionOrigin"));
+    Viewer=CreateDefaultSubobject<URecoveryCameraComponent>(TEXT("ViewerCamera"));
     CreateDefaultSubobject<URecoveryPresentationComponent>(TEXT("FlightPresentation"));
     CreateDefaultSubobject<URecoverySkyComponent>(TEXT("SkyAndCamera"));
     CreateDefaultSubobject<URecoveryVaporComponent>(TEXT("ParticipatingVapor"));
@@ -67,12 +66,6 @@ void ASuperHeavyRecoveryDirector::BeginPlay()
     if(!Tower) for(TActorIterator<ASuperHeavyLaunchTower> It(GetWorld()); It; ++It) { Tower=*It; break; }
     if(!Tower) Tower=GetWorld()->SpawnActor<ASuperHeavyLaunchTower>();
     bExitAfterTest=FParse::Param(FCommandLine::Get(),TEXT("RecoveryAutoExit"));
-    bChaseReview=FParse::Param(FCommandLine::Get(),TEXT("RecoveryChaseReview"));
-    bEarthReview=FParse::Param(FCommandLine::Get(),TEXT("RecoveryEarthReview"));
-    bIgnoreCameraInput=FParse::Param(FCommandLine::Get(),TEXT("RecoveryReview")) ||
-        FParse::Param(FCommandLine::Get(),TEXT("RecoveryInteractiveAudit")) ||
-        FParse::Param(FCommandLine::Get(),TEXT("RecoveryCloudReview")) ||
-        FParse::Param(FCommandLine::Get(),TEXT("RecoveryVaporReview"));
     FParse::Value(FCommandLine::Get(),TEXT("RecoveryReportName="),ReportName);
     FString TestScenario;
     if(FParse::Value(FCommandLine::Get(),TEXT("RecoveryScenario="),TestScenario))
@@ -80,20 +73,12 @@ void ASuperHeavyRecoveryDirector::BeginPlay()
     InitializeVehicle();
     if(!bInitialized) { SetPhase(ERecoveryPhase::Aborted,StatusMessage); WriteResult(false,StatusMessage); return; }
     SelectScenario(ScenarioIndex);
-    Camera=GetWorld()->SpawnActor<ACameraActor>();
-    FParse::Value(FCommandLine::Get(),TEXT("RecoveryCamera="),CameraMode);
-    CameraMode=FMath::Clamp(CameraMode,0,CameraCount-1);
-    if(bIgnoreCameraInput && FParse::Value(FCommandLine::Get(),TEXT("RecoveryReviewZoom="),CameraZoom))
-        CameraZoom=FMath::Clamp(CameraZoom,.25,6.);
-    Camera->GetCameraComponent()->SetFieldOfView(55);
-    // Establish a view above the pad before the renderer's first shadow pass.
-    UpdateCamera(0);
+    Viewer->UpdateCamera(0);
     if(auto* PC=GetWorld()->GetFirstPlayerController())
     {
         // Disable development view-mode shortcuts on the game player only.
         if(PC->PlayerInput) PC->PlayerInput->DebugExecBindings.RemoveAll([](const FKeyBind& Bind)
         { return Bind.Key==EKeys::F1 || Bind.Key==EKeys::F2 || Bind.Key==EKeys::F3; });
-        PC->SetViewTarget(Camera);
         // All viewer input is owned by ARecoveryPlayerController.
     }
     FParse::Value(FCommandLine::Get(),TEXT("RecoveryContactFixture="),ContactFixture);
@@ -113,7 +98,6 @@ void ASuperHeavyRecoveryDirector::InitializeVehicle()
     Vehicle->SetActorTickEnabled(false);
     for(auto* C : Vehicle->GetComponents())
     {
-        if(auto* AP=Cast<USuperHeavyAutopilotComponent>(C)) { AP->bApplyCommandsToVehicle=false; AP->SetComponentTickEnabled(false); }
         if(C->GetFName()==TEXT("COL_Body_Main")) Body=Cast<UPrimitiveComponent>(C);
     }
     if(!Body) { StatusMessage=TEXT("Physics body missing"); return; }
@@ -153,7 +137,6 @@ void ASuperHeavyRecoveryDirector::InitializeVehicle()
         TInlineComponentArray<UPrimitiveComponent*> Primitives(Child);
         for(auto* P:Primitives) { P->SetSimulatePhysics(false); P->SetCollisionEnabled(ECollisionEnabled::NoCollision); }
     }
-    UWidgetLayoutLibrary::RemoveAllWidgets(this);
     InitializePhysicalActuators();
     bInitialized=Engines.Num()==33;
     if(!bInitialized)StatusMessage=TEXT("Expected 33 measured engine sockets");
@@ -199,7 +182,7 @@ void ASuperHeavyRecoveryDirector::SelectScenario(int32 Index)
     ResetPhysicalActuators();
     ++MissionGeneration;
     LaunchSequence=FRecoveryLaunchSequence();DelugeFlow=0;
-    Experiment=FRecoveryFlightExperiment();ChaseTracking=FRecoveryChaseTracking();
+    Experiment=FRecoveryFlightExperiment();
     FString FaultTimeline;
     if(FParse::Value(FCommandLine::Get(),TEXT("RecoveryFaults="),FaultTimeline))
     {

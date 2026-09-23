@@ -37,7 +37,7 @@ void ARecoveryPlayerController::TickPhotographyAudit()
         Check(TEXT("Rendered sun follows true east/north/up"),Match);
     };
     auto* Camera=Cast<ACameraActor>(GetViewTarget());
-    const auto View=[&](FVector Position,FVector Focus){D->SetCameraMode(8);if(Camera)Camera->SetActorLocationAndRotation(Position,(Focus-Position).Rotation());};
+    const auto View=[&](FVector Position,FVector Focus){D->Viewer->SetCameraMode(8);if(Camera)Camera->SetActorLocationAndRotation(Position,(Focus-Position).Rotation());};
     const auto Finish=[&](){
         auto Report=MakeShared<FJsonObject>();Report->SetBoolField(TEXT("success"),bAuditPassed);
         TArray<TSharedPtr<FJsonValue>> Checks;for(const auto& C:AuditChecks)Checks.Add(MakeShared<FJsonValueString>(C));Report->SetArrayField(TEXT("checks"),Checks);
@@ -49,7 +49,7 @@ void ARecoveryPlayerController::TickPhotographyAudit()
     {
     case 0:
         bAtHome=false;SetMenuVisible(false);SetReconstruction(3);bTelemetry=false;D->bShowTelemetry=false;bAutomaticOrbit=false;
-        D->SetWindScale(2);D->SetCameraMode(11);TimeOfDay=8;AuditDeadline=Now+12;
+        D->SetWindScale(2);D->Viewer->SetCameraMode(11);TimeOfDay=8;AuditDeadline=Now+12;
         if(FParse::Param(FCommandLine::Get(),TEXT("RecoveryPhotoReload")))AuditStage=40;
         break;
     case 1:SolarCheck();Shot(TEXT("01_Morning"));break;
@@ -72,7 +72,7 @@ void ARecoveryPlayerController::TickPhotographyAudit()
     case 16:ApplyPhotoPreset(3);AuditDeadline=Now+5;break;
     case 17:Shot(TEXT("09_GoldenLook"));break;
     case 18:
-        TogglePauseMenu();Menu->ShowPage(18);Photography.bAutomaticFraming=false;Photography.FocalLengthMm=80;
+        TogglePauseMenu();Menu->ShowPage(ERecoveryMenuPage::Optics);Photography.bAutomaticFraming=false;Photography.FocalLengthMm=80;
         Photography.WhiteBalanceK=4800;Photography.ExposureBiasEV=.75f;Photography.Aperture=2.8f;Photography.bAutomaticFocus=false;Photography.FocusDistanceM=350;
         TimeOfDay=12;Photography.MotionStrength=0;bAutomaticOrbit=false;
         AuditPosition=D->GetBody()->GetComponentLocation();AuditMissionTime=D->MissionTime;AuditDeadline=Now+5;break;
@@ -84,22 +84,22 @@ void ARecoveryPlayerController::TickPhotographyAudit()
         for(TActorIterator<APostProcessVolume> It(GetWorld());It;++It)if(It->bUnbound){const auto& P=It->Settings;Match=FMath::IsNearlyEqual(P.WhiteTemp,4800.f) && FMath::IsNearlyEqual(P.DepthOfFieldFstop,2.8f) && FMath::IsNearlyEqual(P.DepthOfFieldFocalDistance,35000.f);}
         Check(TEXT("Live post process receives white balance, aperture and focus"),Match);
         Check(TEXT("Paused preview keeps temporal camera history updating"),GetWorld()->bIsCameraMoveableWhenPaused);
-        Menu->ShowPage(18);Shot(TEXT("10_OpticsMenu"));break;
+        Menu->ShowPage(ERecoveryMenuPage::Optics);Shot(TEXT("10_OpticsMenu"));break;
     }
-    case 20:Menu->ShowPage(20);break;
+    case 20:Menu->ShowPage(ERecoveryMenuPage::Environment);break;
     case 21:Shot(TEXT("11_EnvironmentMenu"));break;
     case 22:
         Photography.FocalLengthMm=145;Photography.SolarDayOfYear=172;Photography.UtcOffsetHours=-6;TimeOfDay=17.25;
         Photography.TrackingLagSeconds=.16f;Photography.bFixedFraming=true;
         bInvertVerticalLook=false;SavePreferences();
-        SavePhotoLook(1);ApplyPhotoPreset(0);LoadPhotoLook(1);Menu->ShowPage(21);break;
+        SavePhotoLook(1);ApplyPhotoPreset(0);LoadPhotoLook(1);Menu->ShowPage(ERecoveryMenuPage::SavedLooks);break;
     case 23:
         Check(TEXT("Custom look restores optics, calendar and civil clock"),HasPhotoLook(1) && Photography.FocalLengthMm==145 && Photography.SolarDayOfYear==172 && Photography.UtcOffsetHours==-6 && TimeOfDay==17.25);
         Check(TEXT("Saved look restores tracking character"),Photography.TrackingLagSeconds==.16f && Photography.bFixedFraming);
         Shot(TEXT("12_SavedLooks"));break;
     case 24:
     {
-        ResumeFlight();ApplyPhotoPreset(0);D->SetCameraMode(11);
+        ResumeFlight();ApplyPhotoPreset(0);D->Viewer->SetCameraMode(11);
         const auto* Activity=D->FindComponentByClass<URecoverySiteActivityComponent>();
         const auto* Detail=D->FindComponentByClass<URecoverySiteDetailsComponent>();
         Check(TEXT("Four service vehicles and two facility vents"),Activity && Activity->GetVehicleCount()==4 && Activity->GetVentCount()==2);
@@ -114,7 +114,7 @@ void ARecoveryPlayerController::TickPhotographyAudit()
     case 28:Shot(TEXT("14_ExposureHigh"));break;
     case 29:ResumeFlight();ApplyPhotoPreset(5);AuditDeadline=Now+4;break;
     case 30:
-        Check(TEXT("Fixed coastal preset uses a fixed ground camera"),Photography.bFixedFraming && !Photography.bAutomaticFraming && D->GetCameraMode()==9);
+        Check(TEXT("Fixed coastal preset uses a fixed ground camera"),Photography.bFixedFraming && !Photography.bAutomaticFraming && D->Viewer->GetCameraMode()==9);
         Shot(TEXT("15_FixedCoastal"));Finish();break;
     case 40:
         Check(TEXT("Look survives application restart"),HasPhotoLook(1));LoadPhotoLook(1);AuditDeadline=Now+3;break;

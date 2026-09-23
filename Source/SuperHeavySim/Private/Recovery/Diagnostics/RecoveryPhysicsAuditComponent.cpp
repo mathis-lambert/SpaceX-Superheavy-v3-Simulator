@@ -1,4 +1,4 @@
-#include "Recovery/Tests/RecoveryPhysicsAuditComponent.h"
+#include "Recovery/Diagnostics/RecoveryPhysicsAuditComponent.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "Chaos/SimCallbackObject.h"
 #include "PBDRigidsSolver.h"

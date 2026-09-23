@@ -62,7 +62,7 @@ void URecoveryStartupSubsystem::Tick(float DeltaTime)
         if(FPlatformTime::Seconds()>AuditExitAt)FPlatformMisc::RequestExit(false);
     }
     if(!bEnabled || !Screen)return;
-    // Vehicle BeginPlay removes legacy widgets. Attach after that cleanup, on
+    // Attach when the game viewport is available, on
     // the first world tick, while the early engine screen hands over rendering.
     if(!bViewportAttached && GEngine && GEngine->GameViewport)
     {
@@ -106,7 +106,7 @@ void URecoveryStartupSubsystem::Tick(float DeltaTime)
     ASuperHeavyRecoveryDirector* Director=nullptr;
     for(TActorIterator<ASuperHeavyRecoveryDirector> It(GetWorld());It;++It){Director=*It;break;}
     if(!Director || !Director->GetBody())return;
-    if(ARecoveryPlayerController::ShouldShowFrontend())Director->bFrontendView=true;
+    if(ARecoveryPlayerController::ShouldShowFrontend())Director->Viewer->bFrontendView=true;
     const auto* Presentation=Director->FindComponentByClass<URecoveryPresentationComponent>();
     const auto* Vapor=Director->FindComponentByClass<URecoveryVaporComponent>();
     const auto* Audio=Director->FindComponentByClass<URecoveryAudioComponent>();

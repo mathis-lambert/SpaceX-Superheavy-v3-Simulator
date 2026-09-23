@@ -15,8 +15,9 @@ The playable project is `SuperHeavySim.uproject`. The default level is `/Game/St
 | `Source/SuperHeavySim/.../Recovery/Presentation` | Cameras, exhaust, participating vapor, sky, site lighting, audio |
 | `Source/SuperHeavySim/.../Recovery/Interface` | Player controller, Slate menus, native HUD |
 | `Source/SuperHeavySim/.../Recovery/Shared` | Asset references, geometry conventions and interface styles |
-| `Source/SuperHeavySim/.../Recovery/Tests` | Opt-in integration audits, disabled during normal play |
-| `Source/SuperHeavySimEditor` | Editor-only Blueprint maintenance; excluded from runtime targets |
+| `Source/SuperHeavySim/.../Recovery/Tests` | Native Automation regression tests |
+| `Source/SuperHeavySim/.../Recovery/Diagnostics` | Opt-in rendered, input and physics audit harnesses |
+| `Source/SuperHeavySimEditor` | Native editor asset reimport; excluded from runtime targets |
 | `Tools/Editor` | Unreal asset and scene authoring |
 | `Tools/Art` | Blender artwork, vapor atlas and audio preparation |
 | `Tools/Data` | Geographic data downloads and processing |
@@ -34,6 +35,19 @@ Runtime asset references are centralized in `RecoveryAssets.h`. The active missi
 configuration is `DA_RecoveryMission`. Render meshes use Nanite; dedicated hull,
 catch-fitting and rail shapes supply physical contact rather than decorative
 triangle meshes.
+
+`Recovery` is the single flight implementation. The former autopilot, navigation,
+mission profile, HUD and command-batch interface have been retired. Vehicle
+Blueprints provide assembly and the three visual actuator events; the unused
+vehicle cameras and original Niagara exhaust are removed. Flight forces
+and guidance are native. The tower has no unused capture-restraint component.
+
+`RecoveryCameraComponent` owns camera state and runs after the propulsion
+presentation in `TG_PostPhysics`; it reads the physical vehicle pose without
+changing it. Camera users address that component directly. Menu navigation uses
+`ERecoveryMenuPage`, with shared controls in `RecoveryMenuControls.cpp`.
+`RecoveryPropulsionAssembly.cpp` owns effect construction, while the presentation
+component updates existing effects. C++ formatting is defined in `.clang-format`.
 
 See [tooling entry points](../Tools/README.md) for builds, tests and asset authoring.
 Completed migration scripts, superseded test wrappers and old design notes are

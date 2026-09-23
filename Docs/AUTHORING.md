@@ -44,7 +44,7 @@ is not proof of use. Keep runtime file data such as `Data/Water/Surface.bin`, wh
 is not a UObject package. Follow removals with `audit_runtime.py` and
 appropriate rendered/package tests; never bulk-delete assets by folder name.
 
-The 2026-09-23 inventory found 171 reachable packages, no unreachable packages
+The 2026-09-23 inventory found 167 reachable packages, no unreachable packages
 and no byte-identical Content files. Every constant in `RecoveryAssets.h` has a
 C++ use. This is a dependency audit, not proof that every shader branch or texture
 channel contributes to the final image. Further reductions require visual review

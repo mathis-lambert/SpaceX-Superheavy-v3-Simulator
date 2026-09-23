@@ -25,7 +25,7 @@ For rendering, match camera, weather, reconstruction and output resolution;
 measure frame-time distributions after warmup and inspect temporal behavior.
 Static screenshots alone cannot prove smoothness or a performance improvement.
 
-The asset audit on 2026-09-23 found 171 reachable packages and no orphans.
+The asset audit on 2026-09-23 found 167 reachable packages and no orphans.
 The full Unreal asset/Blueprint audit also completed successfully. No runtime
 assets were removed by that audit. These checks do not replace a full cooked
 release test or validation on additional hardware.

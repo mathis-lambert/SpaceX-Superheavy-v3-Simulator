@@ -29,7 +29,7 @@ void ARecoveryPlayerController::TickOverhaulAudit()
     switch(AuditStage++)
     {
     case 1:Shot(TEXT("HomeSunset"));break;
-    case 2:Menu->ShowPage(7);AuditDeadline=Now+2;break;
+    case 2:Menu->ShowPage(ERecoveryMenuPage::Photography);AuditDeadline=Now+2;break;
     case 3:Shot(TEXT("LightControls"));break;
     case 4:TimeOfDay=12;AuditDeadline=Now+5;break;
     case 5:Check(Noon(),TEXT("Noon sunlight follows solar elevation"));Shot(TEXT("Noon"));break;
@@ -46,7 +46,7 @@ void ARecoveryPlayerController::TickOverhaulAudit()
         Check(Vapor && Vapor->HasRenderableDensity(),TEXT("Visible vapor uses a volume material with nonzero extinction"));
         Shot(TEXT("Liftoff"));break;
     }
-    case 14:TogglePauseMenu();Menu->ShowPage(7);break;
+    case 14:TogglePauseMenu();Menu->ShowPage(ERecoveryMenuPage::Photography);break;
     case 15:AuditMissionTime=D->MissionTime;TimeOfDay=12;AuditDeadline=Now+3;break;
     case 16:
         Check(IsPaused() && FMath::Abs(D->MissionTime-AuditMissionTime)<0.001,TEXT("Lighting controls preserve paused flight time"));
@@ -57,19 +57,19 @@ void ARecoveryPlayerController::TickOverhaulAudit()
         Check(IConsoleManager::Get().FindConsoleVariable(TEXT("r.VolumetricRenderTarget.Mode"))->GetInt()==0,TEXT("Reactive cloud tracing enabled"));
         for(TActorIterator<APostProcessVolume> It(GetWorld());It;++It) if(It->bUnbound) {Check(FMath::Abs(It->Settings.FilmGrainIntensity-CameraGrain)<0.001,TEXT("Camera grain applied to scene postprocess"));break;}
         ReturnHome();Menu->ShowPage();AuditDeadline=Now+2;break;
-    case 19:Menu->ShowPage(8);break;
+    case 19:Menu->ShowPage(ERecoveryMenuPage::Settings);break;
     case 20:Shot(TEXT("SettingsHierarchy"));break;
-    case 21:Menu->ShowPage(3);break;
+    case 21:Menu->ShowPage(ERecoveryMenuPage::Controls);break;
     case 22:Shot(TEXT("CameraControls"));break;
-    case 23:Menu->ShowPage(11);break;
+    case 23:Menu->ShowPage(ERecoveryMenuPage::Audio);break;
     case 24:Shot(TEXT("AudioControls"));break;
-    case 25:Menu->ShowPage(9);break;
+    case 25:Menu->ShowPage(ERecoveryMenuPage::About);break;
     case 26:Shot(TEXT("MissionBriefing"));break;
     case 27:TimeOfDay=21;LaunchFlight();AuditDeadline=Now+FRecoveryLaunchSequence::DurationS+11;break;
     case 28:Shot(TEXT("NightLiftoff"));SetPlaybackRate(.25f);break;
     case 29:
         Check(FMath::Abs(GetWorld()->GetWorldSettings()->GetEffectiveTimeDilation()-.25f)<.001f,TEXT("Interactive playback rate changes world simulation speed"));
-        SetPlaybackRate(1);TogglePauseMenu();Menu->ShowPage(10);break;
+        SetPlaybackRate(1);TogglePauseMenu();Menu->ShowPage(ERecoveryMenuPage::Mission);break;
     case 30:Shot(TEXT("InteractiveFlight"));break;
     case 31:bAutomaticOrbit=false;ChooseCamera(11);AuditDeadline=Now+3;break;
     case 32:

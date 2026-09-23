@@ -24,7 +24,7 @@ void ARecoveryPlayerController::EndOrbitDrag()
 void ARecoveryPlayerController::SelectPart(FRecoverySelection Part)
 {Selection=Part;bFlightComputer=false;if(FlightDeck)FlightDeck->Refresh();}
 void ARecoveryPlayerController::OpenWeather()
-{if(Menu){Menu->ShowPage(20);SetMenuVisible(true);}}
+{if(Menu){Menu->ShowPage(ERecoveryMenuPage::Environment);SetMenuVisible(true);}}
 void ARecoveryPlayerController::SetWeatherPreset(int32 Index)
 {
     WeatherPreset=FMath::Clamp(Index,0,3);

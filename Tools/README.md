@@ -52,7 +52,7 @@ all art without the external `../ArtSource` inputs and installed authoring tools
 | `Art/build_wind_flag.py` | `Editor/build_site_activity_assets.py`: cloth mesh and wind material |
 | `Art/build_cloud_noise.py`, `build_flow_noise.py` | `Editor/build_layered_weather.py`, `build_volumetric_vapor.py`: sampled volume fields |
 | `Art/bake_turbulent_volumes.py` | `Editor/import_coast_volumes.py`: 64-frame sparse-volume cache |
-| `Art/bake_vapor_atlas.py` | Source for `T_RecoveryVaporAtlas`, sampled by `Editor/build_vapor_trail.py`; texture reimport remains an editor operation |
+| `Art/bake_vapor_atlas.py` | Source for `T_RecoveryVaporAtlas`, sampled by `Editor/build_vapor_trail.py`; reimported by `Editor/import_coast_volumes.py` |
 | `Art/prepare_scene_audio.py`, `prepare_propulsion_audio.py` | Original/credited audio sources; `Editor/import_propulsion_audio.py` imports the propulsion layers; original scene loops retain editor import metadata |
 
 `Editor/build_visual_renewal.py` is the single complete material-pass entry point.

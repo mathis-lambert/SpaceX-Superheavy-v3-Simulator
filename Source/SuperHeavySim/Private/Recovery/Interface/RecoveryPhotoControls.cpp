@@ -7,7 +7,7 @@ void ARecoveryPlayerController::ApplyPhotoPreset(int32 Index)
     const auto& Presets=RecoveryPhotography::Presets();if(!Presets.IsValidIndex(Index))return;
     const auto& P=Presets[Index];Photography=P.Lens;TimeOfDay=P.Hour;FogAmount=P.Haze;
     MotionBlur=P.Blur;CameraGrain=P.Grain;bCameraDepthOfField=P.bDepthOfField;bAutomaticOrbit=P.bOrbit;
-    StartingCamera=P.Camera;if(!IsAtHome())if(auto* D=GetDirector())D->SetCameraMode(P.Camera);
+    StartingCamera=P.Camera;if(!IsAtHome())if(auto* D=GetDirector())D->Viewer->SetCameraMode(P.Camera);
     SavePreferences();
 }
 bool ARecoveryPlayerController::HasPhotoLook(int32 Slot) const
@@ -27,7 +27,7 @@ void ARecoveryPlayerController::SavePhotoLook(int32 Slot)
     GConfig->SetFloat(*Section,TEXT("Grain"),CameraGrain,GGameUserSettingsIni);
     GConfig->SetBool(*Section,TEXT("DepthOfField"),bCameraDepthOfField,GGameUserSettingsIni);
     GConfig->SetBool(*Section,TEXT("Orbit"),bAutomaticOrbit,GGameUserSettingsIni);
-    const auto* D=GetDirector();GConfig->SetInt(*Section,TEXT("Camera"),!IsAtHome() && D?D->GetCameraMode():StartingCamera,GGameUserSettingsIni);
+    const auto* D=GetDirector();GConfig->SetInt(*Section,TEXT("Camera"),!IsAtHome() && D?D->Viewer->GetCameraMode():StartingCamera,GGameUserSettingsIni);
     GConfig->SetBool(*Section,TEXT("Saved"),true,GGameUserSettingsIni);GConfig->Flush(false,GGameUserSettingsIni);
 }
 void ARecoveryPlayerController::LoadPhotoLook(int32 Slot)
@@ -45,7 +45,7 @@ void ARecoveryPlayerController::LoadPhotoLook(int32 Slot)
     const auto Safe=[](float V,float Min,float Max,float Default){return FMath::IsFinite(V)?FMath::Clamp(V,Min,Max):Default;};
     TimeOfDay=Safe(TimeOfDay,0,24,12);FogAmount=Safe(FogAmount,0,2,1);
     MotionBlur=Safe(MotionBlur,0,.5f,.15f);CameraGrain=Safe(CameraGrain,0,.35f,.025f);
-    StartingCamera=FMath::Clamp(StartingCamera,0,ASuperHeavyRecoveryDirector::CameraCount-1);
-    if(!IsAtHome())if(auto* D=GetDirector())D->SetCameraMode(StartingCamera);
+    StartingCamera=FMath::Clamp(StartingCamera,0,URecoveryCameraComponent::CameraCount-1);
+    if(!IsAtHome())if(auto* D=GetDirector())D->Viewer->SetCameraMode(StartingCamera);
     SavePreferences();
 }

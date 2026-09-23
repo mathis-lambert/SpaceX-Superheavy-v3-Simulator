@@ -39,9 +39,9 @@ void ARecoveryPlayerController::TickInterfaceAudit()
         Check(TEXT("Home waits for launch"),bAtHome && bMenuOpen && !IsPaused() && D->Phase==ERecoveryPhase::Ready && D->MissionTime==0);
         Check(TEXT("33 registered engine lights, all off at home"),LitCount(false)==33 && LitCount(true)==0);
         Shot(TEXT("Home.png"));AuditDeadline=Now+2;break;
-    case 2: Menu->ShowPage(1);Shot(TEXT("SimulationSettings.png"));AuditDeadline=Now+2;break;
-    case 3: Menu->ShowPage(2);Shot(TEXT("Graphics.png"));AuditDeadline=Now+2;break;
-    case 4: LaunchFlight();D->SetCameraMode(0);AuditDeadline=Now+FRecoveryLaunchSequence::DurationS+14;break;
+    case 2: Menu->ShowPage(ERecoveryMenuPage::Launch);Shot(TEXT("SimulationSettings.png"));AuditDeadline=Now+2;break;
+    case 3: Menu->ShowPage(ERecoveryMenuPage::Display);Shot(TEXT("Graphics.png"));AuditDeadline=Now+2;break;
+    case 4: LaunchFlight();D->Viewer->SetCameraMode(0);AuditDeadline=Now+FRecoveryLaunchSequence::DurationS+14;break;
     case 5:
         Check(TEXT("Launch starts flight and hides menu"),!bMenuOpen && !bAtHome && D->Phase==ERecoveryPhase::Ascent && D->MissionTime>5);
         Check(TEXT("33 engine lights illuminate ascent"),LitCount(true)==33);
@@ -67,12 +67,12 @@ void ARecoveryPlayerController::TickInterfaceAudit()
         Check(TEXT("Resume advances the same flight"),!IsPaused() && !bMenuOpen && D->MissionTime>AuditMissionTime+0.2);
         ReturnHome();AuditDeadline=Now+1;break;
     case 12:
-        TimeOfDay=17.9f;SetReconstruction(0);Menu->ShowPage(12);AuditDeadline=Now+5;break;
+        TimeOfDay=17.9f;SetReconstruction(0);Menu->ShowPage(ERecoveryMenuPage::ImageQuality);AuditDeadline=Now+5;break;
     case 13:
         Check(TEXT("Native reconstruction is active"),ReconstructionMode==0 && RecoveryRenderSettings::ActiveReconstruction()==TEXT("Unreal TSR"));
         Shot(TEXT("ReconstructionNative.png"));AuditDeadline=Now+2;break;
     case 14:
-        SetReconstruction(3);Menu->ShowPage(12);AuditDeadline=Now+5;break;
+        SetReconstruction(3);Menu->ShowPage(ERecoveryMenuPage::ImageQuality);AuditDeadline=Now+5;break;
     case 15:
         Check(TEXT("DLSS availability has an explicit fallback"),ReconstructionMode==(RecoveryRenderSettings::SupportsDLSS()?3:0));
         Check(TEXT("Reconstruction preserves the ready physical state"),D->MissionTime==0 && D->Phase==ERecoveryPhase::Ready && D->GetBody()->IsSimulatingPhysics());

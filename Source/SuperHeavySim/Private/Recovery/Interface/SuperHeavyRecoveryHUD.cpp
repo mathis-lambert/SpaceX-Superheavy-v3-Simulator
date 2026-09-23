@@ -79,7 +79,7 @@ public:
         const int Current=D->IsLaunchMountReleased()?FMath::Clamp(int(D->LastFlightPhase)-2,0,7):-1;const float Step=(VW-96)/8;
         for(int I=0;I<8;++I){const float X=48+I*Step;Rect(X,RailY,Step-12,2,I<=Current?White:Dim);Text(Phases[I],X,RailY-22,10,I==Current?White:Grey);}
         Rect(28,24,245,43,FLinearColor(0,0,0,.4f));Text(TEXT("STARBASE / LIVE"),43,34,14,White,true);
-        Rect(VW-385,24,357,58,FLinearColor(0,0,0,.5f));Text(D->GetCameraLabel(),VW-370,33,14,White);
+        Rect(VW-385,24,357,58,FLinearColor(0,0,0,.5f));Text(D->Viewer->GetCameraLabel(),VW-370,33,14,White);
         if(PC)Text(FString::Printf(TEXT("TAB  CAMERAS    ESC  MENU    %.2f× / %.2f×"),PC->EffectivePlaybackRate,PC->PlaybackRate),VW-370,61,10,Grey);
         if(D->IsLaunchMountReleased() && D->LastFlightPhase>=ERecoveryPhase::LandingBurn)
             Text(FString::Printf(TEXT("VZ %+.2f M/S    AXIS %.2f M    HEADING %.1f°"),D->VerticalSpeedMps,D->HorizontalErrorM,D->HeadingErrorDeg),48,BY-76,13,White);

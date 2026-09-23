@@ -1,39 +1,12 @@
-#include "Recovery/Shared/RecoveryAssets.h"
-#include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
+#include "Recovery/Flight/SuperHeavyLaunchTower.h"
 #include "Recovery/Flight/RecoveryAtmosphere.h"
 #include "Recovery/Flight/RecoveryMassProperties.h"
-#include "Recovery/Presentation/RecoveryPresentationComponent.h"
-#include "Recovery/Presentation/RecoverySkyComponent.h"
-#include "Recovery/Presentation/RecoveryVaporComponent.h"
-#include "Recovery/Presentation/RecoveryAudioComponent.h"
-#include "Recovery/Shared/FlightGeometry.h"
-#include "Recovery/Interface/RecoveryPlayerController.h"
-#include "Recovery/Flight/SuperHeavyLaunchTower.h"
-#include "Vehicle/SuperHeavyVehicleActor.h"
-#include "Autopilot/SuperHeavyAutopilotComponent.h"
+#include "Recovery/Shared/RecoveryLog.h"
 #include "Components/PrimitiveComponent.h"
-#include "Components/BoxComponent.h"
-#include "PhysicalMaterials/PhysicalMaterial.h"
-#include "Components/ChildActorComponent.h"
-#include "Camera/CameraActor.h"
-#include "Camera/CameraComponent.h"
-#include "GameFramework/PlayerController.h"
-#include "GameFramework/PlayerInput.h"
-#include "Kismet/GameplayStatics.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
-#include "EngineUtils.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
-#include "Misc/CommandLine.h"
-#include "Misc/Parse.h"
-#include "HAL/PlatformFileManager.h"
 #include "Serialization/JsonSerializer.h"
-#include "UObject/ConstructorHelpers.h"
-#include "PhysicsEngine/PhysicsSettings.h"
-#include "UnrealClient.h"
-
-#include "Recovery/Shared/RecoveryLog.h"
 
 void ASuperHeavyRecoveryDirector::UpdateMass()
 {
@@ -151,8 +124,6 @@ void ASuperHeavyRecoveryDirector::WriteResult(bool bSuccess,const FString& Reaso
     Result->SetNumberField(TEXT("tower_broken_hinge_mask"),Tower->BrokenHingeMask);
     Result->SetNumberField(TEXT("left_rail_compression_m"),Tower->RailCompressionM.X);
     Result->SetNumberField(TEXT("right_rail_compression_m"),Tower->RailCompressionM.Y);
-    Result->SetNumberField(TEXT("left_rail_load_n"),Tower->RailLoadN.X);
-    Result->SetNumberField(TEXT("right_rail_load_n"),Tower->RailLoadN.Y);
     Result->SetNumberField(TEXT("left_rail_peak_load_n"),Tower->PeakRailLoadN.X);
     Result->SetNumberField(TEXT("right_rail_peak_load_n"),Tower->PeakRailLoadN.Y);
     Result->SetNumberField(TEXT("left_hinge_peak_torque_nm"),DynamicsState.Tower.PeakHingeTorqueNm.X);

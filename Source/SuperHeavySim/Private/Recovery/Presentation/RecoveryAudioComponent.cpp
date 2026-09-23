@@ -89,15 +89,15 @@ void URecoveryAudioComponent::TickComponent(float Dt,ELevelTick Type,FActorCompo
     DelayS=FMath::Max(0.,Now-Heard.Time);
     const double Gain=RecoveryAcoustics::Gain(HeardDistanceM,HeardPower);
     // A camera cut is not a physical observer moving thousands of km/s.
-    const FVector ObserverVelocity=PreviousCamera==D->GetCameraMode() && FVector::Distance(Listener,PreviousListener)<2000?
+    const FVector ObserverVelocity=PreviousCamera==D->Viewer->GetCameraMode() && FVector::Distance(Listener,PreviousListener)<2000?
         (Listener-PreviousListener)/FMath::Max(.001f,Dt):FVector::ZeroVector;
-    PreviousListener=Listener;PreviousCamera=D->GetCameraMode();
+    PreviousListener=Listener;PreviousCamera=D->Viewer->GetCameraMode();
     const double TargetPitch=RecoveryAcoustics::Doppler(Heard.VelocityMps,ObserverVelocity,(Listener-Heard.PositionM).GetSafeNormal());
     Pitch=RecoveryAcoustics::Smooth(Pitch,TargetPitch,Dt,.2,.2);
     EngineGain=RecoveryAcoustics::Smooth(EngineGain,Gain,Dt);
     const double Master=URecoveryStartupSubsystem::IsReady(GetWorld())?FMath::Clamp(double(PC->MasterVolume),0.,1.):0;
     const double Near=1-FMath::SmoothStep(300.,2200.,HeardDistanceM);
-    const double Structural=D->GetCameraMode()==5?FMath::Sqrt(Delivered)*.10:0;
+    const double Structural=D->Viewer->GetCameraMode()==5?FMath::Sqrt(Delivered)*.10:0;
     const double GroundDistance=FVector::Distance(Ground,Listener);
     const double Values[]={EngineGain*.48,EngineGain*.30+Structural,EngineGain*.13*Near,.12*Air,
         FMath::Sqrt(FMath::Clamp(Site.Channels.Y,0.,1.))*.16/(1+GroundDistance/80.)*Air,

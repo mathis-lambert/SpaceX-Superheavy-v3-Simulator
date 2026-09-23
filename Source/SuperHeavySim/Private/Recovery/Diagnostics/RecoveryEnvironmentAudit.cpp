@@ -23,27 +23,28 @@ void ARecoveryPlayerController::TickEnvironmentAudit()
     {
     case 0:AuditDeadline=Now+25;break;
     case 1:Shot(TEXT("Home.png"));AuditDeadline=Now+2;break;
-    case 2:LaunchFlight();D->SetCameraMode(0);AuditDeadline=Now+8;break;
+    case 2:LaunchFlight();D->Viewer->SetCameraMode(0);AuditDeadline=Now+8;break;
     case 3:AuditMissionTime=D->MissionTime;ToggleCameraPicker();AuditDeadline=Now+2;break;
     case 4:
         Check(TEXT("Camera picker stays live"),IsMenuOpen() && !IsPaused() && D->MissionTime>AuditMissionTime);
         Shot(TEXT("CameraPicker.png"));AuditDeadline=Now+2;break;
     case 5:ChooseCamera(9);AuditDeadline=Now+4;break;
     case 6:
-        Check(TEXT("3 km spectator selection"),!IsMenuOpen() && D->GetCameraMode()==9 && FMath::Abs(Camera.X+290000)<100);
+        Check(TEXT("3 km spectator selection"),!IsMenuOpen() && D->Viewer->GetCameraMode()==9 && FMath::Abs(Camera.X+290000)<100);
         Shot(TEXT("Spectator3km.png"));AuditPendingCamera=10;AuditDeadline=Now+4;break;
     case 7:
-        Check(TEXT("8 km spectator selection"),D->GetCameraMode()==10 && FMath::Abs(Camera.X+775000)<100);
+        Check(TEXT("8 km spectator selection"),D->Viewer->GetCameraMode()==10 && FMath::Abs(Camera.X+775000)<100);
         Shot(TEXT("Spectator8km.png"));AuditPendingCamera=11;AuditDeadline=Now+4;break;
     case 8:Shot(TEXT("StarbasePanorama.png"));AuditPendingCamera=13;AuditDeadline=Now+5;break;
     case 9:
-        Check(TEXT("Whole Earth camera"),D->GetCameraMode()==13 && Camera.Z>900000000);
+        UE_LOG(LogTemp,Display,TEXT("RECOVERY_EARTH_VIEW mode=%d position=%s"),D->Viewer->GetCameraMode(),*Camera.ToString());
+        Check(TEXT("Whole Earth camera"),D->Viewer->GetCameraMode()==13 && Camera.Z>900000000);
         Shot(TEXT("EarthGlobe.png"));AuditPendingCamera=0;AuditDeadline=Now+3;break;
     case 10:
         Check(TEXT("Globe to booster transition completes"),(Camera-D->GetBody()->GetComponentLocation()).Size()<150000);
         ChooseCamera(8);AuditDeadline=Now+2;break;
     case 11:
-        Check(TEXT("Free camera selected"),D->GetCameraMode()==8 && !IsPaused());
+        Check(TEXT("Free camera selected"),D->Viewer->GetCameraMode()==8 && !IsPaused());
         TogglePauseMenu();AuditDeadline=Now+1;break;
     case 12:
         Check(TEXT("Pause still works after picker"),IsPaused() && IsMenuOpen());

@@ -221,7 +221,7 @@ void URecoverySkyComponent::TickComponent(float Dt,ELevelTick Type,FActorCompone
         S.bOverride_DepthOfFieldFstop=true;S.DepthOfFieldFstop=PC?PC->Photography.Aperture:8.f;
         S.bOverride_DepthOfFieldFocalDistance=true;
         const double Focus=PC && !PC->Photography.bAutomaticFocus?PC->Photography.FocusDistanceM*100:
-            D?(D->GetViewerFocus()-CameraLocation).Size():50000;
+            D?(D->Viewer->GetViewerFocus()-CameraLocation).Size():50000;
         S.DepthOfFieldFocalDistance=FMath::Max(200.,Focus);
         S.bOverride_DepthOfFieldSensorWidth=true;S.DepthOfFieldSensorWidth=36.f;
     }

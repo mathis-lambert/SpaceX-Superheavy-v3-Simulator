@@ -1,4 +1,4 @@
-#include "Recovery/Tests/RecoveryDiagnosticsComponent.h"
+#include "Recovery/Diagnostics/RecoveryDiagnosticsComponent.h"
 #include "Recovery/Flight/SuperHeavyRecoveryDirector.h"
 #include "ProfilingDebugging/CsvProfiler.h"
 
@@ -13,7 +13,7 @@ void URecoveryDiagnosticsComponent::RecordPerformanceFrame()
     CSV_CUSTOM_STAT(Recovery,Phase,int32(D->Phase),ECsvCustomStatOp::Set);
     CSV_CUSTOM_STAT(Recovery,MissionTimeS,float(D->MissionTime),ECsvCustomStatOp::Set);
     CSV_CUSTOM_STAT(Recovery,AltitudeM,float(D->AltitudeM),ECsvCustomStatOp::Set);
-    CSV_CUSTOM_STAT(Recovery,Camera,D->GetCameraMode(),ECsvCustomStatOp::Set);
+    CSV_CUSTOM_STAT(Recovery,Camera,D->Viewer->GetCameraMode(),ECsvCustomStatOp::Set);
     CSV_CUSTOM_STAT(Recovery,ActiveEngines,D->ActiveEngines,ECsvCustomStatOp::Set);
     if(LastPerformancePhase!=int32(D->Phase))
     {

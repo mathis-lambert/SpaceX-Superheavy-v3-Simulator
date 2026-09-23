@@ -7,6 +7,8 @@ import unreal as u
 A=u.EditorAssetLibrary;R=u.AssetRegistryHelpers.get_asset_registry()
 R.search_all_assets(True)
 root=CONTENT_ROOT;report={'success':False,'blueprints':[],'nanite_meshes':[],'dependencies':[]}
+for retired in ('/Vehicle/Assets/DA_SuperHeavyMission_Main','/Vehicle/Blueprints/WBP_SuperHeavyHUD'):
+    assert not A.does_asset_exist(root+retired), 'Retired flight implementation is still packaged: '+retired
 for file in ['audit_vehicle.py','audit_earth.py','audit_propulsion.py']:
     namespace={'__file__':str(Path(__file__).parent/file)}
     exec(compile((Path(__file__).parent/file).read_text(encoding='utf-8'),file,'exec'),namespace)
