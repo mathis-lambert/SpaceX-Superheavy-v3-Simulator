@@ -10,9 +10,7 @@ if ($LASTEXITCODE) { throw 'Git LFS verification failed' }
 & "$PSScriptRoot/build_simulator.ps1" -EngineRoot $EngineRoot
 & "$root/Tests/Unreal/Automation/run_model_tests.ps1" -EngineRoot $EngineRoot -Prefix CIPhysics
 & "$PSScriptRoot/package_alpha.ps1" -EngineRoot $EngineRoot -Version $Version
-$validation = "$root/Saved/Recovery/Alpha-$Version-validation.json"
-& "$root/Tests/Unreal/Packaging/test_windows_package.ps1" -EngineRoot $EngineRoot -Version $Version -ResultFile $validation
-python "$PSScriptRoot/archive_alpha.py" "$root/Releases/Starbase-$Version" --validation $validation
+python "$PSScriptRoot/archive_alpha.py" "$root/Releases/Starbase-$Version"
 if ($LASTEXITCODE) { throw 'Release archive validation failed' }
 $upload = "$root/Releases/upload"
 if (Test-Path $upload) { throw 'Release upload directory already exists; use a clean build workspace' }

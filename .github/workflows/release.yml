@@ -31,8 +31,11 @@ jobs:
         env:
           RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
           RELEASE_ENVIRONMENT: ${{ vars.RELEASES_ENVIRONMENT }}
+          UE_WINDOWS_RUNNER: ${{ vars.UE_WINDOWS_RUNNER }}
+          UE_ROOT: ${{ vars.UE_ROOT }}
         run: |
           test -n "$RELEASE_ENVIRONMENT" || { echo 'Set repository variable RELEASES_ENVIRONMENT to the GitHub environment holding S3 secrets'; exit 1; }
+          test -n "$UE_WINDOWS_RUNNER" && test -n "$UE_ROOT" || { echo 'Configure UE_WINDOWS_RUNNER and UE_ROOT for a GitHub-hosted Windows runner with Unreal preinstalled'; exit 1; }
           [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$ ]] || { echo 'Invalid alpha tag'; exit 1; }
           commit=$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")
           git merge-base --is-ancestor "$commit" origin/main
@@ -49,15 +52,19 @@ jobs:
       ref: ${{ needs.source.outputs.commit }}
   windows:
     needs: [source, checks]
-    runs-on: [self-hosted, Windows, X64, unreal-5.8-nvidia]
+    runs-on: ${{ vars.UE_WINDOWS_RUNNER }}
     timeout-minutes: 240
-    concurrency:
-      group: unreal-windows
-      cancel-in-progress: false
     env:
       UE_ROOT: ${{ vars.UE_ROOT }}
       RELEASE_VERSION: ${{ needs.source.outputs.version }}
     steps:
+      - name: Require GitHub-hosted build machine
+        shell: pwsh
+        env:
+          RUNNER_ENVIRONMENT_KIND: ${{ runner.environment }}
+        run: |
+          if ($env:RUNNER_ENVIRONMENT_KIND -ne 'github-hosted') { throw 'This workflow requires a GitHub-hosted runner' }
+          if (!$env:UE_ROOT -or !(Test-Path "$env:UE_ROOT/Engine/Build/BatchFiles/Build.bat")) { throw 'Configure the runner image with Unreal and UE_ROOT before running a release' }
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.source.outputs.commit }}
@@ -66,7 +73,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Build, validate and archive
+      - name: Build, test models, cook and verify archive
         shell: pwsh
         run: ./Tools/Runtime/build_release.ps1 -EngineRoot $env:UE_ROOT -Version $env:RELEASE_VERSION
       - uses: actions/upload-artifact@v4

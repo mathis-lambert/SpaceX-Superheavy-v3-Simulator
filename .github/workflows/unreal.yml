@@ -3,17 +3,30 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-concurrency:
-  group: unreal-windows
-  cancel-in-progress: false
 jobs:
-  physics:
+  configuration:
     if: github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, Windows, X64, unreal-5.8-nvidia]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check hosted runner configuration
+        env:
+          UE_WINDOWS_RUNNER: ${{ vars.UE_WINDOWS_RUNNER }}
+          UE_ROOT: ${{ vars.UE_ROOT }}
+        run: |
+          test -n "$UE_WINDOWS_RUNNER" && test -n "$UE_ROOT" || { echo 'Configure UE_WINDOWS_RUNNER and UE_ROOT for a GitHub-hosted runner with Unreal preinstalled'; exit 1; }
+  physics:
+    needs: configuration
+    runs-on: ${{ vars.UE_WINDOWS_RUNNER }}
     timeout-minutes: 120
     env:
       UE_ROOT: ${{ vars.UE_ROOT }}
     steps:
+      - name: Require GitHub-hosted build machine
+        shell: pwsh
+        env:
+          RUNNER_ENVIRONMENT_KIND: ${{ runner.environment }}
+        run: |
+          if ($env:RUNNER_ENVIRONMENT_KIND -ne 'github-hosted') { throw 'This workflow requires a GitHub-hosted runner' }
       - uses: actions/checkout@v4
         with:
           lfs: true
@@ -21,7 +34,7 @@ jobs:
       - name: Check engine
         shell: pwsh
         run: |
-          if (!$env:UE_ROOT -or !(Test-Path "$env:UE_ROOT/Engine/Build/BatchFiles/Build.bat")) { throw 'Set UE_ROOT to the installed Unreal Engine 5.8 directory' }
+          if (!$env:UE_ROOT -or !(Test-Path "$env:UE_ROOT/Engine/Build/BatchFiles/Build.bat")) { throw 'Configure the runner image with Unreal and UE_ROOT before running validation' }
           git lfs fsck
           if ($LASTEXITCODE) { throw 'Git LFS verification failed' }
       - name: Build and test physical models

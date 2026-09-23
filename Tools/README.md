@@ -11,14 +11,22 @@ Run PowerShell commands from the repository root. Build and test scripts accept
 | `Runtime/build_simulator.ps1` | Compile the Unreal editor target |
 | `Runtime/launch_recovery.ps1` | Launch the simulation from the editor build |
 | `Runtime/package_alpha.ps1` | Cook and package the Windows application |
-| `Runtime/build_release.ps1` | Build, validate, package and archive a release |
-| `Runtime/archive_alpha.py` | Archive a validated package with checksums |
+| `Runtime/build_release.ps1` | Build, test native models, package and archive without GPU tests |
+| `Runtime/archive_alpha.py` | Verify package integrity and create an archive with checksums |
 | `Runtime/publish_release.py` | Publish verified artifacts to S3 |
 | `Runtime/install_dlss.py` | Install the official vendor plugin from its distribution |
 
 See [CI and releases](../Docs/CI_RELEASES.md) for runner requirements and publication.
 Packaging uses committed assets; it does not regenerate the world or require
 the external authoring sources.
+
+`build_release.ps1` does not launch graphics tests. Run
+`Tests/Unreal/Packaging/test_windows_package.ps1 -Version <version>` locally against
+the extracted package and matching source checkout. It needs Python 3.12 and the
+game's Windows/GPU prerequisites, but no Unreal installation. Optional local
+evidence passed to `archive_alpha.py --validation <report>` is bound to the manifest
+hash, commit and version. Without it, release metadata explicitly says
+`gpu_validation: not_run`; CI publication does not imply visual acceptance.
 
 ## Tests and analysis
 

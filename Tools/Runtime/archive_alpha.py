@@ -1,4 +1,4 @@
-"""Verify a tested standalone alpha and create its portable ZIP and checksums."""
+"""Verify package integrity and create its portable ZIP; GPU testing is local."""
 import argparse
 import hashlib
 import json
@@ -14,12 +14,20 @@ def sha256(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("release", type=Path)
-    parser.add_argument("--validation", required=True, type=Path)
+    parser.add_argument("--validation", type=Path,
+                        help="Optional local GPU report bound to this exact package")
     args = parser.parse_args()
     release = args.release.resolve()
     manifest = json.loads((release / "build-manifest.json").read_text(encoding="utf-8-sig"))
-    validation = json.loads(args.validation.read_text(encoding="utf-8-sig"))
-    if not validation.get("success") or validation["source_commit"] != manifest["source_commit"]:
+    validation = None
+    if args.validation:
+        validation = json.loads(args.validation.read_text(encoding="utf-8-sig"))
+        if not isinstance(validation, dict):
+            raise SystemExit("A validation report must be a JSON object")
+    if validation is not None and (not validation.get("success")
+            or validation["source_commit"] != manifest["source_commit"]
+            or validation.get("version") != manifest["version"]
+            or validation.get("manifest_sha256") != sha256(release / "build-manifest.json")):
         raise SystemExit("A passing validation of this source build is required")
     expected = {"build-manifest.json"}
     for entry in manifest["files"]:
@@ -52,6 +60,7 @@ def main():
         "game_executable_sha256": sha256(release / "Windows/SuperHeavySim/Binaries/Win64/SuperHeavySim.exe"),
         "files": len(expected),
         "zip_crc_verified": True,
+        "gpu_validation": "passed" if validation is not None else "not_run",
     }
     archive.with_name(archive.stem + "-artifacts.json").write_text(json.dumps(artifact, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(artifact, indent=2))
